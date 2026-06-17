@@ -1,0 +1,15 @@
+datasets
+pandas
+pydantic
+networkx
+numpy
+tqdm
+scikit-learn
+python-dotenv
+matplotlib
+pyvis
+requests
+pytest
+
+# Optional (improves retrieval quality if installed):
+# sentence-transformers
