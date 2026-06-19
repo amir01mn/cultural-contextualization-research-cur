@@ -17,6 +17,7 @@ style: |
   blockquote { border-left: 4px solid #3A7CA5; color: #444; }
 ---
 
+
 <!-- _paginate: false -->
 <!-- _header: '' -->
 <!-- _footer: '' -->
