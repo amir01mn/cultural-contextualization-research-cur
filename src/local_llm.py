@@ -20,6 +20,7 @@ from typing import Any, Optional
 
 import requests
 
+
 from . import config
 from .utils import get_logger
 
