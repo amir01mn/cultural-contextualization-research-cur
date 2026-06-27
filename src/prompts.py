@@ -310,3 +310,54 @@ Instructions:
 - Avoid stereotypes.
 - Give a practical answer.
 - Explain surface behavior, social expectation, and deeper value if supported."""
+
+
+# --- CulturalBench multiple-choice answering -------------------------------
+# These are the prompts used by the S0-S3 systems. They share one system prompt
+# and one answer format so the only thing that varies across systems is the
+# injected cultural evidence block. This keeps the comparison fair.
+
+MCQ_SYSTEM = """You are answering multiple-choice questions about cultural norms and practices.
+
+Read the question carefully. If cultural evidence is provided, use it to inform your answer.
+Avoid stereotyping and do not assume all members of a culture behave identically.
+Base your choice on the most likely culturally appropriate answer.
+
+You must end your response with the answer on its own line in EXACTLY this format:
+ANSWER: <letter>
+where <letter> is one of the provided option letters. Output nothing after that line."""
+
+MCQ_HARD_SYSTEM = """You are judging whether a candidate answer to a cultural question is correct.
+
+Consider the cultural context carefully. If cultural evidence is provided, use it.
+Avoid stereotyping and do not assume all members of a culture behave identically.
+
+You must end your response with your judgment on its own line in EXACTLY this format:
+ANSWER: <TRUE or FALSE>
+Output nothing after that line."""
+
+# Evidence-block headers per system (the body is filled at runtime).
+MCQ_EVIDENCE_HEADERS = {
+    "S0_no_kg": "",
+    "S1_raw_text_rag": "Retrieved cultural reference passages:",
+    "S2_flat_kg": "Retrieved cultural facts:",
+    "S3_layered_kg": "Retrieved cultural knowledge graph triples (with abstraction layers):",
+}
+
+MCQ_EASY_USER = """{evidence_block}Question:
+{question}
+
+Options:
+{options_block}
+
+Choose the single best option. Remember to end with:
+ANSWER: <letter>"""
+
+MCQ_HARD_USER = """{evidence_block}Question:
+{question}
+
+Candidate answer:
+{option_text}
+
+Is the candidate answer correct for this cultural context? Remember to end with:
+ANSWER: <TRUE or FALSE>"""

@@ -116,3 +116,62 @@ def retrieve_triples(question: str,
     """Convenience function: build an index and retrieve top-k triples."""
     retriever = TripleRetriever(triples)
     return [t for t, _ in retriever.retrieve(question, top_k=top_k)]
+
+
+class TextRetriever:
+    """Generic top-k retriever over arbitrary (id, text, payload) documents.
+
+    Used for raw-text passage retrieval (S1). Shares the same sentence-
+    transformers/TF-IDF backend selection as TripleRetriever.
+    """
+
+    def __init__(self, documents: list[dict], text_key: str = "text"):
+        self.documents = documents
+        self.text_key = text_key
+        self.texts = [normalize_text(d.get(text_key, "")) for d in documents]
+        self.backend = "none"
+        self._embeddings = None
+        self._vectorizer = None
+        self._matrix = None
+        if any(self.texts):
+            self._build_index()
+
+    def _build_index(self) -> None:
+        model = _get_st_model()
+        if model is not None:
+            try:
+                self._embeddings = model.encode(
+                    self.texts, normalize_embeddings=True, show_progress_bar=False)
+                self.backend = "sentence-transformers"
+                return
+            except Exception as exc:  # noqa: BLE001
+                LOGGER.warning("Passage embedding failed (%s); using TF-IDF.", exc)
+        from sklearn.feature_extraction.text import TfidfVectorizer
+
+        self._vectorizer = TfidfVectorizer(stop_words="english", max_features=8192)
+        self._matrix = self._vectorizer.fit_transform(self.texts)
+        self.backend = "tfidf"
+
+    def retrieve(self, query: str, top_k: int = 8) -> list[tuple[dict, float]]:
+        if not self.documents:
+            return []
+        query = normalize_text(query)
+        if not query:
+            return []
+        if self.backend == "sentence-transformers":
+            import numpy as np
+
+            model = _get_st_model()
+            q_emb = model.encode([query], normalize_embeddings=True)[0]
+            scores = self._embeddings @ q_emb
+            order = np.argsort(-scores)[:top_k]
+            return [(self.documents[i], float(scores[i])) for i in order]
+        if self.backend == "tfidf":
+            from sklearn.metrics.pairwise import cosine_similarity
+            import numpy as np
+
+            q_vec = self._vectorizer.transform([query])
+            scores = cosine_similarity(q_vec, self._matrix)[0]
+            order = np.argsort(-scores)[:top_k]
+            return [(self.documents[i], float(scores[i])) for i in order]
+        return []

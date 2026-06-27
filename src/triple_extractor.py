@@ -107,6 +107,14 @@ def extract_triples_llm(record,
     if not isinstance(raw_triples, list):
         return []
 
+    return _triples_from_parsed(rec, parsed)
+
+
+def _triples_from_parsed(rec: dict, parsed: dict) -> list[CulturalTriple]:
+    """Build validated CulturalTriples from a parsed extraction-JSON dict."""
+    raw_triples = parsed.get("triples", []) if isinstance(parsed, dict) else []
+    if not isinstance(raw_triples, list):
+        return []
     triples: list[CulturalTriple] = []
     for ft in raw_triples:
         if not isinstance(ft, dict):
@@ -116,6 +124,32 @@ def extract_triples_llm(record,
         ft = validate_triple_layers(ft)
         triples.append(_build_triple(rec, ft, method="llm_based"))
     return triples
+
+
+def extract_triples_llm_batched(records: list,
+                                backend,
+                                *,
+                                allow_fallback: bool = False) -> dict[str, list[CulturalTriple]]:
+    """Batched LLM extraction over many records using a pluggable backend.
+
+    Builds one extraction prompt per record, sends them to ``backend.generate``
+    (which batches on vLLM), parses each response, and returns a mapping from
+    instance_id to its triples. On unparseable output, falls back to the schema
+    extractor for that record only when ``allow_fallback`` is True.
+    """
+    recs = [_record_to_dict(r) for r in records]
+    user_prompts = [_format_user_prompt(r) for r in recs]
+    outputs = backend.generate(
+        user_prompts, system_prompt=prompts.TRIPLE_EXTRACTION_SYSTEM)
+
+    result: dict[str, list[CulturalTriple]] = {}
+    for rec, text in zip(recs, outputs):
+        parsed = local_llm.safe_parse_json(text)
+        triples = _triples_from_parsed(rec, parsed) if parsed else []
+        if not triples and allow_fallback:
+            triples = extract_triples_schema(rec)
+        result[rec.get("instance_id", "")] = triples
+    return result
 
 
 # --- Schema fallback (NOT the main method) --------------------------------

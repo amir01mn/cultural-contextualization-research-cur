@@ -41,12 +41,26 @@ DATASET_NAME = os.getenv("DATASET_NAME", "culturebank")
 DEFAULT_SPLIT = os.getenv("DEFAULT_SPLIT", "train")
 DEFAULT_LIMIT = int(os.getenv("DEFAULT_LIMIT", "100"))
 
-# Hugging Face dataset id used when attempting a real download.
+# Hugging Face dataset ids used when attempting a real download.
 CULTUREBANK_HF_ID = os.getenv("CULTUREBANK_HF_ID", "SALT-NLP/CultureBank")
+# CulturalBench is the sole evaluation benchmark (Easy + Hard).
+CULTURALBENCH_HF_ID = os.getenv("CULTURALBENCH_HF_ID", "kellycyy/CulturalBench")
+
+# Size of the CultureBank retrieval corpus used by the KG-augmented systems.
+# (The KG is built from CultureBank; CulturalBench is held out for evaluation.)
+CORPUS_LIMIT = int(os.getenv("CORPUS_LIMIT", "2000"))
 
 
-# --- LLM (local / Ollama) --------------------------------------------------
+# --- LLM provider selection ------------------------------------------------
+# 'ollama' for local development; 'vllm' for batched GPU inference on Narval.
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
+
+# Generation defaults shared across backends.
+LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.0"))
+LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "512"))
+
+
+# --- Ollama (local dev) ----------------------------------------------------
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 
@@ -59,6 +73,19 @@ OLLAMA_TEMPERATURE = float(os.getenv("OLLAMA_TEMPERATURE", "0.2"))
 OLLAMA_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "1536"))
 # Keep the model resident in memory between calls (Ollama 'keep_alive').
 OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
+# Emulated batching: number of concurrent Ollama requests.
+OLLAMA_MAX_WORKERS = int(os.getenv("OLLAMA_MAX_WORKERS", "4"))
+
+
+# --- vLLM (cluster GPU) ----------------------------------------------------
+# Default to a non-gated instruct model to avoid Hugging Face gating friction.
+# Llama-3.1-8B-Instruct is gated (requires token + license acceptance); set
+# VLLM_MODEL to it once access is granted. Multi-model comparison is Phase 3.
+VLLM_MODEL = os.getenv("VLLM_MODEL", "Qwen/Qwen2.5-7B-Instruct")
+VLLM_DTYPE = os.getenv("VLLM_DTYPE", "auto")
+VLLM_MAX_MODEL_LEN = int(os.getenv("VLLM_MAX_MODEL_LEN", "8192"))
+VLLM_GPU_MEMORY_UTILIZATION = float(os.getenv("VLLM_GPU_MEMORY_UTILIZATION", "0.90"))
+VLLM_TENSOR_PARALLEL_SIZE = int(os.getenv("VLLM_TENSOR_PARALLEL_SIZE", "1"))
 
 
 # --- Feature flags ---------------------------------------------------------
@@ -84,15 +111,26 @@ LAYER_DISTRIBUTIONS = {
 }
 
 
+def active_model(provider: str | None = None) -> str:
+    """Return the model id for the active (or given) provider."""
+    provider = (provider or LLM_PROVIDER or "ollama").strip().lower()
+    return VLLM_MODEL if provider == "vllm" else OLLAMA_MODEL
+
+
 def summary() -> dict:
     """Return a serializable snapshot of the active configuration."""
     return {
         "dataset_name": DATASET_NAME,
         "default_split": DEFAULT_SPLIT,
         "default_limit": DEFAULT_LIMIT,
+        "culturebank_hf_id": CULTUREBANK_HF_ID,
+        "culturalbench_hf_id": CULTURALBENCH_HF_ID,
+        "corpus_limit": CORPUS_LIMIT,
         "llm_provider": LLM_PROVIDER,
+        "active_model": active_model(),
         "ollama_base_url": OLLAMA_BASE_URL,
         "ollama_model": OLLAMA_MODEL,
+        "vllm_model": VLLM_MODEL,
         "use_llm_extraction": USE_LLM_EXTRACTION,
         "use_llm_critique": USE_LLM_CRITIQUE,
         "use_llm_answers": USE_LLM_ANSWERS,

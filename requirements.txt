@@ -3,6 +3,7 @@ pandas
 pydantic
 networkx
 numpy
+scipy
 tqdm
 scikit-learn
 python-dotenv
@@ -13,3 +14,8 @@ pytest
 
 # Optional (improves retrieval quality if installed):
 # sentence-transformers
+
+# Cluster-only (install on the GPU node, e.g. via the Alliance wheelhouse).
+# Not required for local development with the Ollama backend.
+# vllm
+# transformers

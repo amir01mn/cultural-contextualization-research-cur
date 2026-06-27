@@ -6,7 +6,65 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest
 
-from src.schemas import CulturalTriple, LayerLabel
+from src.schemas import CulturalTriple, LayerLabel, MCQQuestion, MCQVariant
+
+
+class FakeBackend:
+    """A deterministic backend for tests: maps each prompt to a response.
+
+    ``responder`` is a callable (user_prompt, system_prompt) -> str.
+    """
+
+    name = "fake"
+    model = "fake-model"
+
+    def __init__(self, responder):
+        self.responder = responder
+        self.calls = []
+
+    def generate(self, prompts, system_prompt=None, **kwargs):
+        self.calls.append((list(prompts), system_prompt))
+        return [self.responder(p, system_prompt) for p in prompts]
+
+    def generate_one(self, prompt, system_prompt=None, **kwargs):
+        return self.responder(prompt, system_prompt)
+
+    def status(self):
+        return {"available": True, "model_present": True, "message": "fake backend"}
+
+
+@pytest.fixture
+def fake_backend_factory():
+    def _make(responder):
+        return FakeBackend(responder)
+    return _make
+
+
+@pytest.fixture
+def mcq_easy_question() -> MCQQuestion:
+    return MCQQuestion(
+        question_id="easy_1", variant=MCQVariant.EASY, group_id="easy_1",
+        question="In Japan, what do you do with shoes when entering a home?",
+        cultural_group="Japan",
+        options={"A": "Keep them on", "B": "Remove them at the entrance",
+                 "C": "Put them on the table", "D": "Give them away"},
+        answer_key="B",
+    )
+
+
+@pytest.fixture
+def mcq_hard_group() -> list[MCQQuestion]:
+    specs = [
+        ("Greeting an elder in India?", "Touch the elder's feet", True),
+        ("Greeting an elder in India?", "Ignore the elder", False),
+    ]
+    return [
+        MCQQuestion(
+            question_id=f"hard_1_{i}", variant=MCQVariant.HARD, group_id="hard_1",
+            question=q, cultural_group="India", option_text=opt, answer_bool=gold,
+        )
+        for i, (q, opt, gold) in enumerate(specs)
+    ]
 
 
 @pytest.fixture

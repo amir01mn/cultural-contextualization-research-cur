@@ -188,3 +188,73 @@ class EvaluationResult(BaseModel):
     question: str
     cultural_group: Optional[str] = None
     answers: dict[str, SystemAnswer] = Field(default_factory=dict)
+
+
+# ===========================================================================
+# CulturalBench multiple-choice evaluation models
+# ===========================================================================
+
+class MCQVariant(str, Enum):
+    """CulturalBench has two formats with different scoring."""
+
+    EASY = "easy"  # 4-way single-correct MCQ
+    HARD = "hard"  # per-option True/False; a group is correct iff all items are
+
+
+class MCQQuestion(BaseModel):
+    """A normalized CulturalBench item.
+
+    Easy: a full 4-way question (``options`` A-D, ``answer_key`` is the correct
+    letter).
+    Hard: a single (question, option) judgment. Multiple Hard items share a
+    ``group_id`` (the underlying question); the group counts as correct only if
+    every item's True/False judgment is right. ``option_text`` is the candidate
+    answer and ``answer_bool`` is its gold truth value.
+    """
+
+    question_id: str
+    variant: MCQVariant
+    group_id: str
+    question: str
+    cultural_group: Optional[str] = None
+    region: Optional[str] = None
+
+    # Easy fields:
+    options: dict[str, str] = Field(default_factory=dict)
+    answer_key: Optional[str] = None
+
+    # Hard fields:
+    option_text: Optional[str] = None
+    answer_bool: Optional[bool] = None
+
+    raw: dict = Field(default_factory=dict)
+
+    @field_validator("variant", mode="before")
+    @classmethod
+    def _coerce_variant(cls, v: Any) -> "MCQVariant":
+        if isinstance(v, MCQVariant):
+            return v
+        key = str(v).strip().lower()
+        if "hard" in key:
+            return MCQVariant.HARD
+        return MCQVariant.EASY
+
+
+class MCQSystemAnswer(BaseModel):
+    """One system's answer to one MCQ item."""
+
+    system: str  # S0_no_kg | S1_raw_text_rag | S2_flat_kg | S3_layered_kg
+    raw_output: str = ""
+    predicted: Optional[str] = None  # "A".."D" (easy) or "true"/"false" (hard)
+    correct: bool = False
+    retrieved_ids: list[str] = Field(default_factory=list)
+
+
+class MCQItemResult(BaseModel):
+    """All systems' answers for a single MCQ item."""
+
+    question_id: str
+    group_id: str
+    variant: MCQVariant
+    cultural_group: Optional[str] = None
+    answers: dict[str, MCQSystemAnswer] = Field(default_factory=dict)
