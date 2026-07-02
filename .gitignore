@@ -14,7 +14,7 @@ env/
 data/raw/*
 data/processed/*
 data/outputs/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
 !data/outputs/.gitkeep
+!data/outputs/culturalbench_*
+!data/outputs/corpus_cultural_kg*
 slurm/logs/

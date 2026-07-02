@@ -1,0 +1,161 @@
+unit_id,variant,cultural_group,system,correct
+easy_0,easy,Netherlands,S0_no_kg,0
+easy_0,easy,Netherlands,S1_raw_text_rag,1
+easy_0,easy,Netherlands,S2_flat_kg,0
+easy_0,easy,Netherlands,S3_layered_kg,0
+easy_1,easy,South Korea,S0_no_kg,1
+easy_1,easy,South Korea,S1_raw_text_rag,1
+easy_1,easy,South Korea,S2_flat_kg,1
+easy_1,easy,South Korea,S3_layered_kg,1
+easy_2,easy,Nigeria,S0_no_kg,0
+easy_2,easy,Nigeria,S1_raw_text_rag,0
+easy_2,easy,Nigeria,S2_flat_kg,0
+easy_2,easy,Nigeria,S3_layered_kg,0
+easy_3,easy,Spain,S0_no_kg,1
+easy_3,easy,Spain,S1_raw_text_rag,0
+easy_3,easy,Spain,S2_flat_kg,0
+easy_3,easy,Spain,S3_layered_kg,0
+easy_4,easy,Morocco,S0_no_kg,1
+easy_4,easy,Morocco,S1_raw_text_rag,1
+easy_4,easy,Morocco,S2_flat_kg,0
+easy_4,easy,Morocco,S3_layered_kg,0
+easy_5,easy,India,S0_no_kg,1
+easy_5,easy,India,S1_raw_text_rag,1
+easy_5,easy,India,S2_flat_kg,1
+easy_5,easy,India,S3_layered_kg,1
+easy_6,easy,United Kingdom,S0_no_kg,1
+easy_6,easy,United Kingdom,S1_raw_text_rag,1
+easy_6,easy,United Kingdom,S2_flat_kg,1
+easy_6,easy,United Kingdom,S3_layered_kg,1
+easy_7,easy,Vietnam,S0_no_kg,1
+easy_7,easy,Vietnam,S1_raw_text_rag,0
+easy_7,easy,Vietnam,S2_flat_kg,1
+easy_7,easy,Vietnam,S3_layered_kg,1
+easy_8,easy,Malaysia,S0_no_kg,1
+easy_8,easy,Malaysia,S1_raw_text_rag,1
+easy_8,easy,Malaysia,S2_flat_kg,1
+easy_8,easy,Malaysia,S3_layered_kg,1
+easy_9,easy,Malaysia,S0_no_kg,1
+easy_9,easy,Malaysia,S1_raw_text_rag,1
+easy_9,easy,Malaysia,S2_flat_kg,1
+easy_9,easy,Malaysia,S3_layered_kg,1
+easy_10,easy,Chile,S0_no_kg,0
+easy_10,easy,Chile,S1_raw_text_rag,0
+easy_10,easy,Chile,S2_flat_kg,1
+easy_10,easy,Chile,S3_layered_kg,1
+easy_11,easy,Zimbabwe,S0_no_kg,1
+easy_11,easy,Zimbabwe,S1_raw_text_rag,1
+easy_11,easy,Zimbabwe,S2_flat_kg,1
+easy_11,easy,Zimbabwe,S3_layered_kg,1
+easy_12,easy,Egypt,S0_no_kg,1
+easy_12,easy,Egypt,S1_raw_text_rag,0
+easy_12,easy,Egypt,S2_flat_kg,0
+easy_12,easy,Egypt,S3_layered_kg,1
+easy_13,easy,India,S0_no_kg,1
+easy_13,easy,India,S1_raw_text_rag,1
+easy_13,easy,India,S2_flat_kg,1
+easy_13,easy,India,S3_layered_kg,1
+easy_14,easy,India,S0_no_kg,1
+easy_14,easy,India,S1_raw_text_rag,1
+easy_14,easy,India,S2_flat_kg,1
+easy_14,easy,India,S3_layered_kg,1
+easy_15,easy,Japan,S0_no_kg,1
+easy_15,easy,Japan,S1_raw_text_rag,1
+easy_15,easy,Japan,S2_flat_kg,1
+easy_15,easy,Japan,S3_layered_kg,1
+easy_16,easy,Iran,S0_no_kg,1
+easy_16,easy,Iran,S1_raw_text_rag,1
+easy_16,easy,Iran,S2_flat_kg,1
+easy_16,easy,Iran,S3_layered_kg,1
+easy_17,easy,South Korea,S0_no_kg,0
+easy_17,easy,South Korea,S1_raw_text_rag,0
+easy_17,easy,South Korea,S2_flat_kg,0
+easy_17,easy,South Korea,S3_layered_kg,0
+easy_18,easy,Philippines,S0_no_kg,1
+easy_18,easy,Philippines,S1_raw_text_rag,1
+easy_18,easy,Philippines,S2_flat_kg,1
+easy_18,easy,Philippines,S3_layered_kg,1
+easy_19,easy,Iran,S0_no_kg,0
+easy_19,easy,Iran,S1_raw_text_rag,0
+easy_19,easy,Iran,S2_flat_kg,0
+easy_19,easy,Iran,S3_layered_kg,0
+hard_0,hard,Netherlands,S0_no_kg,1
+hard_0,hard,Netherlands,S1_raw_text_rag,1
+hard_0,hard,Netherlands,S2_flat_kg,1
+hard_0,hard,Netherlands,S3_layered_kg,1
+hard_1,hard,Netherlands,S0_no_kg,1
+hard_1,hard,Netherlands,S1_raw_text_rag,1
+hard_1,hard,Netherlands,S2_flat_kg,1
+hard_1,hard,Netherlands,S3_layered_kg,1
+hard_2,hard,Netherlands,S0_no_kg,0
+hard_2,hard,Netherlands,S1_raw_text_rag,0
+hard_2,hard,Netherlands,S2_flat_kg,0
+hard_2,hard,Netherlands,S3_layered_kg,0
+hard_3,hard,Netherlands,S0_no_kg,0
+hard_3,hard,Netherlands,S1_raw_text_rag,1
+hard_3,hard,Netherlands,S2_flat_kg,0
+hard_3,hard,Netherlands,S3_layered_kg,0
+hard_4,hard,South Korea,S0_no_kg,1
+hard_4,hard,South Korea,S1_raw_text_rag,1
+hard_4,hard,South Korea,S2_flat_kg,1
+hard_4,hard,South Korea,S3_layered_kg,1
+hard_5,hard,South Korea,S0_no_kg,1
+hard_5,hard,South Korea,S1_raw_text_rag,0
+hard_5,hard,South Korea,S2_flat_kg,0
+hard_5,hard,South Korea,S3_layered_kg,0
+hard_6,hard,South Korea,S0_no_kg,1
+hard_6,hard,South Korea,S1_raw_text_rag,1
+hard_6,hard,South Korea,S2_flat_kg,1
+hard_6,hard,South Korea,S3_layered_kg,1
+hard_7,hard,South Korea,S0_no_kg,1
+hard_7,hard,South Korea,S1_raw_text_rag,1
+hard_7,hard,South Korea,S2_flat_kg,1
+hard_7,hard,South Korea,S3_layered_kg,1
+hard_8,hard,Nigeria,S0_no_kg,0
+hard_8,hard,Nigeria,S1_raw_text_rag,1
+hard_8,hard,Nigeria,S2_flat_kg,0
+hard_8,hard,Nigeria,S3_layered_kg,0
+hard_9,hard,Nigeria,S0_no_kg,0
+hard_9,hard,Nigeria,S1_raw_text_rag,0
+hard_9,hard,Nigeria,S2_flat_kg,0
+hard_9,hard,Nigeria,S3_layered_kg,0
+hard_10,hard,Nigeria,S0_no_kg,1
+hard_10,hard,Nigeria,S1_raw_text_rag,1
+hard_10,hard,Nigeria,S2_flat_kg,1
+hard_10,hard,Nigeria,S3_layered_kg,1
+hard_11,hard,Nigeria,S0_no_kg,1
+hard_11,hard,Nigeria,S1_raw_text_rag,1
+hard_11,hard,Nigeria,S2_flat_kg,1
+hard_11,hard,Nigeria,S3_layered_kg,1
+hard_12,hard,Spain,S0_no_kg,1
+hard_12,hard,Spain,S1_raw_text_rag,1
+hard_12,hard,Spain,S2_flat_kg,1
+hard_12,hard,Spain,S3_layered_kg,1
+hard_13,hard,Spain,S0_no_kg,1
+hard_13,hard,Spain,S1_raw_text_rag,1
+hard_13,hard,Spain,S2_flat_kg,1
+hard_13,hard,Spain,S3_layered_kg,1
+hard_14,hard,Spain,S0_no_kg,0
+hard_14,hard,Spain,S1_raw_text_rag,0
+hard_14,hard,Spain,S2_flat_kg,0
+hard_14,hard,Spain,S3_layered_kg,0
+hard_15,hard,Spain,S0_no_kg,1
+hard_15,hard,Spain,S1_raw_text_rag,1
+hard_15,hard,Spain,S2_flat_kg,1
+hard_15,hard,Spain,S3_layered_kg,1
+hard_16,hard,Morocco,S0_no_kg,0
+hard_16,hard,Morocco,S1_raw_text_rag,0
+hard_16,hard,Morocco,S2_flat_kg,0
+hard_16,hard,Morocco,S3_layered_kg,0
+hard_17,hard,Morocco,S0_no_kg,1
+hard_17,hard,Morocco,S1_raw_text_rag,1
+hard_17,hard,Morocco,S2_flat_kg,1
+hard_17,hard,Morocco,S3_layered_kg,1
+hard_18,hard,Morocco,S0_no_kg,1
+hard_18,hard,Morocco,S1_raw_text_rag,1
+hard_18,hard,Morocco,S2_flat_kg,1
+hard_18,hard,Morocco,S3_layered_kg,1
+hard_19,hard,Morocco,S0_no_kg,1
+hard_19,hard,Morocco,S1_raw_text_rag,1
+hard_19,hard,Morocco,S2_flat_kg,1
+hard_19,hard,Morocco,S3_layered_kg,1

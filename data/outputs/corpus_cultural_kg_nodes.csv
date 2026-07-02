@@ -1,0 +1,7 @@
+node_id,label,dominant_layer,layer_distribution,frequency,generated,sources
+n_ab3ccc8dba2a,people,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b78693d4ba5e
+n_0719d882bc48,between 5:30pm and 10pm,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b78693d4ba5e
+n_5ac649742c73,early dinners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b78693d4ba5e
+n_6dc348f2e0c6,dinner times,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b78693d4ba5e
+n_6e47ef361e92,diverse lifestyles and work routines,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_b78693d4ba5e
+n_e789d64f21b4,common and normative practice,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_b78693d4ba5e
