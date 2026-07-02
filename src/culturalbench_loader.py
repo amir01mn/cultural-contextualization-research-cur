@@ -10,14 +10,16 @@ Design notes:
   - This loader is robust to field-name variation (mirrors the CultureBank
     loader): it tries several candidate column names and config/split names.
   - It supports offline operation on cluster compute nodes: if HF_DATASETS_OFFLINE
-    is set, ``datasets`` reads from the pre-staged cache. On any failure, a small
-    built-in fallback sample is returned so the harness always runs.
+    is set, ``datasets`` reads from the pre-staged cache under HF_DATASETS_CACHE.
+    By default load failures raise; pass ``allow_fallback=True`` for a tiny
+    built-in sample (local dev / unit tests only).
   - CulturalBench is held out from KG construction (built only from CultureBank).
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 from typing import Optional
 
 from . import config
@@ -26,9 +28,10 @@ from .utils import coalesce, get_logger, normalize_text, stable_id, write_jsonl
 
 LOGGER = get_logger("culturalbench_loader")
 
-# Candidate Hugging Face config names per variant.
-_EASY_CONFIGS = ["CulturalBench-Easy", "culturalbench-easy", "easy", "Easy"]
-_HARD_CONFIGS = ["CulturalBench-Hard", "culturalbench-hard", "hard", "Hard"]
+# Config names as staged by scripts/prep_offline_data.py (test split only).
+_EASY_CONFIGS = ["CulturalBench-Easy"]
+_HARD_CONFIGS = ["CulturalBench-Hard"]
+_CULTURALBENCH_SPLITS = ["test"]
 
 _QUESTION_KEYS = ["prompt_question", "question", "prompt", "query"]
 _COUNTRY_KEYS = ["country", "Country", "cultural_group", "culture", "nation"]
@@ -117,25 +120,17 @@ def _normalize_bool(value) -> Optional[bool]:
 
 
 def _load_hf_split(config_names: list[str]):
-    """Try to load a CulturalBench variant under candidate config/split names."""
-    from datasets import get_dataset_split_names, load_dataset
+    """Load a CulturalBench variant from the staged HF datasets cache."""
+    from datasets import load_dataset
 
     last_exc = None
     for cfg in config_names:
-        try:
+        for sp in _CULTURALBENCH_SPLITS:
             try:
-                splits = get_dataset_split_names(config.CULTURALBENCH_HF_ID, cfg)
-            except Exception:  # noqa: BLE001
-                splits = ["test", "train", "validation"]
-            for sp in (splits or ["test"]):
-                try:
-                    return load_dataset(config.CULTURALBENCH_HF_ID, cfg, split=sp), cfg, sp
-                except Exception as exc:  # noqa: BLE001
-                    last_exc = exc
-                    continue
-        except Exception as exc:  # noqa: BLE001
-            last_exc = exc
-            continue
+                return load_dataset(config.CULTURALBENCH_HF_ID, cfg, split=sp), cfg, sp
+            except Exception as exc:  # noqa: BLE001
+                last_exc = exc
+                continue
     if last_exc:
         raise last_exc
     raise RuntimeError("No CulturalBench config could be loaded.")
@@ -246,12 +241,13 @@ def _fallback_dataset() -> list[MCQQuestion]:
 
 
 def load_culturalbench(variants: tuple[str, ...] = ("easy", "hard"),
-                       limit: int = 250) -> list[MCQQuestion]:
+                       limit: int = 250,
+                       allow_fallback: bool = False) -> list[MCQQuestion]:
     """Load and normalize CulturalBench questions.
 
     ``limit`` caps the number of Easy questions and the number of Hard groups
-    (each Hard group expands into several True/False items). Falls back to a
-    built-in sample on any failure.
+    (each Hard group expands into several True/False items). Raises on failure
+    unless ``allow_fallback=True`` (tiny built-in sample for tests only).
     """
     questions: list[MCQQuestion] = []
     try:
@@ -269,7 +265,16 @@ def load_culturalbench(variants: tuple[str, ...] = ("easy", "hard"),
             raise RuntimeError("CulturalBench returned no usable questions.")
         LOGGER.info("Normalized %d CulturalBench items.", len(questions))
     except Exception as exc:  # noqa: BLE001
-        LOGGER.warning("Could not load CulturalBench from Hugging Face: %s", exc)
+        cache = os.getenv("HF_DATASETS_CACHE") or os.getenv("HF_HOME", "(default)")
+        LOGGER.error("Could not load CulturalBench from Hugging Face: %s", exc)
+        LOGGER.error("HF_DATASETS_CACHE=%s  HF_DATASETS_OFFLINE=%s",
+                     cache, os.getenv("HF_DATASETS_OFFLINE", "0"))
+        if not allow_fallback:
+            raise RuntimeError(
+                "CulturalBench load failed and allow_fallback=False. "
+                "Run slurm/prep_offline.sh on the login node, then ensure GPU jobs "
+                "set HF_HOME/HF_DATASETS_CACHE to $SCRATCH/hf_cache."
+            ) from exc
         LOGGER.warning("Using built-in fallback CulturalBench sample.")
         questions = _fallback_dataset()
         if "easy" not in variants:
@@ -284,12 +289,14 @@ def main(argv: Optional[list[str]] = None) -> None:
     parser.add_argument("--variants", default="easy,hard",
                         help="Comma-separated subset of {easy,hard}.")
     parser.add_argument("--limit", type=int, default=250)
+    parser.add_argument("--allow_fallback", action="store_true", default=False)
     parser.add_argument("--output",
                         default=str(config.PROCESSED_DIR / "culturalbench_normalized.jsonl"))
     args = parser.parse_args(argv)
 
     variants = tuple(v.strip() for v in args.variants.split(",") if v.strip())
-    questions = load_culturalbench(variants=variants, limit=args.limit)
+    questions = load_culturalbench(variants=variants, limit=args.limit,
+                                   allow_fallback=args.allow_fallback)
     count = write_jsonl(args.output, [q.model_dump() for q in questions])
     LOGGER.info("Wrote %d CulturalBench items -> %s", count, args.output)
 

@@ -1,9 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=ckg_eval
-#SBATCH --account=def-CHANGEME          # <-- set your Alliance allocation
+#SBATCH --account=def-enaskt_gpu
+#SBATCH --partition=gpubase_bygpu_b1
 #SBATCH --gres=gpu:a100:1
-#SBATCH --cpus-per-task=6
-#SBATCH --mem=48G
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=32G
 #SBATCH --time=02:00:00
 #SBATCH --output=slurm/logs/eval_%j.out
 #SBATCH --error=slurm/logs/eval_%j.err
@@ -15,18 +16,21 @@
 
 set -euo pipefail
 
-module load StdEnv/2023 gcc/12.3 python/3.11 arrow/17.0.0 cuda/12.2 || true
+PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
+# shellcheck source=load_modules.sh
+source "${PROJECT_DIR}/slurm/load_modules.sh"
+load_gpu_modules
 
-PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$PROJECT_DIR"
 mkdir -p slurm/logs
 
-export HF_HOME="${HF_HOME:-$SCRATCH/hf_cache}"
-export HF_DATASETS_OFFLINE=1
-export TRANSFORMERS_OFFLINE=1
-export HF_HUB_OFFLINE=1
+# shellcheck source=env_hf.sh
+source "${PROJECT_DIR}/slurm/env_hf.sh"
+setup_hf_offline
+log_hf_env
 
 source "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/activate"
+verify_torch_import "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/python"
 
 export LLM_PROVIDER=vllm
 export VLLM_MODEL="${VLLM_MODEL:-Qwen/Qwen2.5-7B-Instruct}"

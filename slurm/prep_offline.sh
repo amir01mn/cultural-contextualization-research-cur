@@ -10,14 +10,18 @@
 
 set -euo pipefail
 
-module load StdEnv/2023 gcc/12.3 python/3.11 arrow/17.0.0 || true
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=load_modules.sh
+source "${SCRIPT_DIR}/load_modules.sh"
+load_login_modules
 
-PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 cd "$PROJECT_DIR"
 
-# Persistent caches live on $SCRATCH (large, not backed up but big quota).
-export HF_HOME="${HF_HOME:-$SCRATCH/hf_cache}"
-mkdir -p "$HF_HOME"
+# shellcheck source=env_hf.sh
+source "${SCRIPT_DIR}/env_hf.sh"
+setup_hf_cache
+log_hf_env
 
 # Activate the project virtualenv (see docs/NARVAL_SETUP.md to create it).
 source "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/activate"

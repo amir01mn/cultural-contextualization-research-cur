@@ -18,7 +18,8 @@ def test_load_fallback_when_offline(monkeypatch):
         raise RuntimeError("no network")
 
     monkeypatch.setattr(cbl, "_load_hf_split", boom)
-    qs = cbl.load_culturalbench(variants=("easy", "hard"), limit=10)
+    qs = cbl.load_culturalbench(variants=("easy", "hard"), limit=10,
+                                allow_fallback=True)
     assert len(qs) > 0
     assert any(q.variant == MCQVariant.EASY for q in qs)
     assert any(q.variant == MCQVariant.HARD for q in qs)
@@ -27,7 +28,8 @@ def test_load_fallback_when_offline(monkeypatch):
 def test_variant_filtering(monkeypatch):
     monkeypatch.setattr(cbl, "_load_hf_split",
                         lambda *a, **k: (_ for _ in ()).throw(RuntimeError("x")))
-    easy_only = cbl.load_culturalbench(variants=("easy",), limit=10)
+    easy_only = cbl.load_culturalbench(variants=("easy",), limit=10,
+                                       allow_fallback=True)
     assert all(q.variant == MCQVariant.EASY for q in easy_only)
 
 

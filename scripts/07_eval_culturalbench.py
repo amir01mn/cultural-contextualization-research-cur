@@ -58,6 +58,8 @@ def main(argv=None) -> None:
     p.add_argument("--variants", default="easy,hard")
     p.add_argument("--limit", type=int, default=250,
                    help="Cap on Easy questions and Hard groups.")
+    p.add_argument("--allow_fallback", action="store_true", default=False,
+                   help="Use tiny built-in sample if HF load fails (dev/tests only).")
     p.add_argument("--top_k", type=int, default=config.RETRIEVAL_TOP_K)
     p.add_argument("--systems", default=",".join(ALL_SYSTEMS),
                    help="Comma-separated subset of S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg")
@@ -76,7 +78,11 @@ def main(argv=None) -> None:
         sys.exit(2)
 
     variants = tuple(v.strip() for v in args.variants.split(",") if v.strip())
-    questions = load_culturalbench(variants=variants, limit=args.limit)
+    questions = load_culturalbench(variants=variants, limit=args.limit,
+                                   allow_fallback=args.allow_fallback)
+    if any(q.question_id.endswith("_fb1") or "_fb" in q.question_id for q in questions):
+        LOGGER.error("Loaded fallback CulturalBench IDs; refusing to evaluate.")
+        sys.exit(2)
     LOGGER.info("Loaded %d CulturalBench items.", len(questions))
 
     need_passages = "S1_raw_text_rag" in systems
