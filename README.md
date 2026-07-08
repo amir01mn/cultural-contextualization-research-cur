@@ -219,3 +219,4 @@ Tests run fully offline and do not require Ollama (LLM calls are mocked).
 
 CultureBank is provided by its original authors under their own terms. This project
 is a research MVP; use cultural data responsibly and avoid stereotyping.
+test from Narval
