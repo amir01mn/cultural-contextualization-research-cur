@@ -113,6 +113,15 @@ USE_LLM_EVALUATION = _get_bool("USE_LLM_EVALUATION", False)
 
 # --- Pipeline knobs --------------------------------------------------------
 RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "8"))
+# Retrieval quality (Phase 3+ eval improvements)
+RETRIEVAL_GENERATED_PENALTY = float(os.getenv("RETRIEVAL_GENERATED_PENALTY", "0.45"))
+RETRIEVAL_CULTURE_MISMATCH_PENALTY = float(os.getenv("RETRIEVAL_CULTURE_MISMATCH_PENALTY", "0.15"))
+RETRIEVAL_CULTURE_UNKNOWN_SCORE = float(os.getenv("RETRIEVAL_CULTURE_UNKNOWN_SCORE", "0.6"))
+RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE = float(os.getenv("RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE", "0.75"))
+RETRIEVAL_CANDIDATE_MULTIPLIER = int(os.getenv("RETRIEVAL_CANDIDATE_MULTIPLIER", "5"))
+# Corpus build: schema fallback when LLM returns empty/unparseable (not when server down)
+CORPUS_SCHEMA_FALLBACK_ON_EMPTY = _get_bool("CORPUS_SCHEMA_FALLBACK_ON_EMPTY", True)
+MAX_CRITIQUE_SUGGESTIONS = int(os.getenv("MAX_CRITIQUE_SUGGESTIONS", "2"))
 NUM_SCENARIOS = int(os.getenv("NUM_SCENARIOS", "25"))
 RANDOM_SEED = int(os.getenv("RANDOM_SEED", "42"))
 

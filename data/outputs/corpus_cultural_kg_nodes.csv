@@ -1,11 +1,753 @@
 node_id,label,dominant_layer,layer_distribution,frequency,generated,sources
-n_ab3ccc8dba2a,people,LAYER_1_SURFACE,"[0.5625, 0.2875, 0.15]",4,False,cb_95b6f2fff77a;cb_b78693d4ba5e
-n_6362e86b3e29,"a wide range of food, including traditional American dishes, processed foods, and fast food like burgers, pizza, and wings",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
-n_acf7177f21ee,diverse and convenient food consumption,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
-n_39ccb32d95ed,food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
-n_983123a1a843,"highly processed and elite food items, often with a lower fiber content",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
-n_0719d882bc48,between 5:30pm and 10pm,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b78693d4ba5e
-n_5ac649742c73,early dinners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b78693d4ba5e
-n_6dc348f2e0c6,dinner times,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b78693d4ba5e
-n_6e47ef361e92,diverse lifestyles and work routines,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_b78693d4ba5e
-n_e789d64f21b4,common and normative practice,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_b78693d4ba5e
+n_ab3ccc8dba2a,people,LAYER_1_SURFACE,"[0.5864, 0.2636, 0.15]",92,False,cb_09710225a610;cb_0fe3dfb80a44;cb_2688e1d97269;cb_335fd41aaec1;cb_3a8a8d00d729;cb_456af75fe814;cb_4e6f425c7c75;cb_4f4e9a21feb5;cb_4fe71ac12649;cb_512a01a36780;cb_539a0a252350;cb_5949458755c8;cb_5aeafa5e488e;cb_5af792d91507;cb_64e1c614bd46;cb_68b0d21ba630;cb_8a6b33f997f9;cb_8a9e253e11f7;cb_8b6798accd57;cb_93b12f327938;cb_95b6f2fff77a;cb_9a2fd7e7fcba;cb_a810dcf36b0e;cb_a81d94c66b09;cb_abe8714228b6;cb_acf07552a538;cb_aecf6ef6436f;cb_b75ef5da0ff0;cb_b78693d4ba5e;cb_bf5a8511452e;cb_c5d5815c38a8;cb_c6fca60395ac;cb_ce5a41215df2;cb_d62056539ab7;cb_d8299eb08423;cb_d931ba5079f8;cb_dda562f37bef;cb_f0320858dc7a;cb_f965519865e2
+n_6362e86b3e29,"a wide range of food, including traditional American dishes, processed foods, and fast food like burgers, pizza, and wings",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_95b6f2fff77a
+n_acf7177f21ee,diverse and convenient food consumption,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_95b6f2fff77a
+n_39ccb32d95ed,food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_95b6f2fff77a;cb_c6fca60395ac
+n_983123a1a843,"highly processed and elite food items, often with a lower fiber content",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_95b6f2fff77a
+n_0719d882bc48,between 5:30pm and 10pm,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b78693d4ba5e
+n_5ac649742c73,early dinners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b78693d4ba5e
+n_6dc348f2e0c6,dinner times,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_b78693d4ba5e
+n_6e47ef361e92,diverse lifestyles and work routines,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",2,False,cb_b78693d4ba5e
+n_e789d64f21b4,common and normative practice,LAYER_2_SOCIAL,"[0.15, 0.5167, 0.3333]",3,False,cb_14730c07db71;cb_b78693d4ba5e
+n_b3ae4f722a30,women,LAYER_1_SURFACE,"[0.425, 0.425, 0.15]",2,False,cb_96f3273e2778
+n_309d795068b9,"tampons, including those without applicators",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_96f3273e2778
+n_f69cae80b30a,tampons,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_96f3273e2778
+n_352d6f10e49e,with or without applicators,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_96f3273e2778
+n_f37d09f5f963,sustainable lifestyle,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_96f3273e2778
+n_6d4bfecc73a0,menstrual hygiene,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_96f3273e2778
+n_ee89cf0dc01c,a healthy diet,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_4fe71ac12649
+n_139fb7cbccd6,the high cost and availability of fresh food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4fe71ac12649
+n_ccfb87757eca,American culture,LAYER_3_DEEP_VALUE,"[0.2217, 0.2217, 0.5565]",23,False,cb_03b4f7c0039f;cb_127617354af7;cb_212026053639;cb_25b66cf2a6d8;cb_2688e1d97269;cb_3b89a4ea2688;cb_43fa3a143255;cb_4f4e9a21feb5;cb_4fe71ac12649;cb_5132dc492edb;cb_5f0e22cacd3c;cb_62a6423d40f5;cb_64e1c614bd46;cb_a81d94c66b09;cb_b4d25ae50f4f;cb_c522a4c0be60;cb_ce5a41215df2;cb_d66de5785a9f;cb_d8299eb08423;cb_eef74b325627;cb_fa804d8ad5f4
+n_8ea311a5d6c7,a widespread desire for wellness and nutrition,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_4fe71ac12649
+n_f40dbfb649cd,accessing affordable and fresh food options,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_4fe71ac12649
+n_b4f4c6d7efb3,friendly behaviors like smiling and making small talk,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_9a2fd7e7fcba
+n_cd445d4d4c54,hypocrisy in friendly behaviors,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_9a2fd7e7fcba
+n_a62c31ab197c,friendly behaviors,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_9a2fd7e7fcba
+n_26fabd9aee39,normative aspect of American culture,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_9a2fd7e7fcba
+n_d9c709db47c0,hypocrisy,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_9a2fd7e7fcba
+n_be857290dac2,skepticism or reservation towards genuineness of friendly gestures,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_9a2fd7e7fcba
+n_7c00d7e230e6,yellow school buses,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_127617354af7
+n_ea3d00fb3bff,transporting students,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_127617354af7
+n_a08f84d49c84,school administration and workers,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_127617354af7
+n_46187818216b,maintaining yellow school buses,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_127617354af7
+n_18a346849efc,school buses,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_127617354af7
+n_9bc4e0ecb8f1,safety and visibility,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_127617354af7
+n_2ccd1e69a4b0,safety and visibility in transportation,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_127617354af7
+n_b870e266ebe1,individuals and people,LAYER_1_SURFACE,"[0.6083, 0.2417, 0.15]",6,False,cb_0249bc970409;cb_0820333c9cf6;cb_212026053639
+n_6393e8580398,paper checks with unique spellings,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_0249bc970409
+n_5f330378f48b,individuality and personal expression,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_0249bc970409
+n_46482e36fa24,financial transactions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0249bc970409
+n_daf04c06cbe0,use of paper checks with unique spellings,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_0249bc970409
+n_474331cf18fc,somewhat normative behavior,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_0249bc970409
+n_de7a5eddbe02,people -> use various methods for waste disposal,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_978f447d1c18
+n_0bf2fac63795,"dumpsters, garbage disposals, and waste pick-up services",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_978f447d1c18
+n_d9df7f4f08dd,people -> perceive,LAYER_2_SOCIAL,"[0.3333, 0.5167, 0.15]",3,False,cb_978f447d1c18;cb_c59fea3e75aa;cb_fc2f392b664f
+n_8f5bd420ba94,environmentally unfriendly,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_978f447d1c18
+n_581322070bb7,people -> consider,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",4,False,cb_4aa9162486d6;cb_978f447d1c18;cb_e0580d953525;cb_fc2f392b664f
+n_605f18dae14a,use of various waste disposal methods,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_978f447d1c18
+n_a0bbdc6b3c80,people -> value,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",2,True,cb_43fa3a143255;cb_978f447d1c18
+n_61f4d7408704,over sustainability,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_978f447d1c18
+n_3163cc0612b9,people in the United States,LAYER_1_SURFACE,"[0.537, 0.313, 0.15]",27,False,cb_16ed6ab0a7bb;cb_2b3be44457b3;cb_31f32c99a02d;cb_36de1b4bfb23;cb_3b89a4ea2688;cb_62a6423d40f5;cb_6a5e6918908e;cb_707bfe1edbf1;cb_89818139f1b0;cb_c7684d627aa3;cb_d66de5785a9f;cb_e255e07cdcf7
+n_b10c0cd6bdbc,complex or unfamiliar situations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_31f32c99a02d
+n_0c2a4bc094fd,addressing challenges by actively seeking understanding and clarity,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_31f32c99a02d
+n_aef226c1ad6e,a normative response to navigating unfamiliar circumstances,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_31f32c99a02d
+n_c0896ade8b32,natural beauty of the country,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8a9e253e11f7
+n_fc16bf8ec293,unique landscapes and natural wonders,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8a9e253e11f7
+n_161a66fe1f7d,natural splendor,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8a9e253e11f7
+n_29424d3d2317,diverse landscapes,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8a9e253e11f7
+n_24edf7e6d413,people -> use Fahrenheit for temperature measurement,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_906a57a05279
+n_38013f2e6a28,Fahrenheit,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_906a57a05279
+n_ac6a5ec333ba,people -> prefer practical measurements for humans,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_906a57a05279
+n_7532e5099fa2,Fahrenheit -> used for,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_906a57a05279
+n_4a157bcfd6dd,external temperature and equipment,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_906a57a05279
+n_a664f10b5e58,parents,LAYER_1_SURFACE,"[0.425, 0.425, 0.15]",8,False,cb_1d9220fa3e2a;cb_44044bd93b80;cb_5f0e22cacd3c;cb_bee44e17d220
+n_870ec4ec5283,students and children to walk or cycle to school,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_bee44e17d220
+n_b566f8ec00c1,students and children,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_bee44e17d220
+n_b35b64f1d8cf,physical activity and independence are valued from a young age,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_bee44e17d220
+n_b51eacebba7b,walking or cycling to school,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_bee44e17d220
+n_e3bc84e6e109,among a significant portion of the sampled population,LAYER_1_SURFACE,"[0.3333, 0.3333, 0.3333]",3,False,cb_5b627781020e;cb_75d7545566a1;cb_bee44e17d220
+n_7385ce9f8574,people -> prefer self-service gas pumps,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4527328ef729
+n_787774449ca8,self-service gas pumps,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4527328ef729
+n_687193a255c7,self-service gas pumps -> have,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4527328ef729
+n_3a825d888ef2,gas pump attendants,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4527328ef729
+n_7a70a4fd5fdf,self-service gas pumps -> reflect,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_4527328ef729
+n_a9be716a2aef,cultural norm,LAYER_2_SOCIAL,"[0.15, 0.425, 0.425]",2,False,cb_2eba6e25b27b;cb_4527328ef729
+n_96ef1daf2bef,self-service gas pumps -> represent,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4527328ef729
+n_4e6237e5f38a,Environmental Adaptation and Sustainability,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",2,False,cb_4527328ef729;cb_4fb8bf1701f7
+n_a7718be71521,people -> experience culture shock,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4fb8bf1701f7
+n_6c51a33cfbd9,"differences in food availability and quality, particularly in finding vegetables and meat",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4fb8bf1701f7
+n_33ad866926b2,food availability and quality,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_4fb8bf1701f7
+n_ea0c4952b6e7,cultural adaptation,LAYER_2_SOCIAL,"[0.15, 0.425, 0.425]",2,True,cb_4fb8bf1701f7
+n_ba66b7109ed5,vegetables and meat,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4fb8bf1701f7
+n_5101370bb67b,less available,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4fb8bf1701f7
+n_f4d0f8fa8539,"modern, coordinated, and often matching outfits, including jeans",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_44044bd93b80
+n_9afa599124f2,presenting a well-coordinated and fashionable image for their children,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_44044bd93b80
+n_1ddd8ad280c9,dressing children,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_44044bd93b80
+n_2da79977f100,within the sampled population,LAYER_1_SURFACE,"[0.3333, 0.3333, 0.3333]",3,False,cb_44044bd93b80;cb_59ca07f074ea;cb_a8e8ee97ec09
+n_e6310204b78d,people and highways,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_14730c07db71
+n_fd8b8fb4f7e7,presence and absence of streetlights,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_14730c07db71
+n_8d2a6bf42ad9,"factors like cost, safety, and natural lighting",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_14730c07db71
+n_1430979d2401,perception of lighting,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_14730c07db71
+n_239ee1ea02bf,location and traffic conditions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_14730c07db71
+n_b380a07797eb,environmental adaptation,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_14730c07db71
+n_615923d86676,candy,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_aecf6ef6436f
+n_8f1aea3bd773,throughout the week,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_aecf6ef6436f
+n_afa063530126,candy consumption,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,True,cb_aecf6ef6436f
+n_6f80a18826e6,cultural acceptance,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_aecf6ef6436f
+n_f3acab489554,local traditions,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_aecf6ef6436f
+n_c950af6149a6,fresh strawberries,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_8a6b33f997f9
+n_cd26766c32eb,canned strawberries,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_8a6b33f997f9
+n_c2c1a1062d88,cooking,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8a6b33f997f9
+n_606c94373508,"seeking out and enjoying fresh, high-quality produce",LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_8a6b33f997f9
+n_caa155adf81f,rules,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_16ed6ab0a7bb
+n_c9f2061b0e8b,rules that align with their beliefs,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_16ed6ab0a7bb
+n_4f780e9cefe4,preferences for values and principles,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_16ed6ab0a7bb
+n_c09d4ee2c31c,American cultural behavior,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_16ed6ab0a7bb
+n_cf2b1865aca6,adhering to and showing respect for rules,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_16ed6ab0a7bb
+n_77933d655400,people -> express shock or surprise,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_59ca07f074ea
+n_d7eacd3561fe,unexpected or unfamiliar situations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_59ca07f074ea
+n_d34b2c9c06ef,new or sudden turn of events,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_59ca07f074ea
+n_145e7f7bae30,among Americans,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_59ca07f074ea
+n_12ff658a985c,people -> eat food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_2eba6e25b27b
+n_ed60e197dbe1,buttons to pop open,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2eba6e25b27b
+n_5a61775fc560,food -> associated with,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2eba6e25b27b
+n_5b905e3cd63d,indulgence,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2eba6e25b27b
+n_554668c78461,importance of food in American social settings and daily life,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2eba6e25b27b
+n_85e75d8b7e3d,drug use and abuse,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_abe8714228b6
+n_b308a2152a06,legal restrictions and societal concerns,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_abe8714228b6
+n_47db3b518660,a complex and widespread problem,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_abe8714228b6
+n_e2021a9167da,American cultural context,LAYER_3_DEEP_VALUE,"[0.15, 0.2875, 0.5625]",4,False,cb_abe8714228b6;cb_b383db1d44d8;cb_f98ac5aea810
+n_daa86d028d9e,unusual and highly controversial behavior,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_abe8714228b6
+n_a9ae9b5a6d4e,drivers and passengers -> yell,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_e4d3022300f1,frustration or excitement,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_209bb2bb0d19,yelling -> be considered,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_6a4443acdd8c,American car culture,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_9ecbb3b684f6,yelling -> reflect,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_3c89defe20bd,vocalize emotions and reactions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_75de00e7b130,yelling -> be a normative practice,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_f5789323e2ff,sampled population,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2999a525ab12
+n_a4044c13bb40,"people, including soldiers and individuals",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_168dc4229e3b
+n_06aba07620a0,"military time in various contexts, including 24-hour format and military alphabet",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_168dc4229e3b
+n_01d9eb4c22a7,military time,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,True,cb_168dc4229e3b
+n_623aa0e9e8ee,practical and efficient approach to timekeeping and communication,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_168dc4229e3b
+n_23ccd1dddc59,normative behavior within American culture,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_168dc4229e3b
+n_56acda1744a9,theft for food or money,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_bf5a8511452e
+n_e16cd0547583,vary from acceptance to punishment,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_bf5a8511452e
+n_43a5fedeefd2,complex perceptions of ownership,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_bf5a8511452e
+n_2292595672e4,disapproval or discomfort,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_bf5a8511452e
+n_a0ff6f32d648,Target for groceries and other goods,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a810dcf36b0e
+n_71fb35b643a5,Target's offerings,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a810dcf36b0e
+n_a7f886c2c408,shopping at Target,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a810dcf36b0e
+n_da991537bc8b,a significant portion of the sampled population,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_124f94b50873;cb_a810dcf36b0e
+n_88325295bf47,everyday items and groceries,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_a810dcf36b0e
+n_4c07084907df,people -> prefer and consume Coca-Cola,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a67817e0fb31
+n_17592f5d697f,"Diet Coke, Zero Coke, or frozen Coke",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a67817e0fb31
+n_52fb6a84bb2a,Coca-Cola -> is available at,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a67817e0fb31
+n_9e719b417114,grocery stores and fast food establishments,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a67817e0fb31
+n_941250c8279c,"individuals, women, people",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_c4f851966d7f
+n_8e45b55ba970,socks or go sockless,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c4f851966d7f
+n_c9da8a6b0810,socks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_c4f851966d7f
+n_f06aa0cbd057,keeping feet warm and clean,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_c4f851966d7f
+n_e023e3a38e36,wearing socks in daily life,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c4f851966d7f
+n_ba2e659c9b97,cultural practices,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",2,False,cb_5f570f787b9b;cb_c4f851966d7f
+n_30a1547bed41,"individuals, including those under 21",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_12855edf017b
+n_539133fa2aad,gun ownership and purchase,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_12855edf017b
+n_302ad8a95314,legal ages,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_12855edf017b
+n_c8ab6ad59759,16 to 21,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_12855edf017b
+n_8f17ec18e9ff,gun ownership,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,True,cb_12855edf017b
+n_2ac34cefd772,"historical, legal, and social aspects",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_12855edf017b
+n_f3a8250c6595,complexity and diversity of perspectives,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_12855edf017b
+n_7917fbcd0bde,"people, including children",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_5f570f787b9b
+n_4d4cd5fd47d4,"various activities involving trucks, including driving, standing in front, and riding in the truck bed",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5f570f787b9b
+n_5736894ffc48,trucks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_5f570f787b9b
+n_6f227b280da8,a cultural symbol,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_5f570f787b9b
+n_bd22049c5b73,activities involving trucks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5f570f787b9b
+n_6440b0677ae2,American people and speakers,LAYER_1_SURFACE,"[0.5167, 0.3333, 0.15]",3,False,cb_03b4f7c0039f
+n_ccc7626c5ea4,"articulate, eloquent, and strong language",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_03b4f7c0039f
+n_793502b43b94,well-thought-out and perfect responses,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_03b4f7c0039f
+n_f2f651ed81e4,effective and impactful communication,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_03b4f7c0039f
+n_d2257fb7cf41,make a strong impression,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_03b4f7c0039f
+n_9c3672f967aa,people -> dress casually,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4aa9162486d6
+n_f097d9e0809f,"sportswear like sweatpants, leggings, and athletic shoes",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_4aa9162486d6
+n_887d6f51c62c,formal or tailored clothing,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_4aa9162486d6
+n_1da701385a33,somewhat unconventional or not entirely in line with the local fashion norms,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_4aa9162486d6
+n_74f7f5db9b3b,people and students,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_0bd62a7524a4;cb_b4d25ae50f4f
+n_33357f0df1e5,often before 6am,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0bd62a7524a4
+n_a698ffe485ac,maintain energy levels,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0bd62a7524a4
+n_ae82e41fca5d,American society,LAYER_2_SOCIAL,"[0.15, 0.5167, 0.3333]",9,False,cb_0bd62a7524a4;cb_1d9220fa3e2a;cb_212026053639;cb_347e5fc3aa2b;cb_3843a41d56f1;cb_456af75fe814;cb_5132dc492edb;cb_be3f9bbdafe1
+n_8d98bda19baa,highly,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_0bd62a7524a4
+n_30351bcc7e48,American work and school schedules,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_0bd62a7524a4
+n_beaa758a59c2,early start times,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_0bd62a7524a4
+n_987c7d89c1f6,people -> prefer and use coffee creamers,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d931ba5079f8
+n_6838e4684ad8,coffee creamers,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_d931ba5079f8
+n_d0ee2bb208bb,when unavailable,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d931ba5079f8
+n_3f865a4d3881,within the American population,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d931ba5079f8
+n_86230a968534,employees and people -> express positive emotions towards their job -> love and happiness,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e3755f469420
+n_156b3eae0e39,love and happiness,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e3755f469420
+n_34d2f1899e8d,employees and people -> sometimes to the point of -> workaholism,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e3755f469420
+n_d0432d7c023e,workaholism,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e3755f469420
+n_4acc50abc06a,American workplace -> values -> dedication and commitment to one's job,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_e3755f469420
+n_f06af9a1d055,dedication and commitment to one's job,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_e3755f469420
+n_18c25a2ea15a,American workplace -> considers -> standard practice -> expression of love and happiness towards work,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_e3755f469420
+n_e21d19bf5ba7,standard practice,LAYER_1_SURFACE,"[0.425, 0.15, 0.425]",2,False,cb_20720f3a31c8;cb_e3755f469420
+n_0d34b1f1710e,people and police officers,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0774c894d78a
+n_a633b7d9859e,fear due to gun violence,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_0774c894d78a
+n_30a986f48a43,American cultural group,LAYER_3_DEEP_VALUE,"[0.15, 0.3333, 0.5167]",3,False,cb_0774c894d78a;cb_a4b3a9e26769
+n_e3f6608c0578,stricter gun laws,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0774c894d78a
+n_397bee37016e,some people,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0774c894d78a
+n_a8b6472c501e,fear of gun violence,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0774c894d78a
+n_316be803af63,husband,LAYER_2_SOCIAL,"[0.2875, 0.5625, 0.15]",4,False,cb_4c6f3c73a303
+n_fab3b34fef8b,new environment,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4c6f3c73a303
+n_3e922b3ec7ea,normative practice,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_4c6f3c73a303
+n_f3e2a242717c,new surroundings,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4c6f3c73a303
+n_c06cdefcc410,European culture,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_4c6f3c73a303
+n_dda4d9944ed5,raising children,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5f0e22cacd3c
+n_42685f11da91,children,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5f0e22cacd3c
+n_c95a8e5d6d14,to raise and nurture their children,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_5f0e22cacd3c
+n_753c9720ca12,active and guiding role of parents in child-rearing,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_5f0e22cacd3c
+n_f68f40f5ef3f,construction methods,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_8a181aaf6c19
+n_3a599f45ef44,durability and longevity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_8a181aaf6c19
+n_2d73936df779,"cheaper, faster, and less stable methods",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8a181aaf6c19
+n_1b9d8bf62dc2,value of cost-effectiveness,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_8a181aaf6c19
+n_44d1049c9fd6,longevity of homes,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_8a181aaf6c19
+n_7eaafc860cbb,"breakfast at 4am, lunch at 10:30am, and dinner at 6pm",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b4d25ae50f4f
+n_91f0fd1deef2,non-traditional mealtime patterns,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_b4d25ae50f4f
+n_6ac92846a5bc,American daily routines,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_b4d25ae50f4f
+n_74163db62a28,different lifestyles and work schedules,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_b4d25ae50f4f
+n_684b115fb348,people -> use unique finger counting methods -> starting with the thumb or pointer finger,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_677e064959af
+n_0db1e4461d03,unique finger counting methods,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_677e064959af
+n_32ad4924d00e,people -> finger counting -> unique method,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_677e064959af
+n_67b1faea4b98,unique method,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_677e064959af
+n_7a3c83911d29,people -> finger counting -> starting with the thumb or pointer finger,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_677e064959af
+n_f437de05bb5c,thumb or pointer finger,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_677e064959af
+n_6ff13d1c04fa,cultural identity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_677e064959af
+n_327a473b5d6b,students,LAYER_1_SURFACE,"[0.5167, 0.3333, 0.15]",3,False,cb_456cb35f492f;cb_eef74b325627
+n_0d3dccfd6251,late August or early September,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456cb35f492f
+n_7ad0d639798d,academic year,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456cb35f492f
+n_51b22d144fa3,end of August to middle of June,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456cb35f492f
+n_dbaf7793cd7b,school start date,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456cb35f492f
+n_eab0a2fdca7d,different schools,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456cb35f492f
+n_e1d6b94214ae,school year,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456cb35f492f
+n_049ae9d360c2,among the sampled population,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_456cb35f492f
+n_e27e0039c80a,"hamburgers, hot dogs, and other American fast food staples",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5aeafa5e488e
+n_f541207ec633,American fast food staples,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5aeafa5e488e
+n_a96052ed51e6,in gas stations and fast food establishments,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5aeafa5e488e
+n_f27ec7532e4c,"specific brands and styles, such as Costco hot dogs",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5aeafa5e488e
+n_3139a0bb0a18,American fast food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5aeafa5e488e
+n_62846c8af05f,a normative and customary practice,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_5aeafa5e488e
+n_b6d1bd51273a,"people -> LAYER_1_SURFACE -> prefer fresh, high-quality food with minimal preservatives",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2566911de7a3
+n_53f61b2c7b1e,"fresh, high-quality food with minimal preservatives",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_2566911de7a3
+n_2c95a741b09d,people -> LAYER_2_SOCIAL -> prioritize,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_2566911de7a3
+n_d3cb66f5ec6e,people -> LAYER_3_DEEP_VALUE -> seek out natural and unadulterated food options,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_2566911de7a3
+n_f800b5b01181,natural and unadulterated food options,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_2566911de7a3
+n_8fd99971421b,"poverty, obesity, and homelessness",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_3b89a4ea2688
+n_e48435b02a0c,societal issues,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",2,False,cb_3b89a4ea2688
+n_eea3deeab913,lack of minimum wage and exploitation,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3b89a4ea2688
+n_4d70b6273bfc,"struggles with poverty, obesity, and homelessness",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3b89a4ea2688
+n_afa539e44cb1,biscuit to refer to both bread rolls and a traditional dish made with gravy,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c5d5815c38a8
+n_5ab860616d3e,biscuit,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_c5d5815c38a8
+n_00aa0f4e729d,American cuisine,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_c5d5815c38a8;cb_e255e07cdcf7
+n_7dc5cca9ecb1,tea cakes,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c5d5815c38a8
+n_d1aa6df5c7ba,biscuits and cookies,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c5d5815c38a8
+n_fb3e47cb5153,authentic Mexican food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5949458755c8
+n_dab1bcf6e9c1,authentic Mexican food to local or other international cuisines,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5949458755c8
+n_b50a7af91890,authenticity over Americanized versions,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_5949458755c8
+n_a2df994f0fdf,cultural inclination towards valuing traditional and genuine culinary experiences,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_5949458755c8
+n_599699a17486,people -> prefer building houses with wood,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ad5cbd576ac
+n_e8002c169040,wood,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ad5cbd576ac
+n_ab2ade77d460,people -> often use cheap materials for insulation,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ad5cbd576ac
+n_499d3c7f242c,cheap materials,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ad5cbd576ac
+n_9884c522cfce,American society -> reflects cultural preference,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0ad5cbd576ac
+n_b89d7a86fdf9,preferring wood and cost-effective insulation,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ad5cbd576ac
+n_7ecd02c0d7ca,people -> practice standard approach to construction,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ad5cbd576ac
+n_3c39570a5564,building houses with wood and cheap insulation,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ad5cbd576ac
+n_737a4ea39ecc,people -> enjoy and engage in various pickle-related activities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e255e07cdcf7
+n_fae82db82fe5,"pickle consumption, making, and experimentation with different pickle types",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e255e07cdcf7
+n_08c406094e33,pickles,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_e255e07cdcf7
+n_ec8d0d868308,kosher dill pickles,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e255e07cdcf7
+n_a54d19ca24f8,among people in the United States,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e255e07cdcf7
+n_20b4ba9d08e8,"legal actions, including suing and filing lawsuits",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_62a6423d40f5
+n_38f45f21cb6d,legal actions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_62a6423d40f5
+n_8231349f7ffd,societal inclination towards addressing disputes and grievances through legal channels,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_62a6423d40f5
+n_d0371605d333,resorting to legal measures as a standard approach to conflict resolution,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_62a6423d40f5
+n_a6256c0a061e,a litigious culture,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_62a6423d40f5
+n_0e266128426f,marijuana over alcohol,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_09710225a610
+n_605f87d00a16,marijuana in public,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_09710225a610
+n_8671f1c5796f,marijuana,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_09710225a610
+n_f0d11b738106,a normative practice,LAYER_3_DEEP_VALUE,"[0.15, 0.3333, 0.5167]",3,False,cb_09710225a610;cb_2688e1d97269;cb_e0580d953525
+n_9b00d968fd2e,"people, including children and adults",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_38d008f17082;cb_937a028dd1b3
+n_b966b324d0e6,"outdoors, including fast food, snacks, and new foods",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_937a028dd1b3
+n_10130ec80b39,weather conditions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_937a028dd1b3
+n_ebc8619dea97,American public spaces,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_937a028dd1b3
+n_8c29a1a45990,schools and parks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_937a028dd1b3
+n_fcf62c956ad5,American value,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_937a028dd1b3
+n_d2d46940cafd,embracing outdoor activities and socializing in communal spaces,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_937a028dd1b3
+n_6f81989a239b,people and individuals,LAYER_1_SURFACE,"[0.6389, 0.2111, 0.15]",9,False,cb_347e5fc3aa2b;cb_5132dc492edb;cb_6cff5d4581e9;cb_a1ce96864098;cb_c522a4c0be60
+n_e4f39eeea3b3,preferences and considerations for living,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c522a4c0be60
+n_191fea398a90,personal autonomy and freedom to make choices,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_c522a4c0be60
+n_6bcc2a3e172c,expressive behavior regarding living conditions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_c522a4c0be60
+n_2290a2b0bdb5,people -> consume genetically modified (GMO) foods,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_124f94b50873
+n_6353d37552a1,their safety and regulation,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_124f94b50873
+n_2a5bbdeabff4,GMO foods,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_124f94b50873
+n_66e891bd15d9,preservatives and larger produce,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_124f94b50873
+n_5cffb2bb51e9,consumption of GMO foods,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_124f94b50873
+n_388d2d005b87,some countries,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_124f94b50873
+n_fa584a71f7c2,the concept of freedom,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",2,False,cb_d66de5785a9f
+n_4e8806960068,in relation to freedom,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d66de5785a9f
+n_f99136306b6e,"variety, organization, and frequency of shopping",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_0fe3dfb80a44
+n_84f5ef0c5ba9,wide range of products and store layout,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0fe3dfb80a44
+n_b4f712a7a373,normative feeling of being overwhelmed,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0fe3dfb80a44
+n_13ae900406e0,grocery shopping,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0fe3dfb80a44
+n_4934889db5e1,American consumer behavior,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0fe3dfb80a44
+n_d3277920c4b3,people and homeowners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_1466c1a9d5b4;cb_2de46e4c863a
+n_d3d1ae56b4af,110/120V power,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2de46e4c863a
+n_ea65fce6f589,electrical devices,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2de46e4c863a
+n_9d2798ea0973,adaptors and protectors,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2de46e4c863a
+n_90d8e264c32e,the prevalent use of lower voltage electrical systems,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_2de46e4c863a
+n_80ddc409a3ba,electrical systems,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_2de46e4c863a
+n_8116b9e90ba4,the behavior of people and homeowners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_2de46e4c863a
+n_2e214366367c,water bottles,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_f965519865e2
+n_3e38773c5f0d,for daily activities and travel,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f965519865e2
+n_98116f98bb8d,large sizes or hydroflasks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f965519865e2
+n_bad08118fcb7,carrying or using water bottles,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f965519865e2
+n_98bc9e83501d,in American cultural context,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_f965519865e2
+n_0538221a43c7,people -> use the term 'thongs',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_72cae4091cce
+n_fceca1bfa538,undergarments and flip-flops,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_72cae4091cce
+n_8a8c8f9b2208,people -> have,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_72cae4091cce
+n_f50ba5116e30,usage of 'thongs',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_72cae4091cce
+n_ba4ac26690b3,people -> use,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_4ebb1899147a;cb_72cae4091cce;cb_c59fea3e75aa
+n_3d1668ac31d0,for both undergarments and flip-flops,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_72cae4091cce
+n_9db95247195f,people -> exhibit,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_72cae4091cce
+n_ebb13e4d70a6,in the United States,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_72cae4091cce;cb_a8e8ee97ec09
+n_1e3ea8f3e397,people in America and the United States,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_2fd83b626f25
+n_6a42a9b3e1fc,European car brands,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_2fd83b626f25
+n_e8b4bbd03194,pronunciation of European car brands,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_2fd83b626f25
+n_b4039f38351b,automotive preferences and purchasing habits,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_2fd83b626f25
+n_82246567823a,"diverse pronunciations of geographical names, especially Arkansas",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_93b12f327938
+n_e10aff5f0a96,a form of humor or local pride,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_93b12f327938
+n_28330621c0a8,cultural diversity and regional identity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_93b12f327938
+n_af135a3fe4e0,diverse grocery shopping behaviors,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6cff5d4581e9
+n_c3ec36d6f98f,grocery shopping behaviors,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_6cff5d4581e9
+n_06e3d356fe39,cultural diversity and geographical spread,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_6cff5d4581e9
+n_3d974d8b13a9,American population,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_6cff5d4581e9
+n_3671456b7f50,diversity in grocery shopping practices,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_6cff5d4581e9
+n_796b59dfde71,people -> express a range of opinions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_43fa3a143255
+n_60af3b17e524,"agreement, disagreement, and having a different perspective",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_43fa3a143255
+n_4abdad28f520,society,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_43fa3a143255
+n_01e9cb8dd891,people -> regard as normative,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_43fa3a143255
+n_0e3958665994,people -> accept,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_43fa3a143255
+n_1caa018b0d46,significant portion of the sampled population,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_43fa3a143255
+n_414faf30d4ef,"people, including tourists and individuals moving for personal or professional reasons",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b75ef5da0ff0
+n_43485f6ff6fe,"live, visit, or move to New York",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b75ef5da0ff0
+n_dddd9606dd43,New York,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b75ef5da0ff0
+n_209a0d988159,a desirable and iconic destination,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_b75ef5da0ff0
+n_087316150047,lifelong dreams or aspirations,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_b75ef5da0ff0
+n_33b4bea2dde3,a symbol of opportunity and excitement,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_b75ef5da0ff0
+n_d2275560a899,honestly,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a81d94c66b09
+n_87452162b9de,love and hate,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a81d94c66b09
+n_d13573e539d2,open and honest emotional expression,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a81d94c66b09
+n_1cb35b6b6328,American communication style,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_a81d94c66b09
+n_8735205e8fd2,open and honest expression of emotions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a81d94c66b09
+n_6a3dea713fdb,people -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_3014b4eb3b1a;cb_7021255aaecc
+n_b010781179ce,drinking water at room temperature or with ice -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_7021255aaecc
+n_dfd1301d7d46,room temperature water stale -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_7021255aaecc
+n_8a79f96e240c,drinking water -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_7021255aaecc
+n_30a50d8bd18a,habit -> LAYER_3_DEEP_VALUE,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_7021255aaecc
+n_6eecbc712858,individuals and people -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_23b56b8eb331
+n_b8da59b4f27c,IDing -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_23b56b8eb331
+n_4422d49e2042,individuals and people -> LAYER_2_SOCIAL,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",2,False,cb_23b56b8eb331
+n_6fe218b8f983,identification -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_23b56b8eb331
+n_f5e342be17fe,social norms and etiquette -> LAYER_3_DEEP_VALUE,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_23b56b8eb331
+n_d22c59bacaa7,a strong sense of patriotism and a belief in American superiority,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_38d008f17082
+n_77e6faca7d5f,American upbringing,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_38d008f17082
+n_994a3cf67528,a happy childhood and a belief in the American Dream,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_38d008f17082
+n_75e8b463ee4d,American identity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_38d008f17082
+n_d59699921d43,a widespread acceptance of patriotism and American superiority,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_38d008f17082
+n_a74824214728,people and speakers -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f4cf4dc3a653
+n_732a025a03ce,"words with a unique American accent, including mispronunciations and specific pronunciations of rural and German words -> LAYER_1_SURFACE",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f4cf4dc3a653
+n_c5326ea2826d,American accent -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_f4cf4dc3a653
+n_e5ab3bc784ee,cultural and linguistic diversity -> LAYER_3_DEEP_VALUE,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_f4cf4dc3a653
+n_2937a1d32470,light switches and outlets,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_1466c1a9d5b4
+n_d105ef089ba7,safety and convenience,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",2,False,cb_1466c1a9d5b4
+n_4cbb5870b4d8,switches and plugs,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_1466c1a9d5b4
+n_92f3f313def8,older houses,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_1466c1a9d5b4
+n_37a50ac96d3c,switches plugged into the wall,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_1466c1a9d5b4
+n_8eb21e033254,lively and fun party activities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d8299eb08423
+n_1a5ff1001a3c,parties and celebrations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d8299eb08423
+n_7183297ec6ee,cultural value placed on social interaction and enjoyment,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d8299eb08423
+n_e28f6235d7b0,vibrant and engaging festivities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d8299eb08423
+n_c567b134c3aa,lively and fun party activities as a normative and standard way of participating in social gatherings,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_d8299eb08423
+n_09da703763aa,dog owners,LAYER_1_SURFACE,"[0.425, 0.425, 0.15]",2,False,cb_0ebfcfe41c4d
+n_cc90fda9b1a7,dogs,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ebfcfe41c4d
+n_ee751a2096f8,dog names,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_0ebfcfe41c4d
+n_df5d0966db02,dog's appearance or personality,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ebfcfe41c4d
+n_adc292b2a0ec,cultural influences,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0ebfcfe41c4d
+n_807b0e49f623,creativity in naming,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_0ebfcfe41c4d
+n_86178ff4ace0,people -> engage in various celebratory activities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_67d281471c1d
+n_2904efc95b15,"setting off fireworks, giving presents, and watching fireworks",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_67d281471c1d
+n_00bf7556873f,setting off fireworks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_67d281471c1d
+n_8f06af2311b0,enthusiasm and joy,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_67d281471c1d
+n_480bb6840037,exchanging presents,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_67d281471c1d
+n_3fea1b514433,a normative part of the New Year's festivities,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_67d281471c1d
+n_46a6a4c58d87,New Year's celebrations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_67d281471c1d
+n_47843fdd6bfe,vibrant and celebratory nature,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_67d281471c1d
+n_40c1feb6dbaf,use the phrase 'sent me into a coma',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_9f334f3d3ca2
+n_9c3e848a648b,serious medical condition,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_9f334f3d3ca2
+n_7001305212cb,people -> have sensitivity and awareness,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_9f334f3d3ca2
+n_7e56396df26a,in American culture,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",2,False,cb_51aea25f1860;cb_9f334f3d3ca2
+n_86c46d709c90,stabbings and violence,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_36de1b4bfb23
+n_81b180bedc06,concern for stabbings and violence,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_36de1b4bfb23
+n_f19322dd6d3b,unusual behavior,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_36de1b4bfb23
+n_1785a93e5a96,government,LAYER_1_SURFACE,"[0.5625, 0.2875, 0.15]",4,False,cb_0e63888ca52f;cb_1d9220fa3e2a;cb_f98ac5aea810
+n_e3d9da92ae72,military spending,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f98ac5aea810
+n_7bd9a03e9bd1,other sectors like infrastructure,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f98ac5aea810
+n_de5dba85c5e2,emphasis on national defense and security,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_f98ac5aea810
+n_6aeda11a00e5,American cultural framework,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_f98ac5aea810
+n_9217c5f01386,prioritization of military spending,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_f98ac5aea810
+n_1fa5ed0e96c4,speakers and listeners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0cb6ea8a6e9e
+n_c15eee7b94cd,idiomatic expressions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_0cb6ea8a6e9e
+n_f78cf21c9ba3,dynamic and expressive nature of communication,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0cb6ea8a6e9e
+n_c6436b3fa64f,rich and diverse linguistic landscape of American English,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0cb6ea8a6e9e
+n_375c05ab3cfe,ability to understand and employ idiomatic expressions,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_0cb6ea8a6e9e
+n_09dbaa7ef6a8,linguistic proficiency and cultural fluency,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0cb6ea8a6e9e
+n_721f0f82fcff,"various items such as laptops, bags, and suitcases",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_64e1c614bd46
+n_f11b80ade73d,casual manner,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_64e1c614bd46
+n_92f42db5a90d,people carrying and handling various items in a casual manner,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_64e1c614bd46
+n_b654a82914b8,people -> use the term 'pants',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6afbb3c36e73
+n_a3f7f2e58f98,both trousers and underwear,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6afbb3c36e73
+n_5a05e7e528e4,people -> have a preference for,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6afbb3c36e73
+n_0ed01acb465f,'pants' over 'trousers',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6afbb3c36e73
+n_eac271659693,term 'pants',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6afbb3c36e73
+n_6089e932c1b5,Communication and Language,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6afbb3c36e73
+n_f8ec63aba61f,access to resources and services,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_6a5e6918908e
+n_8b84a45c5525,a tendency to take certain things for granted,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_6a5e6918908e
+n_fcb1c2b6c483,the cultural group in the United States,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_6a5e6918908e
+n_554dd57b37d4,"people, government, states",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_2461587fc553
+n_46f70711f90e,high GDP as a measure of economic strength and well-being,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2461587fc553
+n_147d20314e5c,high GDP,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2461587fc553
+n_a94f79cb6493,economic strength and well-being,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2461587fc553
+n_95c3cabb1b16,GDP per capita,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2461587fc553
+n_fa324c1dbcc0,key indicator,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2461587fc553
+n_8f3b57d134b3,limitations of GDP in reflecting economic disparities and median income,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2461587fc553
+n_62861984695f,having a TV in the bedroom,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_25b66cf2a6d8
+n_c1a3f18b7404,people in American households,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_25b66cf2a6d8
+n_f95ab2f6af15,sleep schedule,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_25b66cf2a6d8
+n_8bf79a9b15a1,American parents and children,LAYER_2_SOCIAL,"[0.3333, 0.5167, 0.15]",3,False,cb_a4b3a9e26769
+n_8a3dbd53a7aa,chickenpox parties and vaccination,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a4b3a9e26769
+n_1018162f4921,the severity and immunity benefits of chickenpox,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_a4b3a9e26769
+n_d5705b63da09,to build immunity and avoid severe illness,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_a4b3a9e26769
+n_6dda850dd234,regarding the severity and necessity of chickenpox vaccination,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_a4b3a9e26769
+n_83c8ac4fbb48,people -> use the term 'Karen',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_92e3d96b027b
+n_370eaba6d5fd,a specific type of person,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_92e3d96b027b
+n_612071a615fc,"entitled, overly sensitive, or aggressive",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_92e3d96b027b
+n_b67c8bd1f93f,the term 'Karen',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_92e3d96b027b
+n_6aad96b8ba2e,other countries,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_92e3d96b027b
+n_b22c86f44b30,derogatory manner,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_92e3d96b027b
+n_435dabc7eae6,"formal titles such as 'Ms.', 'Mrs.', 'Miss', or 'Dr.'",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_eef74b325627
+n_8eea3d11ccbf,teachers,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_eef74b325627
+n_663c3bde0f42,showing respect to educators,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_eef74b325627
+n_3d7c28b3c494,"bulletproof vests, helmets, and armor",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0820333c9cf6
+n_4e9003b56ebc,safety very seriously,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0820333c9cf6
+n_770596514390,safety and security,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0820333c9cf6
+n_83a6e7f8a969,concern for personal safety,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0820333c9cf6
+n_8706a243b94b,use of protective gear,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0820333c9cf6
+n_bb9c9327f20e,perceived level of normativity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_0820333c9cf6
+n_36f2a077a66a,people -> use the term 'Cali',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b593727df7a2
+n_e37b030af5fa,California,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b593727df7a2
+n_acc698dfe3c6,people -> have mixed feelings,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_b593727df7a2
+n_41a5dbac5232,the term 'Cali',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b593727df7a2
+n_075a829bcb52,diverse attitudes,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_b593727df7a2
+n_5dc49881e813,controversial or unconventional,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_b593727df7a2
+n_df08c6a0388c,people -> use and exchange cards,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5b627781020e
+n_04987163ac23,"cards, including bank cards and personal checks",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_5b627781020e
+n_b9b8a5a3f596,widespread reliance on electronic and paper-based transactions,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_5b627781020e
+n_f7b7d0c18161,use of cards for financial transactions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5b627781020e
+n_47ae0e536e5d,in grocery stores and retail settings,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_68b0d21ba630
+n_ffbb92697bfe,for transactions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_68b0d21ba630
+n_5717e99af064,in a standard way,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_68b0d21ba630
+n_bd4873d60afe,the United States and its people,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_512a01a36780
+n_ef8957ff613f,generalizations,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_512a01a36780
+n_3d79ba0acd44,limited experiences or stereotypes,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_512a01a36780
+n_01b0216fcc5a,to make generalizations about the United States and its people,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_512a01a36780
+n_9c0c246c16d3,people -> prefer using cup measurements in cooking and baking,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d6ace480dc99
+n_040848356e0d,measuring cups,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_d6ace480dc99
+n_138cbf871dd9,people -> convert other units to cups,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d6ace480dc99
+n_50df4c85cdf4,other units,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d6ace480dc99
+n_5876a7a553c2,cup measurements -> reflect,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_d6ace480dc99
+n_b461b458bbe4,widespread practice,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_d6ace480dc99
+n_60943696e12c,people -> rely on,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d6ace480dc99
+n_7e89e5d83aba,"people, including neighbors and mail carriers",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a8e8ee97ec09
+n_2a601fc0b7fb,"package theft, often from porches or doorsteps",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a8e8ee97ec09
+n_a4130eeb172b,package theft,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_a8e8ee97ec09
+n_5947727cea9d,individuals,LAYER_1_SURFACE,"[0.425, 0.425, 0.15]",6,False,cb_28951268cadc;cb_a8e8ee97ec09;cb_b8beaee9f9f8
+n_805cee82fe88,"people -> LAYER_1_SURFACE -> treat and perceive stray animals with care, using shelters and viewing them as creatures with feelings",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6689bdfa20ec
+n_fa19167a05f0,stray animals -> LAYER_1_SURFACE -> creatures with feelings,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_6689bdfa20ec
+n_a35117c67889,stray animals -> LAYER_1_SURFACE -> uncommon,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6689bdfa20ec
+n_d1321df21f6c,urban and rural areas -> LAYER_1_SURFACE -> difference,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6689bdfa20ec
+n_ba9bbe35351f,people -> LAYER_2_SOCIAL -> acknowledge and practice compassionate approach towards stray animals,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_6689bdfa20ec
+n_300ffc004eb5,stray animals -> LAYER_1_SURFACE -> sentient beings with emotions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6689bdfa20ec
+n_9b382636a3f0,"life, food, and American culture",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456af75fe814
+n_26515a4e4594,positivity and celebration of life,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_456af75fe814
+n_9353ba3e41d2,Americans,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_456af75fe814;cb_75d7545566a1
+n_2d6499342b7e,openly expressing love for various aspects of American culture,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456af75fe814
+n_203be70ecc0f,openly expressing enjoyment and appreciation,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_456af75fe814
+n_094af0ac9f65,people -> speak in various ways,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_be3f9bbdafe1
+n_0561b84f3b84,"loudly, indirectly, and with a normal human voice",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_be3f9bbdafe1
+n_d4c0c7df7aed,diverse range of speaking styles,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_be3f9bbdafe1
+n_068afad92bbb,cultural diversity and individuality,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_be3f9bbdafe1
+n_578808df6223,diverse approach to speaking,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_be3f9bbdafe1
+n_75a13f1ad575,hardwood floors,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_ecd7d24518a6
+n_243715e19f6a,homeowners and people,LAYER_1_SURFACE,"[0.425, 0.425, 0.15]",2,False,cb_ecd7d24518a6
+n_e20f8d1fef60,tiles,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ecd7d24518a6
+n_e8104d36303b,kitchen and bathroom,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ecd7d24518a6
+n_d0712d0e10b2,cleanliness and maintenance,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_ecd7d24518a6
+n_26f238e9a990,clean and well-maintained homes,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_ecd7d24518a6
+n_407ba4843d79,people and society,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_d3a1f234d7e0
+n_f9f2d8c8dbaa,discussions about money,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d3a1f234d7e0
+n_c95259de1fd7,money,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d3a1f234d7e0
+n_a0b07c5269aa,status symbol and measure of success,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d3a1f234d7e0
+n_68fbe90bda5e,hard work and prioritization of money over other aspects of life,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d3a1f234d7e0
+n_2a8dd8e0cf0d,majority of the population,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_d3a1f234d7e0
+n_235f52faea49,importance placed on financial success and associated discussions about money,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d3a1f234d7e0
+n_86a834a9b8c9,people -> typically pay for food or drinks before consuming them,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_46caeb98d281
+n_7aab74181a0a,food or drinks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_46caeb98d281
+n_fba74b5aaff5,people -> may occasionally consume before paying,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_46caeb98d281
+n_224431a541fd,paying,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_46caeb98d281
+n_e0719973e128,people -> reflect a level of trust and flexibility,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_46caeb98d281
+n_56590952aca8,cultural practice,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_46caeb98d281
+n_83e288f25e96,people -> is a standard part of the dining and social experience,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_46caeb98d281
+n_388882d14a31,dining and social experience,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_46caeb98d281
+n_3e21163ac3c8,"popsicles, ice pops, Icey Poles",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8b6798accd57
+n_6671668ca724,popsicles,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_8b6798accd57
+n_66a95b1e021a,icicle and lollipop,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_8b6798accd57
+n_755909794251,people in New York and New England,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_fac2e180c00d
+n_cb7f6ecebcb3,American English with a distinct accent,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fac2e180c00d
+n_e174d431e142,diversity and regional variations,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_fac2e180c00d
+n_9254b8feacb7,American English,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fac2e180c00d
+n_274e9f44089e,rich tapestry of American linguistic heritage,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_fac2e180c00d
+n_8585788c80d7,speaking American English with a distinct accent as a standard and prevalent practice,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_fac2e180c00d
+n_04b1c7b532aa,various activities requiring a Social Security number,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b8beaee9f9f8
+n_8dc0905862fe,Social Security number,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b8beaee9f9f8
+n_258e56ece946,unique identifier for legal and financial transactions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b8beaee9f9f8
+n_385899419c81,standard and essential part of everyday life,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_b8beaee9f9f8
+n_e173379ed0fa,selling and consuming food with specific parts removed or unwrapped,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c6fca60395ac
+n_9ea9aa5dbf35,engage in the practice of selling and consuming food with specific parts removed or unwrapped,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c6fca60395ac
+n_f6f1ca5a4de6,have specific parts removed or unwrapped before consumption,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_c6fca60395ac
+n_c2e4ea0cf285,"people -> use various terms like 'British', 'Brits', and 'Americans'",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_20720f3a31c8
+n_f23ab26bd9bd,people from the UK,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_20720f3a31c8
+n_85d5a79ef933,people -> have varying perspectives on,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_20720f3a31c8
+n_5dabc395f796,people -> use the term 'bubbler',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4ebb1899147a
+n_b0b3ef625f7a,a water fountain or drinking fountain,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4ebb1899147a
+n_0d62c9a7a708,in Wisconsin and Massachusetts,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4ebb1899147a
+n_a703ad1a3fb0,as a regional linguistic quirk,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4ebb1899147a
+n_4fd64f925b5a,people -> embrace,LAYER_1_SURFACE,"[0.425, 0.425, 0.15]",2,False,cb_4ebb1899147a;cb_6dc81432d5ef
+n_ef09b5ceaf51,showcasing its normative nature,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_4ebb1899147a
+n_f5da323c9e3b,homeowners and individuals,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_baa63afac95b
+n_1fe7c6157a5d,spacious and well-constructed living spaces,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_baa63afac95b
+n_d8661a5d530a,living spaces,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_baa63afac95b
+n_df1775cb9eae,large detached houses,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_baa63afac95b
+n_44ccdceb463c,housing preferences,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_baa63afac95b
+n_1202dd8c792d,sturdiness and American-style architecture,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_baa63afac95b
+n_91511514cd6e,American-style architecture,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_baa63afac95b
+n_b7d0fefbbffc,national identity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_baa63afac95b
+n_74715b0dbb6c,"people, including women and fathers",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_fab05712669b
+n_fa8d9642f3f1,fancy or nice attire,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fab05712669b
+n_f9d132e71b5e,to feel good or have fun,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fab05712669b
+n_3b836e1cf963,EBT use and farmer's market visits,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fab05712669b
+n_5776fc3e1a12,dressing up,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fab05712669b
+n_5621dec872aa,a normative behavior,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",3,False,cb_13e00592d620;cb_539a0a252350;cb_fab05712669b
+n_df41c70199e4,high standards,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_4e6f425c7c75
+n_bac98d74a5d3,self-realization,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4e6f425c7c75
+n_8df3d6a191f5,realization of low quality,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4e6f425c7c75
+n_1bbeb0ac5be4,overly demanding or potentially harmful,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_4e6f425c7c75
+n_877e839105cb,"American parents, particularly mothers",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_3843a41d56f1
+n_fbd77d56b8a5,self-care and personal happiness,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_3843a41d56f1
+n_5f3df630fb7c,to engage in activities they enjoy,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3843a41d56f1
+n_485dcf839be0,self-care,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_3843a41d56f1
+n_9616edb77020,individual well-being and the pursuit of happiness,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_3843a41d56f1
+n_df4f7cc6481d,varying sunrise and sunset times -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3014b4eb3b1a
+n_18686e7991fb,people -> LAYER_2_SOCIAL,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3014b4eb3b1a
+n_e4b0b8b1c2b3,late sunsets and early sunrises -> LAYER_1_SURFACE,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3014b4eb3b1a
+n_c44cc272a34e,people -> LAYER_3_DEEP_VALUE,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_3014b4eb3b1a
+n_5174bd849382,adaptability -> LAYER_2_SOCIAL,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_3014b4eb3b1a
+n_4978f032599d,wealth inequality,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2b3be44457b3
+n_ff7168708535,gap between rich and poor,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2b3be44457b3
+n_d9020096f8b2,financial opportunities,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2b3be44457b3
+n_6467d1fde0a5,American cultural discourse,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_2b3be44457b3
+n_dfac73aebdcd,acknowledgment of wealth inequality and advocacy for financial opportunities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_2b3be44457b3
+n_6e93ec14179f,affordable healthcare,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_335fd41aaec1
+n_c9166827bc07,bagels,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_335fd41aaec1
+n_3cacdf8ceda6,common prioritization of essential needs,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_335fd41aaec1
+n_278513318c17,"pandemic with a mix of caution, compliance, and frustration",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_347e5fc3aa2b
+n_f937563c8cfe,post-pandemic mindset,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_347e5fc3aa2b
+n_d19393573825,complex emotions and attitudes,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_347e5fc3aa2b
+n_18fb870e0833,traveler,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_347e5fc3aa2b
+n_0f9cc2e4e3e8,multifaceted reaction of the local population,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_347e5fc3aa2b
+n_6edf9f5aa1f1,"coffee cups, face masks, and general trash",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_acf07552a538
+n_58703ec79fe2,laws,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_acf07552a538
+n_cfcea3469a87,littering in confined areas,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_acf07552a538
+n_f0c571b5de5f,societal concern,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_acf07552a538
+n_a379c3eb197d,environmental cleanliness and public hygiene,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_acf07552a538
+n_042d210a4455,travelers,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_acf07552a538
+n_d168d19e3294,environmental sustainability and local customs,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_acf07552a538
+n_8a916f8ea4d2,various phenomena,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_707bfe1edbf1
+n_626c41844dcb,different occurrences,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_707bfe1edbf1
+n_a4a624a83a4e,neither uncommon nor overwhelmingly prevalent,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_707bfe1edbf1
+n_c2e1ea1f5108,people -> use unique and varied names for food items,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6dc81432d5ef
+n_78f0372a21b2,food items,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_6dc81432d5ef
+n_e912c9940e7f,people -> reflect,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",2,True,cb_6dc81432d5ef;cb_fc2f392b664f
+n_99e8a0040644,diversity and regional influences,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_6dc81432d5ef
+n_45427bed8617,using distinct food terminology,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_6dc81432d5ef
+n_96cebc12b614,individuals and men -> expressing height,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_13e00592d620
+n_8f25a15acc2b,tall stature,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_13e00592d620
+n_73e7e545c519,height,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_13e00592d620
+n_6fae3e667949,social and healthcare settings,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_13e00592d620
+n_65626ddcde9a,digital payment methods including Venmo and PayWave,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_a1ce96864098
+n_85631a9da472,trend of early adoption and reliance on digital payment platforms,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_a1ce96864098
+n_6147d804df11,banks and retailers,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a1ce96864098
+n_ac975e0549c3,technology adoption,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_a1ce96864098
+n_d7b96d585362,mixed perception of digital payment behavior,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_a1ce96864098
+n_74441b4b9c13,"ice for cooling purposes, including drinks and perishables",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3a8a8d00d729
+n_b30fbd129f3b,various social gatherings and outdoor activities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3a8a8d00d729
+n_d53b257ba8da,ice,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_3a8a8d00d729;cb_ff32af5af4a4
+n_96b8e12b5372,"cooling purposes, including drinks and perishables",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_3a8a8d00d729
+n_621279cf0c10,Health and Hygiene practices,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_3a8a8d00d729
+n_fa0cce046ec1,people -> use the term 'jab',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c59fea3e75aa
+n_c5504bb24ef5,vaccinations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c59fea3e75aa
+n_8297da7edc6d,medical experiments gone wrong,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c59fea3e75aa
+n_ff2126b4bcef,with negative connotations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_c59fea3e75aa
+n_138e8bde0c13,people -> share,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_c59fea3e75aa
+n_20e75a2cb53b,skepticism or distrust towards vaccinations,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_c59fea3e75aa
+n_b2c7bcb9c029,individuals -> wash hair daily,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_51aea25f1860
+n_e3870592406b,after three days,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_51aea25f1860
+n_ac63ff21c137,frequent hair washing,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_51aea25f1860
+n_00de4af16b51,itching,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_51aea25f1860
+n_5194d3809a77,people and churches,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fa804d8ad5f4
+n_3d5a8cdd454f,separation of church and state,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fa804d8ad5f4
+n_d7304fb61b99,religious beliefs and practices,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fa804d8ad5f4
+n_0cda24181e9d,different states,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fa804d8ad5f4
+n_7335610bdd89,individual freedom of belief and expression,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fa804d8ad5f4
+n_9a3b138c1919,separation of church and state as a standard practice,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fa804d8ad5f4
+n_2fa000e4ab84,"sales activities, including buying, selling, and making money",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5132dc492edb
+n_adaf315e1a18,sales activities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5132dc492edb
+n_b09e707d18a9,freedom and government regulation,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5132dc492edb
+n_7164ccc4289b,"entrepreneurship, commerce, and the pursuit of economic opportunities",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_5132dc492edb
+n_005b363d2bd2,economic independence and the entrepreneurial spirit,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_5132dc492edb
+n_75a05353f24c,personal responsibility and accountability for their actions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_212026053639
+n_bc5370bf23f7,individual agency and self-reliance,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_212026053639
+n_f27d1c984c43,their choices and their consequences,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_212026053639
+n_d6e35779ee12,individuals to take ownership of their actions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_212026053639
+n_2f3dfef63ef0,individuals and employees,LAYER_1_SURFACE,"[0.5167, 0.3333, 0.15]",3,False,cb_ba533f39b797
+n_f0cff3a614f7,monthly payments as wages or salary,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ba533f39b797
+n_0f39357cc8a7,monthly payments,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ba533f39b797
+n_da94df0a3b70,taxes deducted,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ba533f39b797
+n_5cecc893a829,standard or normative way of compensation,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_ba533f39b797
+n_c89db47564b0,monthly payment schedule,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ba533f39b797
+n_ad2147bec8f3,people -> express various forms of disgust and disbelief,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fc2f392b664f
+n_d7fc2bacede7,perceived unhygienic or unfamiliar practices,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_fc2f392b664f
+n_a8a5fc3c8fdc,cleanliness and familiarity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_fc2f392b664f
+n_639d4cb5885f,within American culture,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_fc2f392b664f
+n_e58cad91018e,as normative behavior,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_fc2f392b664f
+n_556bd69d55da,"specific flavors such as cherry, blueberry, peach, and brown sugar",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_f0320858dc7a
+n_753b397d5e70,cheesier or sweeter options,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f0320858dc7a
+n_30f8fb6af06b,American snack food preferences,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_f0320858dc7a
+n_9015707591a9,a norm within the sampled population,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_f0320858dc7a
+n_425b84774155,"large portions of food, particularly burgers",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2688e1d97269
+n_8e25c0b46178,variety and size in food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2688e1d97269
+n_0ba3a3a5aeef,abundance and choice in dining,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_2688e1d97269
+n_d1118e6a7a74,job applicants and seekers,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_dcf369ef9427
+n_d6f9c7a927ff,"perceived interrogations, multiple rounds, and feeling tricked",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_dcf369ef9427
+n_3db61cdde73d,high-stakes nature of job interviews,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_dcf369ef9427
+n_b2ecd8163aec,efficiency and transparency in communication,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_dcf369ef9427
+n_50ddb7d2de57,overwhelmed by the rigorous and sometimes confusing job interview process,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_dcf369ef9427
+n_26918249b8e3,"larger, domestic cars with powerful engines",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_c7684d627aa3
+n_ab61bf507b01,safety and status,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",2,False,cb_c7684d627aa3
+n_3d54b9c065ce,people and individuals in the United States,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_9de8bce51e1c
+n_330a268fc397,"independence, self-sufficiency, and individualism",LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_9de8bce51e1c
+n_c532f928730f,individuals in the United States,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_9de8bce51e1c
+n_46d1bf31a6e4,personal freedom and respecting others' independence,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_9de8bce51e1c
+n_c1d309036c30,a senior citizen from a collective-oriented culture,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_9de8bce51e1c
+n_a204710861a5,cultural nuances of independence and self-reliance in American society,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_9de8bce51e1c
+n_a2d6c83e2d33,employers and employees,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8ea4db73226c
+n_dd2ef1f9d238,"tax-related activities including deducting, paying, and inquiring about taxes",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8ea4db73226c
+n_211a0606b24b,tax-related activities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_8ea4db73226c
+n_a1207d613bc8,emphasis on tax compliance and financial responsibility,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_8ea4db73226c
+n_e4493eab74fa,in the professional landscape,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_8ea4db73226c
+n_f4151bd44c46,waiting in line,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_539a0a252350
+n_983c1a1bd36d,discomfort while waiting,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_539a0a252350
+n_12625ba3c14e,waiting,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_539a0a252350
+n_1fe0c63508c2,people -> engage in running and jogging activities,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_4ccb36b36e91
+n_1771a65a0319,health-conscious and active lifestyle,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_4ccb36b36e91
+n_1099074785b7,normative and standard practice,LAYER_2_SOCIAL,"[0.15, 0.425, 0.425]",2,False,cb_4ccb36b36e91;cb_cb9c408ddb05
+n_966b4d693253,social status or a desire to appear athletic,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_4ccb36b36e91
+n_c2429c9d2c46,"people, especially women",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e89d9cb73634
+n_a75b09a457be,"a variety of lip products, including lipstick, lip balm, and lip liner",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e89d9cb73634
+n_d8cb8f83ffd5,lip products,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_e89d9cb73634
+n_1520b17e2690,a common and widely accepted behavior,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_e89d9cb73634
+n_2e6fa667e0fb,personal preference or cosmetic purposes,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_e89d9cb73634
+n_ef90f1645eb1,"colors red, white, and blue in flags",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_d62056539ab7
+n_bc73966b6970,patriotism,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d62056539ab7
+n_8d5347441e26,American flag,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_d62056539ab7
+n_06ebc0adfac0,ideals and history of the nation,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d62056539ab7
+n_a6c3ef2dc65d,national pride and identity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_d62056539ab7
+n_4ff5ab79b0bb,carrying guns over alcohol consumption,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_28951268cadc
+n_0e4324d72c27,safety concerns,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_28951268cadc
+n_68adca98e1c7,guns,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_28951268cadc
+n_545a0a82ce6f,up to 12 weeks,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_1d9220fa3e2a
+n_40f9880d44ca,100% paid parental leave,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_1d9220fa3e2a
+n_01b660e2b21e,work and family life,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_1d9220fa3e2a
+n_d4088be0eccf,work-life balance,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_1d9220fa3e2a
+n_5b906b751a38,various leg and knee positions,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_dda562f37bef
+n_42d6a6e83dea,positions for comfort or modesty,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_dda562f37bef
+n_6cf45d94a962,normal practice,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_dda562f37bef
+n_d6054ad60ed8,modesty,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_dda562f37bef
+n_1d23b9b5abba,"bottles, including water bottles",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5af792d91507
+n_be6c324c05dd,safety,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_5af792d91507
+n_41fe43ca13e0,hydration and convenience,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_5af792d91507
+n_c5dec2df568c,personal health and cleanliness,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_5af792d91507
+n_8d12e1a3884a,various forms of entertainment and experiences,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ce5a41215df2
+n_9499c6e703c5,diversity in entertainment and experiences,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,True,cb_ce5a41215df2
+n_fb091ab7c085,diversity in entertainment and experiences as common or less prevalent,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,True,cb_ce5a41215df2
+n_6b1664284a84,"hard, salty, and buttery pretzels",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_8c6ee93709fa
+n_4d1cb3c5f407,"people in the United States, particularly in BJ's and Philly",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_8c6ee93709fa
+n_42d29c3c2773,pretzels,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_8c6ee93709fa
+n_d92df5bf6646,cost-effective and quick fixes,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_89818139f1b0
+n_ce11622c8f65,practical and resourceful approach to problem-solving,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_89818139f1b0
+n_d28bc7a6c4b1,cultural normativity of cost-effective and easy-to-repair solutions,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_89818139f1b0
+n_a63571d3aa4a,people -> use the term 'girl',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_e0580d953525
+n_95749b35765f,"endearment, familiarity, or to refer to a woman",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e0580d953525
+n_608ff84d6062,casual conversations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_e0580d953525
+n_86d7ea6f88e5,cultural nuances of familiarity and affection,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_e0580d953525
+n_cadbae5752e7,people and parents,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_ff32af5af4a4
+n_d1ff2cec4a74,ice in various forms,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ff32af5af4a4
+n_7c16c8188e25,ice cream,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ff32af5af4a4
+n_72ff3f8d6949,in grocery stores,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_ff32af5af4a4
+n_4211f578d206,normative practice of purchasing ice,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_ff32af5af4a4
+n_774acdbd7212,"to express surprise, humor, or a casual tone",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4f4e9a21feb5
+n_346f3c75310d,use of 'bruh',LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_4f4e9a21feb5
+n_62650dfea983,in informal conversations,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_4f4e9a21feb5
+n_be03915921c9,builders and homeowners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_2f6b800db96b
+n_327844f9efcb,"using bricks, stone, and wood in building and exterior design",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2f6b800db96b
+n_e71d3454deba,drywall and wooden frames,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2f6b800db96b
+n_4b1714713c41,cost-effectiveness and aesthetic appeal,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2f6b800db96b
+n_51c585a4f5a8,American construction and housing,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_2f6b800db96b
+n_24f78c97bb92,high level of normativity,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_2f6b800db96b
+n_42b2d292b704,American dining experience,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",4,False,cb_cb9c408ddb05
+n_775b44ba2ee7,classic combo of food and drink,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_cb9c408ddb05
+n_ebabae4d8a2a,cultural emphasis on culinary enjoyment and social gatherings,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_cb9c408ddb05
+n_7cdbe9169c7d,fundamental aspect,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,False,cb_cb9c408ddb05
+n_cfa796d95e0f,candy and toys,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",3,False,cb_0e63888ca52f
+n_3c1c561f2c0d,toys inside chocolate eggs or other candy packaging,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0e63888ca52f
+n_72d3df84cd88,sale of toys within chocolate shells,LAYER_2_SOCIAL,"[0.15, 0.7, 0.15]",1,False,cb_0e63888ca52f
+n_bdacd05730d3,people and the government,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_0e63888ca52f
+n_649550b3dc75,family traditions and heritage,LAYER_3_DEEP_VALUE,"[0.15, 0.15, 0.7]",1,True,cb_0e63888ca52f
+n_867da8a76985,people in the United States and Europe,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_75d7545566a1
+n_7a9d3704b1ef,walking differently,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_75d7545566a1
+n_08661355e624,walking as a European habit,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_75d7545566a1
+n_82a85b3ca7aa,some Americans,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_75d7545566a1
+n_43f557b83852,adapting to walking in Europe,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_75d7545566a1
+n_6ac9bf43972d,walking,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_75d7545566a1
+n_b84711897449,outdoor events,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b383db1d44d8
+n_3bdbee792fc5,Las Vegas,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b383db1d44d8
+n_f002965c5176,sunburns at outdoor events,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b383db1d44d8
+n_39cabdf3f686,outdoor activities and leisure in sunny environments,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b383db1d44d8

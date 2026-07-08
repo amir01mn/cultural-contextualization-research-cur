@@ -39,6 +39,9 @@ def _build_triple(rec: dict, fields: dict, method: str) -> CulturalTriple:
         rec.get("instance_id", ""), subject, predicate, obj, method,
         prefix="t_",
     )
+    raw_fields = dict(rec.get("raw", {}) or {})
+    if rec.get("cultural_group"):
+        raw_fields.setdefault("cultural_group", rec.get("cultural_group"))
     return CulturalTriple(
         triple_id=triple_id,
         subject=subject,
@@ -51,7 +54,7 @@ def _build_triple(rec: dict, fields: dict, method: str) -> CulturalTriple:
         source_text=rec.get("source_text") or "",
         dataset_id=rec.get("dataset_id", "culturebank"),
         instance_id=rec.get("instance_id", ""),
-        raw_fields=rec.get("raw", {}) or {},
+        raw_fields=raw_fields,
         extraction_method=method,
         generated=bool(fields.get("generated", False)),
         evidence=fields.get("evidence"),
@@ -218,7 +221,9 @@ def extract_triples_llm_batched_resumable(
             iid = rec.get("instance_id", "")
             parsed = local_llm.safe_parse_json(text)
             triples = _triples_from_parsed(rec, parsed) if parsed else []
-            if not triples and allow_fallback:
+            if not triples and config.CORPUS_SCHEMA_FALLBACK_ON_EMPTY:
+                triples = extract_triples_schema(rec)
+            elif not triples and allow_fallback:
                 triples = extract_triples_schema(rec)
             result[iid] = triples
             batch_rows.extend(t.model_dump() for t in triples)

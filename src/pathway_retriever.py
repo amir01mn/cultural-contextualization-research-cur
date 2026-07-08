@@ -10,6 +10,7 @@ import numpy as np
 
 from . import config
 from .embedding_utils import backend_name, cosine_similarity_matrix, embed_texts
+from .retrieval_ranking import rerank_hits
 from .schemas import CulturalPathway
 from .utils import ensure_dir, get_logger, normalize_text
 
@@ -59,11 +60,15 @@ class PathwayRetriever:
         LOGGER.info("Loaded pathway index: %d pathways from %s",
                     len(self.pathways), self.index_dir)
 
-    def retrieve(self, query: str, top_k: int = 5) -> list[tuple[CulturalPathway, float]]:
+    def retrieve(self,
+                 query: str,
+                 top_k: int = 5,
+                 *,
+                 question_culture: Optional[str] = None) -> list[tuple[CulturalPathway, float]]:
         if not self.pathways or self.embeddings is None:
             return []
+        candidate_k = min(len(self.pathways), max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k))
         if self.backend == "tfidf":
-            # TF-IDF vectorizer is not persisted; refit on corpus + query for retrieval.
             texts = self.documents + [query]
             embs = embed_texts(texts, fit=True)
             if embs.shape[0] < 2:
@@ -74,8 +79,15 @@ class PathwayRetriever:
             if q_emb.shape[0] == 0:
                 return []
             scores = cosine_similarity_matrix(q_emb, self.embeddings)[0]
-        idx = np.argsort(scores)[::-1][:top_k]
-        return [(self.pathways[i], float(scores[i])) for i in idx if scores[i] > 0]
+        idx = np.argsort(scores)[::-1][:candidate_k]
+        hits = [(self.pathways[i], float(scores[i])) for i in idx if scores[i] > 0]
+        return rerank_hits(
+            hits,
+            top_k=top_k,
+            question_culture=question_culture,
+            get_culture=lambda p: p.culture,
+            allow_cross_culture_shared=lambda p: p.has_shared_pivot,
+        )
 
 
 def build_pathway_index(

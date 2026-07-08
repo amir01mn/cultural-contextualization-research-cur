@@ -28,6 +28,7 @@ from src.mcq_systems import (  # noqa: E402
     S4_SYSTEMS,
     SYSTEM_S2,
     SYSTEM_S3,
+    SYSTEM_S4,
     RetrievalContext,
     run_system,
 )
@@ -121,7 +122,12 @@ def main(argv=None) -> None:
     need_triples = any(s in {SYSTEM_S2, SYSTEM_S3} for s in systems) or bool(
         set(systems) & S4_SYSTEMS
     )
-    need_refined = "S4_triple_retrieval" in systems
+    need_refined = (
+        SYSTEM_S3 in systems
+        or "S4_triple_retrieval" in systems
+        or SYSTEM_S4 in systems
+        or "S4_no_shared_pivot" in systems
+    )
     need_pathways = bool(set(systems) & {s for s in S4_SYSTEMS if s != "S4_triple_retrieval"})
 
     passages, triples, refined, pathway_retriever = _load_corpus(

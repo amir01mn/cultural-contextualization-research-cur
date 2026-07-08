@@ -23,6 +23,7 @@ from typing import Optional
 
 from . import config, prompts
 from .pathway_retriever import PathwayRetriever
+from .retrieval_ranking import culture_match_score
 from .retriever import TextRetriever, TripleRetriever
 from .schemas import (
     CulturalPathway,
@@ -100,30 +101,29 @@ def _query_for(q: MCQQuestion) -> str:
     return " ".join(p for p in parts if p)
 
 
-def _culture_match(pathway_culture: str, question_culture: Optional[str]) -> float:
-    pc = normalize_text(pathway_culture).lower()
-    qc = normalize_text(question_culture or "").lower()
-    if not pc or not qc:
-        return 0.5
-    if pc == qc or pc in qc or qc in pc:
-        return 1.0
-    return 0.35
-
-
 def _rank_pathways(hits: list[tuple[CulturalPathway, float]],
                    question_culture: Optional[str],
                    *,
                    exclude_shared: bool = False) -> list[tuple[CulturalPathway, float]]:
-    ranked: list[tuple[CulturalPathway, float]] = []
+    ranked: list[tuple[CulturalPathway, float, float]] = []
     for pw, score in hits:
         if exclude_shared and pw.has_shared_pivot:
             continue
         w = _COMPLETENESS_WEIGHT.get(pw.completeness, 0.5)
-        cm = _culture_match(pw.culture, question_culture)
+        cm = culture_match_score(pw.culture, question_culture)
+        if pw.has_shared_pivot and cm < 0.9:
+            cm = max(cm, config.RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE)
         bonus = 1.1 if pw.has_shared_pivot else 1.0
-        ranked.append((pw, score * w * cm * bonus))
+        ranked.append((pw, score * w * cm * bonus, cm))
     ranked.sort(key=lambda x: x[1], reverse=True)
-    return ranked
+
+    if question_culture:
+        matched = [x for x in ranked if x[2] >= 0.9]
+        cross = [x for x in ranked if x[2] < 0.9 and x[0].has_shared_pivot]
+        rest = [x for x in ranked if x[2] < 0.9 and not x[0].has_shared_pivot]
+        ranked = matched + cross + rest
+
+    return [(pw, s) for pw, s, _ in ranked]
 
 
 def _completeness_from_triples(triples: list[CulturalTriple]) -> tuple[str, float, bool]:
@@ -179,10 +179,12 @@ def _options_block(q: MCQQuestion) -> str:
     return "\n".join(f"{letter}. {text}" for letter, text in q.options.items())
 
 
-def _passage_evidence(ctx: RetrievalContext, query: str, top_k: int) -> tuple[str, list[str], dict]:
+def _passage_evidence(ctx: RetrievalContext, query: str, top_k: int,
+                      q: MCQQuestion) -> tuple[str, list[str], dict]:
     if not ctx.passage_retriever:
         return "", [], {}
-    hits = ctx.passage_retriever.retrieve(query, top_k=top_k)
+    hits = ctx.passage_retriever.retrieve(
+        query, top_k=top_k, question_culture=q.cultural_group)
     lines, ids = [], []
     for i, (doc, _score) in enumerate(hits, 1):
         text = truncate(doc.get("text", ""), 300)
@@ -198,11 +200,13 @@ def _passage_evidence(ctx: RetrievalContext, query: str, top_k: int) -> tuple[st
 
 
 def _flat_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
+                          q: MCQQuestion,
                           retriever: Optional[TripleRetriever] = None) -> tuple[str, list[str], dict]:
     retriever = retriever or ctx.triple_retriever
     if not retriever:
         return "", [], {}
-    hits = retriever.retrieve(query, top_k=top_k)
+    hits = retriever.retrieve(
+        query, top_k=top_k, question_culture=q.cultural_group)
     triples = [t for t, _ in hits]
     lines, ids = [], []
     for i, (t, _score) in enumerate(hits, 1):
@@ -214,11 +218,13 @@ def _flat_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
 
 
 def _layered_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
+                             q: MCQQuestion,
                              retriever: Optional[TripleRetriever] = None) -> tuple[str, list[str], dict]:
-    retriever = retriever or ctx.triple_retriever
+    retriever = retriever or ctx.refined_triple_retriever or ctx.triple_retriever
     if not retriever:
         return "", [], {}
-    hits = retriever.retrieve(query, top_k=top_k)
+    hits = retriever.retrieve(
+        query, top_k=top_k, question_culture=q.cultural_group)
     triples = [t for t, _ in hits]
     lines, ids = [], []
     for i, (t, _score) in enumerate(hits, 1):
@@ -242,7 +248,9 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
             "completeness_score": 0.0,
             "shared_node_available": False,
         }
-    hits = ctx.pathway_retriever.retrieve(query, top_k=max(top_k * 3, top_k))
+    hits = ctx.pathway_retriever.retrieve(
+        query, top_k=max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k),
+        question_culture=q.cultural_group)
     ranked = _rank_pathways(hits, q.cultural_group, exclude_shared=exclude_shared)[:top_k]
     lines, ids, pathways = [], [], []
     for i, (pw, _score) in enumerate(ranked, 1):
@@ -265,18 +273,18 @@ def _evidence_for(system: str, ctx: Optional[RetrievalContext],
         return "", [], empty_meta
     query = _query_for(q)
     if system == SYSTEM_S1:
-        body, ids, meta = _passage_evidence(ctx, query, top_k)
+        body, ids, meta = _passage_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S2:
-        body, ids, meta = _flat_triple_evidence(ctx, query, top_k)
+        body, ids, meta = _flat_triple_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S3:
-        body, ids, meta = _layered_triple_evidence(ctx, query, top_k)
+        body, ids, meta = _layered_triple_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S4:
         body, ids, meta = _pathway_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S4_NO_SHARED:
         body, ids, meta = _pathway_evidence(ctx, query, top_k, q, exclude_shared=True)
     elif system == SYSTEM_S4_TRIPLE:
         retriever = ctx.refined_triple_retriever or ctx.triple_retriever
-        body, ids, meta = _layered_triple_evidence(ctx, query, top_k, retriever=retriever)
+        body, ids, meta = _layered_triple_evidence(ctx, query, top_k, q, retriever=retriever)
     else:
         return "", [], empty_meta
     if not body:

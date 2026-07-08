@@ -1,0 +1,15 @@
+[2026-07-08T01:54:29-04:00] === Starting 2000-sample babysit ===
+[2026-07-08T01:54:29-04:00] Project: /home/amir01mn/scratch/cultural-contextualization-research-cur
+[2026-07-08T01:54:29-04:00] Initial corpus job: 64880536
+[2026-07-08T01:54:29-04:00] Initial eval job: 64880609 (will replace if needed)
+[2026-07-08T01:54:29-04:00] Watching job 64880536 ...
+[2026-07-08T02:21:30-04:00] Job 64880536 ended: FAILED
+[2026-07-08T02:21:30-04:00] Corpus checkpoint complete (>=2000 extraction + critique IDs).
+[2026-07-08T02:21:30-04:00] Checkpoints complete but last job exit=1:0; running one more corpus job for downstream stages...
+[2026-07-08T02:21:30-04:00] Watching job 64881336 ...
+[2026-07-08T02:35:01-04:00] Job 64881336 ended: FAILED
+[2026-07-08T02:35:01-04:00] Eval job submitted: 64881769
+[2026-07-08T02:35:01-04:00] Watching job 64881769 ...
+[2026-07-08T02:44:01-04:00] Job 64881769 COMPLETED (ExitCode=0:0)
+[2026-07-08T02:44:01-04:00] === 2000-sample pipeline complete ===
+[2026-07-08T02:44:01-04:00] Outputs: data/outputs/culturalbench_summary.md, mechanism_analysis.md

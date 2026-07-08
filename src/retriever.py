@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from . import config
+from .retrieval_ranking import passage_culture, rerank_hits, triple_culture
 from .schemas import CulturalTriple
 from .utils import get_logger, normalize_text
 
@@ -81,7 +83,11 @@ class TripleRetriever:
         self._matrix = self._vectorizer.fit_transform(self.documents)
         self.backend = "tfidf"
 
-    def retrieve(self, question: str, top_k: int = 8) -> list[tuple[CulturalTriple, float]]:
+    def retrieve(self,
+                 question: str,
+                 top_k: int = 8,
+                 *,
+                 question_culture: Optional[str] = None) -> list[tuple[CulturalTriple, float]]:
         """Return up to top_k (triple, score) pairs sorted by relevance."""
         if not self.triples:
             return []
@@ -89,25 +95,34 @@ class TripleRetriever:
         if not query:
             return []
 
+        candidate_k = min(len(self.triples), max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k))
+        hits: list[tuple[CulturalTriple, float]] = []
+
         if self.backend == "sentence-transformers":
             import numpy as np
 
             model = _get_st_model()
             q_emb = model.encode([query], normalize_embeddings=True)[0]
             scores = self._embeddings @ q_emb
-            order = np.argsort(-scores)[:top_k]
-            return [(self.triples[i], float(scores[i])) for i in order]
+            order = np.argsort(-scores)[:candidate_k]
+            hits = [(self.triples[i], float(scores[i])) for i in order]
 
-        if self.backend == "tfidf":
+        elif self.backend == "tfidf":
             from sklearn.metrics.pairwise import cosine_similarity
             import numpy as np
 
             q_vec = self._vectorizer.transform([query])
             scores = cosine_similarity(q_vec, self._matrix)[0]
-            order = np.argsort(-scores)[:top_k]
-            return [(self.triples[i], float(scores[i])) for i in order]
+            order = np.argsort(-scores)[:candidate_k]
+            hits = [(self.triples[i], float(scores[i])) for i in order]
 
-        return []
+        return rerank_hits(
+            hits,
+            top_k=top_k,
+            question_culture=question_culture,
+            get_culture=triple_culture,
+            get_generated=lambda t: bool(t.generated),
+        )
 
 
 def retrieve_triples(question: str,
@@ -152,26 +167,41 @@ class TextRetriever:
         self._matrix = self._vectorizer.fit_transform(self.texts)
         self.backend = "tfidf"
 
-    def retrieve(self, query: str, top_k: int = 8) -> list[tuple[dict, float]]:
+    def retrieve(self,
+                 query: str,
+                 top_k: int = 8,
+                 *,
+                 question_culture: Optional[str] = None) -> list[tuple[dict, float]]:
         if not self.documents:
             return []
         query = normalize_text(query)
         if not query:
             return []
+
+        candidate_k = min(len(self.documents), max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k))
+        hits: list[tuple[dict, float]] = []
+
         if self.backend == "sentence-transformers":
             import numpy as np
 
             model = _get_st_model()
             q_emb = model.encode([query], normalize_embeddings=True)[0]
             scores = self._embeddings @ q_emb
-            order = np.argsort(-scores)[:top_k]
-            return [(self.documents[i], float(scores[i])) for i in order]
-        if self.backend == "tfidf":
+            order = np.argsort(-scores)[:candidate_k]
+            hits = [(self.documents[i], float(scores[i])) for i in order]
+
+        elif self.backend == "tfidf":
             from sklearn.metrics.pairwise import cosine_similarity
             import numpy as np
 
             q_vec = self._vectorizer.transform([query])
             scores = cosine_similarity(q_vec, self._matrix)[0]
-            order = np.argsort(-scores)[:top_k]
-            return [(self.documents[i], float(scores[i])) for i in order]
-        return []
+            order = np.argsort(-scores)[:candidate_k]
+            hits = [(self.documents[i], float(scores[i])) for i in order]
+
+        return rerank_hits(
+            hits,
+            top_k=top_k,
+            question_culture=question_culture,
+            get_culture=passage_culture,
+        )

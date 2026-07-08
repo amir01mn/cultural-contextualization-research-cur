@@ -108,6 +108,8 @@ def _parse_critique_response(record: dict, triples: list[CulturalTriple],
         if isinstance(st, dict) and normalize_text(st.get("subject")) and normalize_text(st.get("object")):
             st = validate_triple_layers(st)
             suggested.append(_build_suggested_triple(record, st))
+            if len(suggested) >= config.MAX_CRITIQUE_SUGGESTIONS:
+                break
 
     flagged = []
     for ft in parsed.get("triples_to_flag", []) or []:

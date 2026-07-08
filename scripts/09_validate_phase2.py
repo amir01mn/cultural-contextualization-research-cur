@@ -72,7 +72,7 @@ def build_validation_report(
         lines.append("- No pathway hits (index empty or query unmatched).")
     else:
         for pw, score in hits:
-            node_labels = " -> ".join(n.get("label", "") for n in pw.nodes)
+            node_labels = " -> ".join(n.label for n in pw.nodes)
             lines.append(
                 f"- score={score:.3f} culture={pw.culture} "
                 f"completeness={pw.completeness.value} path={node_labels}"
