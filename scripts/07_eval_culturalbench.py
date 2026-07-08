@@ -1,4 +1,4 @@
-"""Step 7: evaluate systems S0-S3 on CulturalBench and save results.
+"""Step 7: evaluate systems S0-S4 on CulturalBench and save results.
 
 Loads the held-out CulturalBench benchmark, loads the CultureBank retrieval
 corpus (built by scripts/06_build_retrieval_corpus.py), runs each system with a
@@ -6,7 +6,7 @@ shared backend, scores accuracy with bootstrap CIs + McNemar, and writes outputs
 
 Examples:
     # Local smoke test (Ollama), tiny:
-    python scripts/07_eval_culturalbench.py --provider ollama --limit 6 --systems S0_no_kg,S3_layered_kg
+    python scripts/07_eval_culturalbench.py --provider ollama --limit 6 --systems S0_no_kg,S4_abstraction_refinement_kg
 
     # Cluster (vLLM), full:
     python scripts/07_eval_culturalbench.py --provider vllm --limit 250
@@ -23,36 +23,63 @@ from src import config  # noqa: E402
 from src.culturalbench_loader import load_culturalbench  # noqa: E402
 from src.llm_backend import get_backend  # noqa: E402
 from src.mcq_evaluator import save_outputs, summarize  # noqa: E402
-from src.mcq_systems import ALL_SYSTEMS, KG_SYSTEMS, RetrievalContext, run_system  # noqa: E402
+from src.mcq_systems import (  # noqa: E402
+    ALL_SYSTEMS,
+    S4_SYSTEMS,
+    SYSTEM_S2,
+    SYSTEM_S3,
+    RetrievalContext,
+    run_system,
+)
+from src.pathway_retriever import PathwayRetriever  # noqa: E402
 from src.schemas import CulturalTriple  # noqa: E402
 from src.utils import get_logger, read_jsonl  # noqa: E402
 
 LOGGER = get_logger("07_eval_culturalbench")
 
 
-def _load_corpus(passages_path: Path, triples_path: Path, need_passages: bool,
-                 need_triples: bool):
+def _load_corpus(passages_path: Path,
+                 triples_path: Path,
+                 refined_path: Path,
+                 pathway_index_dir: Path,
+                 need_passages: bool,
+                 need_triples: bool,
+                 need_refined: bool,
+                 need_pathways: bool):
     passages = None
     triples = None
+    refined = None
+    pathway_retriever = None
+
     if need_passages and passages_path.exists():
         passages = list(read_jsonl(passages_path))
         LOGGER.info("Loaded %d retrieval passages.", len(passages))
     elif need_passages:
-        LOGGER.warning("Passages file not found at %s; S1 will have no evidence.",
-                       passages_path)
+        LOGGER.warning("Passages file not found at %s; S1 will have no evidence.", passages_path)
+
     if need_triples and triples_path.exists():
         triples = [CulturalTriple(**t) for t in read_jsonl(triples_path)]
-        LOGGER.info("Loaded %d corpus triples.", len(triples))
+        LOGGER.info("Loaded %d raw corpus triples.", len(triples))
     elif need_triples:
-        LOGGER.warning("Triples file not found at %s; S2/S3 will have no evidence. "
-                       "Run scripts/06_build_retrieval_corpus.py first.", triples_path)
-    return passages, triples
+        LOGGER.warning("Triples file not found at %s; S2/S3 will have no evidence.", triples_path)
+
+    if need_refined and refined_path.exists():
+        refined = [CulturalTriple(**t) for t in read_jsonl(refined_path)]
+        LOGGER.info("Loaded %d refined corpus triples.", len(refined))
+    elif need_refined:
+        LOGGER.warning("Refined triples not found at %s; S4 triple ablation empty.", refined_path)
+
+    if need_pathways:
+        pathway_retriever = PathwayRetriever(pathway_index_dir)
+        LOGGER.info("Pathway index: %d pathways.", len(pathway_retriever.pathways))
+
+    return passages, triples, refined, pathway_retriever
 
 
 def main(argv=None) -> None:
     import argparse
 
-    p = argparse.ArgumentParser(description="Evaluate S0-S3 on CulturalBench.")
+    p = argparse.ArgumentParser(description="Evaluate S0-S4 on CulturalBench.")
     p.add_argument("--provider", default=config.LLM_PROVIDER, choices=["ollama", "vllm"])
     p.add_argument("--model", default=None)
     p.add_argument("--variants", default="easy,hard")
@@ -61,14 +88,19 @@ def main(argv=None) -> None:
     p.add_argument("--allow_fallback", action="store_true", default=False,
                    help="Use tiny built-in sample if HF load fails (dev/tests only).")
     p.add_argument("--top_k", type=int, default=config.RETRIEVAL_TOP_K)
-    p.add_argument("--systems", default=",".join(ALL_SYSTEMS),
-                   help="Comma-separated subset of S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg")
+    p.add_argument(
+        "--systems",
+        default=",".join(ALL_SYSTEMS),
+        help="Comma-separated subset of: " + ",".join(ALL_SYSTEMS),
+    )
     p.add_argument("--seed", type=int, default=config.RANDOM_SEED)
     p.add_argument("--n_boot", type=int, default=10000)
     p.add_argument("--passages",
                    default=str(config.PROCESSED_DIR / "corpus_passages.jsonl"))
     p.add_argument("--triples",
                    default=str(config.PROCESSED_DIR / "corpus_triples.jsonl"))
+    p.add_argument("--refined_triples", default=str(config.CORPUS_TRIPLES_REFINED_PATH))
+    p.add_argument("--pathway_index", default=str(config.PATHWAY_INDEX_DIR))
     args = p.parse_args(argv)
 
     systems = [s.strip() for s in args.systems.split(",") if s.strip()]
@@ -86,10 +118,28 @@ def main(argv=None) -> None:
     LOGGER.info("Loaded %d CulturalBench items.", len(questions))
 
     need_passages = "S1_raw_text_rag" in systems
-    need_triples = any(s in KG_SYSTEMS for s in systems)
-    passages, triples = _load_corpus(Path(args.passages), Path(args.triples),
-                                     need_passages, need_triples)
-    ctx = RetrievalContext(passages=passages, triples=triples)
+    need_triples = any(s in {SYSTEM_S2, SYSTEM_S3} for s in systems) or bool(
+        set(systems) & S4_SYSTEMS
+    )
+    need_refined = "S4_triple_retrieval" in systems
+    need_pathways = bool(set(systems) & {s for s in S4_SYSTEMS if s != "S4_triple_retrieval"})
+
+    passages, triples, refined, pathway_retriever = _load_corpus(
+        Path(args.passages),
+        Path(args.triples),
+        Path(args.refined_triples),
+        Path(args.pathway_index),
+        need_passages,
+        need_triples,
+        need_refined,
+        need_pathways,
+    )
+    ctx = RetrievalContext(
+        passages=passages,
+        triples=triples,
+        refined_triples=refined,
+        pathway_retriever=pathway_retriever,
+    )
 
     backend = get_backend(args.provider, model=args.model)
     LOGGER.info("Answering backend: %s (model=%s)", backend.name, backend.model)
@@ -121,6 +171,8 @@ def main(argv=None) -> None:
         "systems": systems,
         "corpus_passages": len(passages) if passages else 0,
         "corpus_triples": len(triples) if triples else 0,
+        "corpus_triples_refined": len(refined) if refined else 0,
+        "corpus_pathways": len(pathway_retriever.pathways) if pathway_retriever else 0,
     }
     paths = save_outputs(questions, answers_by_system, summary, units_meta,
                          correctness, run_meta=run_meta)
@@ -132,17 +184,18 @@ def main(argv=None) -> None:
 
 def _print_summary(summary: dict, run_meta: dict) -> None:
     combined = summary["accuracy"]["combined"]
-    print("\n===== CULTURALBENCH EVALUATION (Phase 1: S0-S3) =====\n")
+    print("\n===== CULTURALBENCH EVALUATION (S0-S4) =====\n")
     print(f"Provider: {run_meta['provider']}   Model: {run_meta['model']}")
     print(f"Units: {summary['num_units_total']} "
           f"(easy={summary['num_units_easy']}, hard={summary['num_units_hard']})")
     print(f"Retrieval top-k: {run_meta['top_k']}   "
-          f"corpus triples: {run_meta['corpus_triples']}\n")
+          f"corpus triples: {run_meta['corpus_triples']}   "
+          f"pathways: {run_meta.get('corpus_pathways', 0)}\n")
     print("Combined accuracy (95% CI):")
     for s in summary["systems"]:
         e = combined.get(s, {})
         if e:
-            print(f"  {s:18s}: {e['accuracy']*100:5.1f}%  "
+            print(f"  {s:30s}: {e['accuracy']*100:5.1f}%  "
                   f"[{e['ci_low']*100:.1f}, {e['ci_high']*100:.1f}]")
     print("\nKey McNemar comparisons:")
     for key, m in summary.get("mcnemar_combined", {}).items():

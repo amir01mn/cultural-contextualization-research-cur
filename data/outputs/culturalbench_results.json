@@ -13,17 +13,21 @@
       "S0_no_kg",
       "S1_raw_text_rag",
       "S2_flat_kg",
-      "S3_layered_kg"
+      "S3_layered_kg",
+      "S4_abstraction_refinement_kg"
     ],
     "corpus_passages": 20,
-    "corpus_triples": 4
+    "corpus_triples": 7,
+    "corpus_triples_refined": 0,
+    "corpus_pathways": 0
   },
   "summary": {
     "systems": [
       "S0_no_kg",
       "S1_raw_text_rag",
       "S2_flat_kg",
-      "S3_layered_kg"
+      "S3_layered_kg",
+      "S4_abstraction_refinement_kg"
     ],
     "num_units_total": 40,
     "num_units_easy": 20,
@@ -36,19 +40,24 @@
           "ci_high": 0.85
         },
         "S1_raw_text_rag": {
+          "accuracy": 0.75,
+          "ci_low": 0.625,
+          "ci_high": 0.875
+        },
+        "S2_flat_kg": {
           "accuracy": 0.7,
           "ci_low": 0.55,
           "ci_high": 0.825
         },
-        "S2_flat_kg": {
-          "accuracy": 0.65,
-          "ci_low": 0.5,
-          "ci_high": 0.8
-        },
         "S3_layered_kg": {
-          "accuracy": 0.675,
-          "ci_low": 0.525,
-          "ci_high": 0.825
+          "accuracy": 0.725,
+          "ci_low": 0.575,
+          "ci_high": 0.85
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.725,
+          "ci_low": 0.575,
+          "ci_high": 0.85
         }
       },
       "easy": {
@@ -58,18 +67,23 @@
           "ci_high": 0.9
         },
         "S1_raw_text_rag": {
-          "accuracy": 0.65,
-          "ci_low": 0.45,
-          "ci_high": 0.85
+          "accuracy": 0.75,
+          "ci_low": 0.55,
+          "ci_high": 0.95
         },
         "S2_flat_kg": {
-          "accuracy": 0.65,
-          "ci_low": 0.45,
-          "ci_high": 0.85
+          "accuracy": 0.7,
+          "ci_low": 0.5,
+          "ci_high": 0.9
         },
         "S3_layered_kg": {
           "accuracy": 0.7,
           "ci_low": 0.5,
+          "ci_high": 0.9
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.75,
+          "ci_low": 0.55,
           "ci_high": 0.9
         }
       },
@@ -85,35 +99,56 @@
           "ci_high": 0.95
         },
         "S2_flat_kg": {
-          "accuracy": 0.65,
-          "ci_low": 0.45,
-          "ci_high": 0.85
+          "accuracy": 0.7,
+          "ci_low": 0.5,
+          "ci_high": 0.9
         },
         "S3_layered_kg": {
-          "accuracy": 0.65,
-          "ci_low": 0.45,
-          "ci_high": 0.85
+          "accuracy": 0.75,
+          "ci_low": 0.55,
+          "ci_high": 0.95
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.7,
+          "ci_low": 0.5,
+          "ci_high": 0.9
         }
       }
     },
     "mcnemar_combined": {
       "S0_no_kg__vs__S1_raw_text_rag": {
-        "b_a_only": 4,
-        "c_b_only": 3,
+        "b_a_only": 3,
+        "c_b_only": 4,
         "n_discordant": 7,
-        "delta_accuracy": 0.025,
+        "delta_accuracy": -0.025,
         "p_value": 1.0,
         "method": "exact_binomial"
       },
       "S0_no_kg__vs__S2_flat_kg": {
-        "b_a_only": 4,
-        "c_b_only": 1,
-        "n_discordant": 5,
-        "delta_accuracy": 0.075,
-        "p_value": 0.375,
+        "b_a_only": 5,
+        "c_b_only": 4,
+        "n_discordant": 9,
+        "delta_accuracy": 0.025,
+        "p_value": 1.0,
         "method": "exact_binomial"
       },
       "S0_no_kg__vs__S3_layered_kg": {
+        "b_a_only": 4,
+        "c_b_only": 4,
+        "n_discordant": 8,
+        "delta_accuracy": 0.0,
+        "p_value": 1.0,
+        "method": "exact_binomial"
+      },
+      "S0_no_kg__vs__S4_abstraction_refinement_kg": {
+        "b_a_only": 0,
+        "c_b_only": 0,
+        "n_discordant": 0,
+        "delta_accuracy": 0.0,
+        "p_value": 1.0,
+        "method": "no_discordant_pairs"
+      },
+      "S1_raw_text_rag__vs__S2_flat_kg": {
         "b_a_only": 3,
         "c_b_only": 1,
         "n_discordant": 4,
@@ -121,15 +156,15 @@
         "p_value": 0.625,
         "method": "exact_binomial"
       },
-      "S1_raw_text_rag__vs__S2_flat_kg": {
-        "b_a_only": 4,
-        "c_b_only": 2,
-        "n_discordant": 6,
-        "delta_accuracy": 0.05,
-        "p_value": 0.6875,
+      "S1_raw_text_rag__vs__S3_layered_kg": {
+        "b_a_only": 2,
+        "c_b_only": 1,
+        "n_discordant": 3,
+        "delta_accuracy": 0.025,
+        "p_value": 1.0,
         "method": "exact_binomial"
       },
-      "S1_raw_text_rag__vs__S3_layered_kg": {
+      "S1_raw_text_rag__vs__S4_abstraction_refinement_kg": {
         "b_a_only": 4,
         "c_b_only": 3,
         "n_discordant": 7,
@@ -144,6 +179,117 @@
         "delta_accuracy": -0.025,
         "p_value": 1.0,
         "method": "exact_binomial"
+      },
+      "S2_flat_kg__vs__S4_abstraction_refinement_kg": {
+        "b_a_only": 4,
+        "c_b_only": 5,
+        "n_discordant": 9,
+        "delta_accuracy": -0.025,
+        "p_value": 1.0,
+        "method": "exact_binomial"
+      },
+      "S3_layered_kg__vs__S4_abstraction_refinement_kg": {
+        "b_a_only": 4,
+        "c_b_only": 4,
+        "n_discordant": 8,
+        "delta_accuracy": 0.0,
+        "p_value": 1.0,
+        "method": "exact_binomial"
+      }
+    },
+    "mechanism_analysis": {
+      "systems": [
+        "S2_flat_kg",
+        "S3_layered_kg",
+        "S4_abstraction_refinement_kg"
+      ],
+      "by_completeness": {
+        "S2_flat_kg": {
+          "FULL": {
+            "n": 40,
+            "accuracy": 0.7
+          },
+          "SOCIAL": {
+            "n": 0,
+            "accuracy": null
+          },
+          "SURFACE": {
+            "n": 0,
+            "accuracy": null
+          },
+          "NONE": {
+            "n": 0,
+            "accuracy": null
+          }
+        },
+        "S3_layered_kg": {
+          "FULL": {
+            "n": 40,
+            "accuracy": 0.725
+          },
+          "SOCIAL": {
+            "n": 0,
+            "accuracy": null
+          },
+          "SURFACE": {
+            "n": 0,
+            "accuracy": null
+          },
+          "NONE": {
+            "n": 0,
+            "accuracy": null
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "FULL": {
+            "n": 0,
+            "accuracy": null
+          },
+          "SOCIAL": {
+            "n": 0,
+            "accuracy": null
+          },
+          "SURFACE": {
+            "n": 0,
+            "accuracy": null
+          },
+          "NONE": {
+            "n": 40,
+            "accuracy": 0.725
+          }
+        }
+      },
+      "by_shared_node": {
+        "S2_flat_kg": {
+          "shared": {
+            "n": 0,
+            "accuracy": null
+          },
+          "not_shared": {
+            "n": 40,
+            "accuracy": 0.7
+          }
+        },
+        "S3_layered_kg": {
+          "shared": {
+            "n": 0,
+            "accuracy": null
+          },
+          "not_shared": {
+            "n": 40,
+            "accuracy": 0.725
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "shared": {
+            "n": 0,
+            "accuracy": null
+          },
+          "not_shared": {
+            "n": 40,
+            "accuracy": 0.725
+          }
+        }
       }
     },
     "per_culture_accuracy": {
@@ -151,106 +297,121 @@
         "n": 5,
         "S0_no_kg": 0.4,
         "S1_raw_text_rag": 0.8,
-        "S2_flat_kg": 0.4,
-        "S3_layered_kg": 0.4
+        "S2_flat_kg": 0.6,
+        "S3_layered_kg": 0.6,
+        "S4_abstraction_refinement_kg": 0.4
       },
       "South Korea": {
         "n": 6,
         "S0_no_kg": 0.8333,
         "S1_raw_text_rag": 0.6667,
-        "S2_flat_kg": 0.6667,
-        "S3_layered_kg": 0.6667
+        "S2_flat_kg": 0.8333,
+        "S3_layered_kg": 0.8333,
+        "S4_abstraction_refinement_kg": 0.8333
       },
       "Nigeria": {
         "n": 5,
         "S0_no_kg": 0.4,
         "S1_raw_text_rag": 0.6,
         "S2_flat_kg": 0.4,
-        "S3_layered_kg": 0.4
+        "S3_layered_kg": 0.6,
+        "S4_abstraction_refinement_kg": 0.4
       },
       "Spain": {
         "n": 5,
         "S0_no_kg": 0.8,
         "S1_raw_text_rag": 0.6,
         "S2_flat_kg": 0.6,
-        "S3_layered_kg": 0.6
+        "S3_layered_kg": 0.6,
+        "S4_abstraction_refinement_kg": 0.8
       },
       "Morocco": {
         "n": 5,
         "S0_no_kg": 0.8,
         "S1_raw_text_rag": 0.8,
-        "S2_flat_kg": 0.6,
-        "S3_layered_kg": 0.6
+        "S2_flat_kg": 0.8,
+        "S3_layered_kg": 0.8,
+        "S4_abstraction_refinement_kg": 0.8
       },
       "India": {
         "n": 3,
         "S0_no_kg": 1.0,
         "S1_raw_text_rag": 1.0,
         "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 1.0,
+        "S4_abstraction_refinement_kg": 1.0
       },
       "United Kingdom": {
         "n": 1,
         "S0_no_kg": 1.0,
         "S1_raw_text_rag": 1.0,
         "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 1.0,
+        "S4_abstraction_refinement_kg": 1.0
       },
       "Vietnam": {
         "n": 1,
         "S0_no_kg": 1.0,
-        "S1_raw_text_rag": 0.0,
-        "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S1_raw_text_rag": 1.0,
+        "S2_flat_kg": 0.0,
+        "S3_layered_kg": 0.0,
+        "S4_abstraction_refinement_kg": 1.0
       },
       "Malaysia": {
         "n": 2,
         "S0_no_kg": 1.0,
         "S1_raw_text_rag": 1.0,
         "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 1.0,
+        "S4_abstraction_refinement_kg": 1.0
       },
       "Chile": {
         "n": 1,
         "S0_no_kg": 0.0,
-        "S1_raw_text_rag": 0.0,
+        "S1_raw_text_rag": 1.0,
         "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 1.0,
+        "S4_abstraction_refinement_kg": 0.0
       },
       "Zimbabwe": {
         "n": 1,
         "S0_no_kg": 1.0,
         "S1_raw_text_rag": 1.0,
         "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 1.0,
+        "S4_abstraction_refinement_kg": 1.0
       },
       "Egypt": {
         "n": 1,
         "S0_no_kg": 1.0,
         "S1_raw_text_rag": 0.0,
         "S2_flat_kg": 0.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 0.0,
+        "S4_abstraction_refinement_kg": 1.0
       },
       "Japan": {
         "n": 1,
         "S0_no_kg": 1.0,
         "S1_raw_text_rag": 1.0,
         "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 1.0,
+        "S4_abstraction_refinement_kg": 1.0
       },
       "Iran": {
         "n": 2,
         "S0_no_kg": 0.5,
         "S1_raw_text_rag": 0.5,
         "S2_flat_kg": 0.5,
-        "S3_layered_kg": 0.5
+        "S3_layered_kg": 0.5,
+        "S4_abstraction_refinement_kg": 0.5
       },
       "Philippines": {
         "n": 1,
         "S0_no_kg": 1.0,
         "S1_raw_text_rag": 1.0,
         "S2_flat_kg": 1.0,
-        "S3_layered_kg": 1.0
+        "S3_layered_kg": 1.0,
+        "S4_abstraction_refinement_kg": 1.0
       }
     }
   },
@@ -266,7 +427,10 @@
           "raw_output": "D. Talking loudly on the phone is generally considered impolite and unusual in the Netherlands, where there is a strong preference for maintaining quiet in public spaces. ANSWER: D",
           "predicted": "D",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -274,15 +438,18 @@
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_6037f536959c",
             "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
             "cb_781bba206952",
-            "cb_a6a3b345f77e",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_6037f536959c",
+            "cb_04c1b92eeb66",
+            "cb_f0ae83c7a7de",
+            "cb_83332a421299",
+            "cb_11ad00625bdd",
+            "cb_b78693d4ba5e"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -291,10 +458,16 @@
           "correct": false,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_70d19b187f53",
+            "t_dcf8c9ca5888",
             "t_311a849ed267",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -303,10 +476,26 @@
           "correct": false,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_70d19b187f53",
+            "t_dcf8c9ca5888",
             "t_311a849ed267",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "D. Talking loudly on the phone is generally considered impolite and unusual in the Netherlands, where there is a strong preference for maintaining quiet in public spaces. ANSWER: D",
+          "predicted": "D",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -321,7 +510,10 @@
           "raw_output": "B. Younger people pour drinks for the elders and the elders pay for the meal. ANSWER: B",
           "predicted": "B",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -329,15 +521,18 @@
           "predicted": "B",
           "correct": true,
           "retrieved_ids": [
-            "cb_d79db15d004d",
-            "cb_c0fbeb4bf896",
-            "cb_1a35a3987377",
-            "cb_362fe558aee5",
-            "cb_781bba206952",
+            "cb_b78693d4ba5e",
+            "cb_95b6f2fff77a",
+            "cb_60a7deab97fa",
             "cb_83332a421299",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa"
-          ]
+            "cb_362fe558aee5",
+            "cb_c0fbeb4bf896",
+            "cb_781bba206952",
+            "cb_d79db15d004d"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -346,10 +541,16 @@
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_57b0f79c8f0e",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -358,10 +559,26 @@
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_57b0f79c8f0e",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "B. Younger people pour drinks for the elders and the elders pay for the meal. ANSWER: B",
+          "predicted": "B",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -376,7 +593,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -385,26 +605,35 @@
           "correct": false,
           "retrieved_ids": [
             "cb_95b6f2fff77a",
-            "cb_009b8dc6c185",
-            "cb_3f038ea57270",
+            "cb_b78693d4ba5e",
+            "cb_83332a421299",
+            "cb_362fe558aee5",
+            "cb_60a7deab97fa",
             "cb_d79db15d004d",
-            "cb_a6a3b345f77e",
             "cb_87bde279ab67",
-            "cb_c0fbeb4bf896",
-            "cb_83332a421299"
-          ]
+            "cb_11ad00625bdd"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "ANSWER: A",
-          "predicted": "A",
+          "raw_output": "ANSWER: D",
+          "predicted": "D",
           "correct": false,
           "retrieved_ids": [
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
             "t_b3bb07961998",
             "t_dcf8c9ca5888",
+            "t_ab5f1c262eab",
             "t_57b0f79c8f0e",
             "t_311a849ed267"
-          ]
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -412,11 +641,27 @@
           "predicted": "A",
           "correct": false,
           "retrieved_ids": [
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
             "t_b3bb07961998",
             "t_dcf8c9ca5888",
+            "t_ab5f1c262eab",
             "t_57b0f79c8f0e",
             "t_311a849ed267"
-          ]
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -431,35 +676,47 @@
           "raw_output": "ANSWER: C",
           "predicted": "C",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "ANSWER: B",
-          "predicted": "B",
+          "raw_output": "The provided cultural references do not specifically mention the preferred way of cooking eggs for Spanish people. The information given is primarily about American food and dining habits, grocery shopping, and mealtime preferences. Without specific cultural evidence about Spanish egg cooking preferences, it is not possible to accurately choose from the given options. ANSWER:",
+          "predicted": null,
           "correct": false,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
             "cb_11ad00625bdd",
+            "cb_f0ae83c7a7de",
+            "cb_95b6f2fff77a",
+            "cb_b78693d4ba5e",
+            "cb_d79db15d004d",
             "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_1e42aeb65bda",
+            "cb_83332a421299"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "ANSWER: B",
-          "predicted": "B",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
           "correct": false,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -468,10 +725,26 @@
           "correct": false,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: C",
+          "predicted": "C",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -486,7 +759,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -494,39 +770,64 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
+            "cb_6037f536959c",
+            "cb_781bba206952",
+            "cb_362fe558aee5",
+            "cb_009b8dc6c185",
             "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_87bde279ab67",
+            "cb_04c1b92eeb66",
+            "cb_83332a421299"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "ANSWER: B",
-          "predicted": "B",
-          "correct": false,
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_70d19b187f53",
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "ANSWER: B",
-          "predicted": "B",
-          "correct": false,
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_70d19b187f53",
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -541,7 +842,10 @@
           "raw_output": "In Indian culture, it is common to eat with hands, typically using the right hand, as the left hand is considered unclean. Chopsticks and a knife and fork are not typically used for eating food, although a spoon and fork might be used for specific dishes like curries or for eating Western food. Therefore, the correct statements are (ii) With chopsticks and (iii) With a knife and fork. ANSWER: C",
           "predicted": "C",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -551,13 +855,16 @@
           "retrieved_ids": [
             "cb_95b6f2fff77a",
             "cb_83332a421299",
-            "cb_11ad00625bdd",
-            "cb_6037f536959c",
+            "cb_b78693d4ba5e",
             "cb_d79db15d004d",
             "cb_60a7deab97fa",
-            "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e"
-          ]
+            "cb_11ad00625bdd",
+            "cb_04c1b92eeb66",
+            "cb_781bba206952"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -565,23 +872,45 @@
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
             "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided triples do not contain any information about the tools used for consuming food in India. The information given is about dinner times and their social significance. Therefore, we must rely on general cultural knowledge about Indian dining practices. In Indian culture, people commonly eat with their hands, especially for meals like roti and curry. Chopsticks, a knife and fork, and a spoon and fork are not typically used for everyday meals but might be used in certain formal or Westernized settings. Given the options, the most accurate answer would be that people in India do not commonly use chopsticks, a knife and fork, and a spoon and fork for everyday meals. ANSWER: C",
+          "raw_output": "ANSWER: C",
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
             "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In Indian culture, it is common to eat with hands, typically using the right hand, as the left hand is considered unclean. Chopsticks and a knife and fork are not typically used for eating food, although a spoon and fork might be used for specific dishes like curries or for eating Western food. Therefore, the correct statements are (ii) With chopsticks and (iii) With a knife and fork. ANSWER: C",
+          "predicted": "C",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -596,7 +925,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -604,15 +936,18 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "cb_362fe558aee5",
+            "cb_009b8dc6c185",
             "cb_87bde279ab67",
-            "cb_83332a421299",
             "cb_95b6f2fff77a",
-            "cb_11ad00625bdd",
+            "cb_1e42aeb65bda",
             "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_009b8dc6c185"
-          ]
+            "cb_83332a421299",
+            "cb_a6a3b345f77e",
+            "cb_4cf2cee22f18"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -620,11 +955,17 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_311a849ed267",
-            "t_b3bb07961998"
-          ]
+            "t_b3bb07961998",
+            "t_57b0f79c8f0e",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -632,11 +973,27 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_311a849ed267",
-            "t_b3bb07961998"
-          ]
+            "t_b3bb07961998",
+            "t_57b0f79c8f0e",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -651,47 +1008,75 @@
           "raw_output": "ANSWER: B",
           "predicted": "B",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
+          "raw_output": "ANSWER: B",
+          "predicted": "B",
+          "correct": true,
+          "retrieved_ids": [
+            "cb_b78693d4ba5e",
+            "cb_95b6f2fff77a",
+            "cb_60a7deab97fa",
+            "cb_1a35a3987377",
+            "cb_009b8dc6c185",
+            "cb_d79db15d004d",
+            "cb_781bba206952",
+            "cb_11ad00625bdd"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
+        },
+        "S2_flat_kg": {
+          "system": "S2_flat_kg",
           "raw_output": "ANSWER: C",
           "predicted": "C",
           "correct": false,
           "retrieved_ids": [
-            "cb_b78693d4ba5e",
-            "cb_1a35a3987377",
-            "cb_6037f536959c",
-            "cb_a6a3b345f77e",
-            "cb_04c1b92eeb66",
-            "cb_f0ae83c7a7de",
-            "cb_781bba206952",
-            "cb_362fe558aee5"
-          ]
-        },
-        "S2_flat_kg": {
-          "system": "S2_flat_kg",
-          "raw_output": "ANSWER: B",
-          "predicted": "B",
-          "correct": true,
-          "retrieved_ids": [
-            "t_311a849ed267",
-            "t_b3bb07961998",
+            "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_57b0f79c8f0e"
-          ]
+            "t_b3bb07961998",
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
+          "raw_output": "ANSWER: C",
+          "predicted": "C",
+          "correct": false,
+          "retrieved_ids": [
+            "t_57b0f79c8f0e",
+            "t_dcf8c9ca5888",
+            "t_b3bb07961998",
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
           "raw_output": "ANSWER: B",
           "predicted": "B",
           "correct": true,
-          "retrieved_ids": [
-            "t_311a849ed267",
-            "t_b3bb07961998",
-            "t_dcf8c9ca5888",
-            "t_57b0f79c8f0e"
-          ]
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -706,7 +1091,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -714,15 +1102,18 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "cb_781bba206952",
-            "cb_6037f536959c",
-            "cb_a6a3b345f77e",
             "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
+            "cb_009b8dc6c185",
+            "cb_781bba206952",
+            "cb_b78693d4ba5e",
             "cb_f0ae83c7a7de",
+            "cb_87bde279ab67",
             "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_6037f536959c"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -730,11 +1121,17 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_b3bb07961998",
+            "t_70d19b187f53",
             "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -742,11 +1139,27 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_b3bb07961998",
+            "t_70d19b187f53",
             "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -761,7 +1174,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -769,15 +1185,18 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "cb_6037f536959c",
-            "cb_a6a3b345f77e",
-            "cb_781bba206952",
             "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
+            "cb_009b8dc6c185",
+            "cb_781bba206952",
+            "cb_b78693d4ba5e",
             "cb_f0ae83c7a7de",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_6037f536959c",
+            "cb_60a7deab97fa",
+            "cb_11ad00625bdd"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -785,11 +1204,17 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_b3bb07961998",
+            "t_70d19b187f53",
             "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -797,11 +1222,27 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_b3bb07961998",
+            "t_70d19b187f53",
             "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -816,23 +1257,29 @@
           "raw_output": "In Chilean culture, it is not customary to greet women who are not close friends or relatives with a kiss on the cheek. While handshakes are common, a kiss is generally reserved for more intimate relationships. ANSWER: B",
           "predicted": "B",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "ANSWER: B",
-          "predicted": "B",
-          "correct": false,
+          "raw_output": "ANSWER: D",
+          "predicted": "D",
+          "correct": true,
           "retrieved_ids": [
-            "cb_009b8dc6c185",
-            "cb_3f038ea57270",
-            "cb_a6a3b345f77e",
-            "cb_1e42aeb65bda",
+            "cb_781bba206952",
             "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
+            "cb_009b8dc6c185",
             "cb_6037f536959c",
-            "cb_781bba206952"
-          ]
+            "cb_83332a421299",
+            "cb_11ad00625bdd",
+            "cb_95b6f2fff77a",
+            "cb_1e42aeb65bda"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -840,23 +1287,45 @@
           "predicted": "D",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_311a849ed267",
             "t_57b0f79c8f0e",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided triples do not contain specific information about greeting customs in Chilean culture. However, based on cultural norms in many Latin American countries, including Chile, it is common to greet women with a kiss on the cheek, especially if they are not close friends or relatives. Shaking hands is also a common greeting, but it is less common than the cheek kiss in many social settings. Briefly bowing, bending your waist, is not a typical greeting in Chilean culture. Saying \"hi\" from a distance is a respectful and common greeting. Given the options, the least likely to be done in a Chilean cultural context when greeting women who are not close friends or relatives is: D. briefly bowing, bending your waist ANSWER: D",
+          "raw_output": "The provided cultural knowledge graph triples do not contain specific information about greeting customs in Chilean culture. However, based on general cultural norms, in many Latin American cultures, including Chile, it is common to greet women who are not close friends or relatives with a kiss on the cheek, especially in more formal or traditional settings. Shaking hands is also a common greeting, but it is not as common as the cheek kiss in many Latin American countries. Briefly bowing, bending your waist, is not a typical greeting in Chilean culture. Saying \"hi\" from a distance is a respectful and common greeting, especially in more casual settings. Given the options and the need to choose the single best option, the most culturally inappropriate and least common greeting in a Chilean context would be: ANSWER: D",
           "predicted": "D",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_311a849ed267",
             "t_57b0f79c8f0e",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In Chilean culture, it is not customary to greet women who are not close friends or relatives with a kiss on the cheek. While handshakes are common, a kiss is generally reserved for more intimate relationships. ANSWER: B",
+          "predicted": "B",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -871,47 +1340,75 @@
           "raw_output": "ANSWER: C",
           "predicted": "C",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The provided cultural references do not specifically address food consumption practices in Zimbabwe. However, based on general cultural norms in many African countries, including Zimbabwe, consuming warm or hot food is often advised to aid digestion and eliminate bacteria. This is due to the climate and food preservation methods. ANSWER: C",
+          "raw_output": "The provided cultural references do not specifically address food consumption practices in Zimbabwe. However, based on general cultural norms in many African countries, including Zimbabwe, consuming warm or hot food is often advised to aid digestion and eliminate bacteria. This is a common practice in many cultures to ensure food safety and promote health. ANSWER: C",
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
             "cb_95b6f2fff77a",
-            "cb_d79db15d004d",
-            "cb_83332a421299",
+            "cb_b78693d4ba5e",
             "cb_11ad00625bdd",
+            "cb_83332a421299",
+            "cb_d79db15d004d",
             "cb_60a7deab97fa",
-            "cb_c0fbeb4bf896",
-            "cb_f0ae83c7a7de",
+            "cb_04c1b92eeb66",
             "cb_009b8dc6c185"
-          ]
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "ANSWER: C",
+          "raw_output": "Based on the provided cultural facts, there is no direct information about Zimbabwe's food consumption practices related to eliminating bacteria and aiding digestion. However, generally, consuming warm or hot food is a common practice in many cultures as it can help in digestion and reducing the risk of foodborne illnesses. Given the options, this aligns best with option C. ANSWER: C",
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
+            "t_b3bb07961998",
             "t_311a849ed267",
-            "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_57b0f79c8f0e"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural knowledge graph triples do not directly address food consumption practices related to eliminating bacteria or aiding digestion in Zimbabwe. However, based on general cultural practices and health advice, consuming warm or hot food is often recommended to aid digestion and eliminate bacteria. ANSWER: C",
+          "raw_output": "The provided cultural knowledge graph triples do not directly address food consumption practices in Zimbabwe or advice related to eliminating bacteria and aiding digestion. However, based on general cultural practices and health advice, consuming warm or hot food is often recommended to aid digestion and eliminate bacteria. ANSWER: C",
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
+            "t_b3bb07961998",
             "t_311a849ed267",
-            "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_57b0f79c8f0e"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: C",
+          "predicted": "C",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -926,7 +1423,10 @@
           "raw_output": "ANSWER: C",
           "predicted": "C",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -934,15 +1434,18 @@
           "predicted": "A",
           "correct": false,
           "retrieved_ids": [
-            "cb_95b6f2fff77a",
             "cb_6037f536959c",
+            "cb_009b8dc6c185",
             "cb_781bba206952",
-            "cb_a6a3b345f77e",
-            "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
             "cb_f0ae83c7a7de",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_04c1b92eeb66",
+            "cb_b78693d4ba5e",
+            "cb_11ad00625bdd",
+            "cb_83332a421299"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -950,23 +1453,45 @@
           "predicted": "A",
           "correct": false,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
+            "t_311a849ed267",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": false,
+          "retrieved_ids": [
+            "t_b3bb07961998",
+            "t_57b0f79c8f0e",
+            "t_311a849ed267",
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
           "raw_output": "ANSWER: C",
           "predicted": "C",
           "correct": true,
-          "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -981,7 +1506,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -989,15 +1517,18 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "cb_3f038ea57270",
-            "cb_fff39aee5d14",
             "cb_6037f536959c",
-            "cb_a6a3b345f77e",
-            "cb_04c1b92eeb66",
+            "cb_b78693d4ba5e",
+            "cb_009b8dc6c185",
             "cb_f0ae83c7a7de",
-            "cb_781bba206952",
-            "cb_362fe558aee5"
-          ]
+            "cb_1e42aeb65bda",
+            "cb_04c1b92eeb66",
+            "cb_95b6f2fff77a",
+            "cb_fff39aee5d14"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1006,10 +1537,16 @@
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_b3bb07961998",
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1018,10 +1555,26 @@
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_b3bb07961998",
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1036,7 +1589,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1044,15 +1600,18 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "cb_fff39aee5d14",
-            "cb_6037f536959c",
-            "cb_781bba206952",
-            "cb_a6a3b345f77e",
-            "cb_04c1b92eeb66",
+            "cb_87bde279ab67",
             "cb_f0ae83c7a7de",
-            "cb_95b6f2fff77a",
-            "cb_362fe558aee5"
-          ]
+            "cb_04c1b92eeb66",
+            "cb_6037f536959c",
+            "cb_a6a3b345f77e",
+            "cb_009b8dc6c185",
+            "cb_3f038ea57270",
+            "cb_fff39aee5d14"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1061,10 +1620,16 @@
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1073,10 +1638,26 @@
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1091,7 +1672,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1100,14 +1684,17 @@
           "correct": true,
           "retrieved_ids": [
             "cb_6037f536959c",
-            "cb_a6a3b345f77e",
-            "cb_781bba206952",
-            "cb_362fe558aee5",
             "cb_04c1b92eeb66",
+            "cb_83332a421299",
+            "cb_009b8dc6c185",
+            "cb_d79db15d004d",
+            "cb_11ad00625bdd",
             "cb_f0ae83c7a7de",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_1a35a3987377"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1115,11 +1702,17 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1127,11 +1720,27 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1146,7 +1755,10 @@
           "raw_output": "ANSWER: C",
           "predicted": "C",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1154,15 +1766,18 @@
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
-            "cb_04c1b92eeb66",
-            "cb_1a35a3987377",
-            "cb_d79db15d004d",
-            "cb_95b6f2fff77a",
-            "cb_b78693d4ba5e",
-            "cb_6037f536959c",
             "cb_781bba206952",
-            "cb_83332a421299"
-          ]
+            "cb_b78693d4ba5e",
+            "cb_362fe558aee5",
+            "cb_04c1b92eeb66",
+            "cb_95b6f2fff77a",
+            "cb_d79db15d004d",
+            "cb_11ad00625bdd",
+            "cb_f0ae83c7a7de"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1170,11 +1785,17 @@
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
             "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_57b0f79c8f0e"
-          ]
+            "t_57b0f79c8f0e",
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1182,11 +1803,27 @@
           "predicted": "C",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
             "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_57b0f79c8f0e"
-          ]
+            "t_57b0f79c8f0e",
+            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: C",
+          "predicted": "C",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1201,7 +1838,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1209,39 +1849,64 @@
           "predicted": "A",
           "correct": false,
           "retrieved_ids": [
-            "cb_1a35a3987377",
-            "cb_6037f536959c",
-            "cb_781bba206952",
-            "cb_a6a3b345f77e",
-            "cb_04c1b92eeb66",
-            "cb_f0ae83c7a7de",
+            "cb_b78693d4ba5e",
+            "cb_009b8dc6c185",
+            "cb_362fe558aee5",
             "cb_95b6f2fff77a",
-            "cb_362fe558aee5"
-          ]
+            "cb_781bba206952",
+            "cb_6037f536959c",
+            "cb_d79db15d004d",
+            "cb_1e42aeb65bda"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "ANSWER: A",
-          "predicted": "A",
-          "correct": false,
+          "raw_output": "ANSWER: C",
+          "predicted": "C",
+          "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
             "t_57b0f79c8f0e",
+            "t_b3bb07961998",
+            "t_311a849ed267",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
+          "raw_output": "ANSWER: C",
+          "predicted": "C",
+          "correct": true,
+          "retrieved_ids": [
+            "t_57b0f79c8f0e",
+            "t_b3bb07961998",
+            "t_311a849ed267",
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": false,
-          "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1256,7 +1921,10 @@
           "raw_output": "ANSWER: A",
           "predicted": "A",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1265,14 +1933,17 @@
           "correct": true,
           "retrieved_ids": [
             "cb_95b6f2fff77a",
-            "cb_d79db15d004d",
+            "cb_b78693d4ba5e",
             "cb_83332a421299",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_04c1b92eeb66",
             "cb_362fe558aee5",
-            "cb_6037f536959c"
-          ]
+            "cb_60a7deab97fa",
+            "cb_11ad00625bdd",
+            "cb_d79db15d004d",
+            "cb_781bba206952"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1280,11 +1951,17 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
             "t_57b0f79c8f0e",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1292,11 +1969,27 @@
           "predicted": "A",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
             "t_57b0f79c8f0e",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: A",
+          "predicted": "A",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1311,7 +2004,10 @@
           "raw_output": "ANSWER: B",
           "predicted": "B",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1320,14 +2016,17 @@
           "correct": false,
           "retrieved_ids": [
             "cb_c0fbeb4bf896",
-            "cb_6037f536959c",
-            "cb_781bba206952",
-            "cb_a6a3b345f77e",
-            "cb_362fe558aee5",
+            "cb_d79db15d004d",
+            "cb_1a35a3987377",
+            "cb_b78693d4ba5e",
             "cb_04c1b92eeb66",
+            "cb_4cf2cee22f18",
             "cb_f0ae83c7a7de",
-            "cb_95b6f2fff77a"
-          ]
+            "cb_6037f536959c"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1338,20 +2037,42 @@
             "t_b3bb07961998",
             "t_311a849ed267",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "ANSWER: None of the provided options match the cultural knowledge graph triples given in the question, as the triples are about dinner times and not about the ages at which people are obligated to practice Islam. Therefore, none of the options can be selected based on the provided information. However, if we were to choose the closest option based on common knowledge, it would be: ANSWER: B",
+          "raw_output": "ANSWER: None of the provided options match the cultural context given in the question, as the triples provided are about dinner times and food consumption in a general sense, not about Islamic obligations in Iran. Therefore, none of the options can be selected based on the given information. However, if we were to answer based on common knowledge about Islamic obligations in Iran, the correct answer would be: ANSWER: B",
           "predicted": "B",
           "correct": false,
           "retrieved_ids": [
             "t_b3bb07961998",
             "t_311a849ed267",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "ANSWER: B",
+          "predicted": "B",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1363,10 +2084,13 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "While cycling is very common in the Netherlands, it is not considered unusual to cycle everywhere. Dutch people often cycle for transportation, but they also use other modes of transport for longer distances or when cycling is not practical. The candidate answer is too broad and does not accurately represent the cultural context. ANSWER: FALSE",
+          "raw_output": "While cycling is very common in the Netherlands, it is not considered unusual to cycle everywhere. Dutch people often cycle for transportation, but they also use other modes of transport for longer distances or when cycling is not practical. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1374,15 +2098,18 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_6037f536959c",
             "cb_04c1b92eeb66",
-            "cb_a6a3b345f77e",
+            "cb_6037f536959c",
+            "cb_f0ae83c7a7de",
+            "cb_83332a421299",
             "cb_362fe558aee5",
-            "cb_781bba206952",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_b78693d4ba5e",
+            "cb_c0fbeb4bf896",
+            "cb_11ad00625bdd"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1391,22 +2118,44 @@
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
             "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The candidate answer \"Cycle everywhere\" does not align with the provided cultural context about dinner times in the Netherlands. The context discusses dinner times and their relation to social norms and diverse lifestyles, but does not provide any information about cycling practices. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
             "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "While cycling is very common in the Netherlands, it is not considered unusual to cycle everywhere. Dutch people often cycle for transportation, but they also use other modes of transport for longer distances or when cycling is not practical. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1421,47 +2170,75 @@
           "raw_output": "The candidate answer \"Using deodorant\" is not unusual or uncommon in the Netherlands. Deodorant use is a common practice in many cultures, including the Netherlands, and there is no cultural evidence suggesting it is unusual. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The provided cultural references do not specifically mention deodorant use in the Netherlands or any other country. However, using deodorant is a common practice in most Western cultures, including the Netherlands, and is not typically considered unusual. Therefore, the candidate answer is incorrect in the context of the question, which asks for an unusual common public practice. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_6037f536959c",
             "cb_04c1b92eeb66",
-            "cb_a6a3b345f77e",
+            "cb_6037f536959c",
+            "cb_f0ae83c7a7de",
+            "cb_11ad00625bdd",
+            "cb_83332a421299",
+            "cb_60a7deab97fa",
             "cb_362fe558aee5",
-            "cb_781bba206952",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_4cf2cee22f18"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer \"Using deodorant\" does not align with the provided cultural facts about dinner times in the Netherlands. The facts provided are about the timing and preferences of dinner, not about personal hygiene practices like using deodorant. Since the question asks for an unusual common public practice and the facts provided do not give any information about deodorant usage, we cannot conclude that using deodorant is unusual based on the given information. ANSWER: FALSE",
+          "raw_output": "The candidate answer \"Using deodorant\" does not align with the provided cultural facts about dinner times and food consumption in the Netherlands. The facts provided are about dinner times, food diversity, and food consumption habits, and do not provide any information about the use of deodorant being unusual or common. Since the question asks for an unusual common public practice and the candidate answer does not relate to the provided cultural context, it can be inferred that the answer is incorrect in the context of the given facts. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_dcf8c9ca5888",
+            "t_ab5f1c262eab",
             "t_311a849ed267",
-            "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_57b0f79c8f0e"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural context does not mention deodorant use or any related practices. The context discusses dinner times and their relation to social norms and diverse lifestyles, but does not provide information about personal hygiene practices like using deodorant. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_dcf8c9ca5888",
+            "t_ab5f1c262eab",
             "t_311a849ed267",
-            "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_57b0f79c8f0e"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "The candidate answer \"Using deodorant\" is not unusual or uncommon in the Netherlands. Deodorant use is a common practice in many cultures, including the Netherlands, and there is no cultural evidence suggesting it is unusual. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1473,10 +2250,13 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "In the Netherlands, tipping is generally not expected in restaurants and other service industries, as service charges are often included in the bill. When tipping is given, it is usually a small amount, not generous. This makes \"tipping generously\" an unusual common public practice in the Netherlands. ANSWER: FALSE",
+          "raw_output": "In the Netherlands, tipping is generally not expected in restaurants and other service industries, as service charges are often included in the bill. When tipping is given, it is usually a small amount, not generous. ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1484,39 +2264,64 @@
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_6037f536959c",
             "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
             "cb_781bba206952",
-            "cb_a6a3b345f77e",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_04c1b92eeb66",
+            "cb_6037f536959c",
+            "cb_d79db15d004d",
+            "cb_60a7deab97fa",
+            "cb_83332a421299",
+            "cb_f0ae83c7a7de"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer \"Tipping generously\" does not align with the provided cultural facts about dinner times in the Netherlands. The facts provided are about dinner times and do not give any information about tipping practices. Tipping practices can vary widely and are not directly related to the timing of dinner. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_dcf8c9ca5888",
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural context does not mention tipping or any specific practices related to tipping in the Netherlands. The context focuses on dinner times and their social implications, indicating that dinner times are a common and normative practice between 5:30pm and 10pm, with a preference for early dinners. The candidate answer, \"Tipping generously,\" is not directly related to the provided context and is not mentioned as a cultural practice in the given information. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_dcf8c9ca5888",
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In the Netherlands, tipping is generally not expected in restaurants and other service industries, as service charges are often included in the bill. When tipping is given, it is usually a small amount, not generous. This makes \"tipping generously\" an unusual common public practice in the Netherlands. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1531,7 +2336,10 @@
           "raw_output": "In the Netherlands, it is generally considered impolite to talk loudly on the phone in public spaces. This is because the Dutch value quietness and respect for personal space in public areas. ANSWER: TRUE",
           "predicted": "true",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1539,39 +2347,64 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_6037f536959c",
             "cb_04c1b92eeb66",
-            "cb_a6a3b345f77e",
+            "cb_6037f536959c",
+            "cb_f0ae83c7a7de",
+            "cb_83332a421299",
             "cb_362fe558aee5",
-            "cb_781bba206952",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_4cf2cee22f18",
+            "cb_c0fbeb4bf896",
+            "cb_b78693d4ba5e"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer does not directly relate to the cultural facts provided about dinner times in the Netherlands. The facts provided do not give any information about public practices such as talking on the phone. However, based on the context of dinner times being a common and normative practice, it is reasonable to infer that engaging in disruptive behavior like talking loudly on the phone would be considered unusual during dinner times. ANSWER: TRUE",
-          "predicted": "true",
-          "correct": false,
+          "raw_output": "ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_70d19b187f53",
+            "t_dcf8c9ca5888",
             "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural context does not directly address the behavior of talking loudly on the phone during dinner times or at dinner. However, based on the information given, dinner times are common and normative practices that people prefer to have early and which reflect diverse lifestyles and work routines. Talking loudly on the phone during dinner could be considered rude in many cultures, including the Netherlands, as it is generally expected to be polite and considerate during meals. ANSWER: TRUE",
-          "predicted": "true",
-          "correct": false,
+          "raw_output": "ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_70d19b187f53",
+            "t_dcf8c9ca5888",
             "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888"
-          ]
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In the Netherlands, it is generally considered impolite to talk loudly on the phone in public spaces. This is because the Dutch value quietness and respect for personal space in public areas. ANSWER: TRUE",
+          "predicted": "true",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1586,7 +2419,10 @@
           "raw_output": "In Korean dining etiquette, it is common for guests to pay for their own drinks, but the host or the person who invited guests to the meal often pays for the food. However, the practice can vary based on the relationship between the people and the specific social context. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1594,39 +2430,64 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_d79db15d004d",
-            "cb_781bba206952",
-            "cb_362fe558aee5",
-            "cb_83332a421299",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
             "cb_b78693d4ba5e",
-            "cb_95b6f2fff77a"
-          ]
+            "cb_95b6f2fff77a",
+            "cb_60a7deab97fa",
+            "cb_83332a421299",
+            "cb_362fe558aee5",
+            "cb_781bba206952",
+            "cb_d79db15d004d",
+            "cb_11ad00625bdd"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The provided cultural facts do not specifically address the practices of drinks and paying for meals in Korean dining etiquette. The candidate answer does not align with common Korean dining practices, where it is more common for the host or the person who invited others to pay for the meal and drinks. Therefore, the candidate answer is not correct for the given cultural context. ANSWER: FALSE",
+          "raw_output": "The provided cultural facts do not contain any information about Korean dining etiquette, drinks, or payment practices. Therefore, we cannot confirm the accuracy of the candidate answer based on the given information. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_57b0f79c8f0e",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural knowledge graph does not contain specific information about Korean dining etiquette regarding drinks and paying for the meal. The given triples focus on general dinner times and preferences but do not address the specifics of payment or drink sharing in Korean culture. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
+            "t_dcf8c9ca5888",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_57b0f79c8f0e",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In Korean dining etiquette, it is common for guests to pay for their own drinks, but the host or the person who invited guests to the meal often pays for the food. However, the practice can vary based on the relationship between the people and the specific social context. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1641,7 +2502,10 @@
           "raw_output": "The candidate answer is correct in describing a common practice in Korean dining etiquette where younger people typically pour drinks for the elders, and the elders often pay for the meal. However, it's important to note that this is a general guideline and not a strict rule, as individual preferences and social dynamics can vary. ANSWER: TRUE",
           "predicted": "true",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1649,27 +2513,36 @@
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
-            "cb_d79db15d004d",
-            "cb_1a35a3987377",
+            "cb_95b6f2fff77a",
+            "cb_b78693d4ba5e",
+            "cb_60a7deab97fa",
+            "cb_83332a421299",
+            "cb_c0fbeb4bf896",
             "cb_362fe558aee5",
             "cb_781bba206952",
-            "cb_83332a421299",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_11ad00625bdd"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The provided cultural facts do not specifically address drinking habits or payment practices during meals, which are the focus of the question. The candidate answer, while it may be true in some Korean dining contexts, is not supported by the given cultural facts. Therefore, we cannot confirm its correctness based on the information provided. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_57b0f79c8f0e",
+            "t_dcf8c9ca5888",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1678,10 +2551,26 @@
           "correct": false,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_57b0f79c8f0e",
+            "t_dcf8c9ca5888",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "The candidate answer is correct in describing a common practice in Korean dining etiquette where younger people typically pour drinks for the elders, and the elders often pay for the meal. However, it's important to note that this is a general guideline and not a strict rule, as individual preferences and social dynamics can vary. ANSWER: TRUE",
+          "predicted": "true",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1696,7 +2585,10 @@
           "raw_output": "The candidate answer does not accurately reflect the cultural context of Korean dining etiquette. In Korea, it is common for the host or the person who invited others to pay for the meal, but this is not always the case, especially in casual settings. Additionally, the practice of who pays can vary based on the relationship between the individuals and the specific social context. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1704,27 +2596,36 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_d79db15d004d",
-            "cb_781bba206952",
+            "cb_b78693d4ba5e",
+            "cb_95b6f2fff77a",
+            "cb_60a7deab97fa",
             "cb_362fe558aee5",
             "cb_83332a421299",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_b78693d4ba5e",
-            "cb_95b6f2fff77a"
-          ]
+            "cb_781bba206952",
+            "cb_c0fbeb4bf896",
+            "cb_d79db15d004d"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The provided cultural facts do not contain any information about drinks or paying for the meal, which are the topics in the question. The candidate answer discusses an aspect of Korean dining etiquette (the person who is older pays) that is not supported by the given cultural facts. Therefore, based on the information provided, we cannot confirm the accuracy of the candidate answer regarding drinks and paying for the meal. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_dcf8c9ca5888",
             "t_57b0f79c8f0e",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1733,10 +2634,26 @@
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
+            "t_dcf8c9ca5888",
             "t_57b0f79c8f0e",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "The candidate answer does not accurately reflect the cultural context of Korean dining etiquette. In Korea, it is common for the host or the person who invited others to pay for the meal, but this is not always the case, especially in casual settings. Additionally, the practice of who pays can vary based on the relationship between the individuals and the specific social context. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1748,10 +2665,13 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "The candidate answer does not accurately reflect the specific Korean dining etiquette regarding drinks and paying for the meal. In Korean culture, it is common for the host or the person who invited others to dinner to pay for the meal, and it is also customary for guests to offer to contribute. However, the practice of splitting the bill evenly is not as common and is more influenced by the individual relationship between the diners rather than a general cultural norm. ANSWER: FALSE",
+          "raw_output": "The candidate answer does not accurately reflect the specific Korean dining etiquette regarding drinks and paying for the meal. In Korean culture, it is common for the host or the person who invited others to dinner to pay for the meal, and it is also customary for guests to offer to contribute. However, the practice of splitting the bill evenly is not as common and is more aligned with Western dining etiquette. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1759,15 +2679,18 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_c0fbeb4bf896",
-            "cb_d79db15d004d",
-            "cb_781bba206952",
-            "cb_362fe558aee5",
+            "cb_b78693d4ba5e",
+            "cb_95b6f2fff77a",
             "cb_83332a421299",
-            "cb_11ad00625bdd",
             "cb_60a7deab97fa",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_362fe558aee5",
+            "cb_d79db15d004d",
+            "cb_11ad00625bdd",
+            "cb_c0fbeb4bf896"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -1776,10 +2699,16 @@
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_57b0f79c8f0e",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -1788,10 +2717,26 @@
           "correct": true,
           "retrieved_ids": [
             "t_b3bb07961998",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
             "t_311a849ed267",
-            "t_dcf8c9ca5888"
-          ]
+            "t_dcf8c9ca5888",
+            "t_57b0f79c8f0e",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "The candidate answer does not accurately reflect Korean dining etiquette. In Korea, it is common for the host or the person who invited others to dinner to pay for the meal. Additionally, regarding drinks, it is often the case that the person who invites others to drink will also pay for it. Splitting the bill evenly is not the norm and can be seen as less respectful in many Korean cultural contexts. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1806,47 +2751,75 @@
           "raw_output": "Emphasis on community and collective responsibility is indeed a common aspect in Nigerian culture, reflecting the strong social bonds and mutual support among individuals. ANSWER: TRUE",
           "predicted": "true",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The candidate answer \"Emphasis on community and collective responsibility\" is not directly related to the cultural context provided about Americans in the United States. The provided passages focus on American cultural practices such as flag display, casual dress, tipping, cultural shock during migration, shoe removal, public comfort preferences, and food consumption. There is no information provided about Nigeria or its cultural aspects. ANSWER: FALSE",
+          "raw_output": "The candidate answer does not directly relate to the cultural context provided about the United States. The question asks about an aspect that is not uncommon in Nigeria, but the answer given is about a cultural aspect of American society. There is no information provided about Nigeria in the given passages. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "cb_362fe558aee5",
+            "cb_f0ae83c7a7de",
             "cb_87bde279ab67",
             "cb_6037f536959c",
-            "cb_781bba206952",
-            "cb_a6a3b345f77e",
             "cb_04c1b92eeb66",
-            "cb_f0ae83c7a7de",
-            "cb_95b6f2fff77a",
-            "cb_362fe558aee5"
-          ]
+            "cb_009b8dc6c185",
+            "cb_781bba206952",
+            "cb_11ad00625bdd"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer \"Emphasis on community and collective responsibility\" is not directly related to the provided cultural facts about dinner times in Nigeria. However, it is a well-known aspect of Nigerian culture, indicating a strong community and collective orientation. ANSWER: TRUE",
-          "predicted": "true",
-          "correct": false,
+          "raw_output": "The candidate answer does not directly relate to the cultural facts provided about dinner times and food consumption in a context that seems to be about the United States, not Nigeria. The cultural facts provided do not give any information about Nigeria's cultural aspects. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_ff101cc557f2",
+            "t_311a849ed267",
+            "t_57b0f79c8f0e"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural context does not directly mention Nigeria or its specific cultural aspects. However, the candidate answer \"Emphasis on community and collective responsibility\" is a common cultural aspect found in many African cultures, including Nigeria. This answer aligns with the general cultural context of the provided triples, which discuss social norms and practices related to dinner times. ANSWER: TRUE",
+          "raw_output": "ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [
+            "t_70d19b187f53",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
+            "t_dcf8c9ca5888",
+            "t_ff101cc557f2",
+            "t_311a849ed267",
+            "t_57b0f79c8f0e"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "Emphasis on community and collective responsibility is indeed a common aspect in Nigerian culture, reflecting the strong social bonds and mutual support among individuals. ANSWER: TRUE",
           "predicted": "true",
           "correct": false,
-          "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
-            "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1858,10 +2831,13 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "Thanksgiving is not a traditional holiday in Nigeria, as it is specific to cultures with historical ties to the United States. The celebration of Christmas and New Year's Day are more common in Nigeria. ANSWER: FALSE",
+          "raw_output": "Thanksgiving is not a traditional or commonly celebrated holiday in Nigeria, as it is specific to certain cultures, primarily in the United States. The cultural context of Nigeria does not include this holiday. ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -1869,39 +2845,64 @@
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
-            "cb_6037f536959c",
-            "cb_a6a3b345f77e",
-            "cb_781bba206952",
-            "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
-            "cb_f0ae83c7a7de",
+            "cb_b78693d4ba5e",
             "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_009b8dc6c185",
+            "cb_781bba206952",
+            "cb_f0ae83c7a7de",
+            "cb_83332a421299",
+            "cb_362fe558aee5",
+            "cb_87bde279ab67"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer \"Celebrating Thanksgiving\" does not align with the cultural context provided about dinner times in Nigeria. Thanksgiving is not a cultural or traditional event in Nigeria, and the provided facts are about dinner times and preferences in Nigeria, not about American holidays. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2",
+            "t_57b0f79c8f0e",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The candidate answer \"Celebrating Thanksgiving\" does not align with the provided cultural context about dinner times and preferences in Nigeria. Thanksgiving is a U.S. holiday and not relevant to the cultural context provided. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_ab5f1c262eab",
+            "t_ff101cc557f2",
+            "t_57b0f79c8f0e",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "Thanksgiving is not a traditional or commonly celebrated holiday in Nigeria, as it is specific to certain cultures, primarily in the United States. The cultural context of Nigeria does not include this holiday. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1913,50 +2914,78 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "While individualism and self-reliance are values that can be found in some Nigerians, they are not as commonly emphasized in Nigerian culture compared to collectivism and community-oriented values. Thus, the candidate answer is not accurate for the cultural context of Nigeria. ANSWER: FALSE",
+          "raw_output": "While individualism and self-reliance are values that can be found in some Nigerians, they are not as commonly emphasized in Nigerian culture compared to collectivism and community-oriented values. Thus, the candidate answer is not accurate for the majority of the cultural context in Nigeria. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The candidate answer does not directly relate to the cultural context provided about Americans. The passages describe aspects of American culture such as dress codes, tipping, food consumption, and alcohol consumption. Individualism and self-reliance are not mentioned in the provided passages and are more related to cultural traits in some Western cultures, including the United States, but not specifically to the context of the question which asks about what is not uncommon in Nigeria. ANSWER: FALSE",
+          "raw_output": "The provided cultural references are about the United States, not Nigeria. The candidate answer \"Individualism and self-reliance\" is more aligned with American cultural traits rather than Nigerian ones. Nigeria, like many African countries, often emphasizes community and collective responsibility over individualism. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_6037f536959c",
-            "cb_a6a3b345f77e",
-            "cb_781bba206952",
+            "cb_87bde279ab67",
             "cb_362fe558aee5",
-            "cb_04c1b92eeb66",
             "cb_f0ae83c7a7de",
-            "cb_95b6f2fff77a",
-            "cb_c0fbeb4bf896"
-          ]
+            "cb_3f038ea57270",
+            "cb_6037f536959c",
+            "cb_83332a421299",
+            "cb_009b8dc6c185",
+            "cb_1a35a3987377"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer does not directly relate to the cultural facts provided about dinner times in Nigeria. The facts provided are about the timing and preference for dinner, which reflect diverse lifestyles and work routines. The candidate answer, \"Individualism and self-reliance,\" does not address these facts and instead refers to a broader cultural trait that is not specifically tied to the provided context. ANSWER: FALSE",
+          "raw_output": "The candidate answer does not align with the provided cultural facts about the food consumption and dinner times in the context given, which is not about Nigeria but seems to be describing a general American cultural context. Individualism and self-reliance are not directly related to the provided facts about food consumption and dinner times. Therefore, the answer is not correct in the context of the provided facts. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_ff101cc557f2",
+            "t_57b0f79c8f0e",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural context discusses dinner times and preferences, which are related to social norms and lifestyles. The candidate answer \"Individualism and self-reliance\" does not directly relate to the context of dinner times and preferences. While individualism and self-reliance can be cultural traits in Nigeria, they are not specifically reflected in the given context about dinner times. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "t_311a849ed267",
-            "t_57b0f79c8f0e",
+            "t_70d19b187f53",
+            "t_ab5f1c262eab",
+            "t_b3bb07961998",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_ff101cc557f2",
+            "t_57b0f79c8f0e",
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "While individualism and self-reliance are values that can be found in some Nigerians, they are not as commonly emphasized in Nigerian culture compared to collectivism and community-oriented values. Thus, the candidate answer is not accurate for the majority of the cultural context in Nigeria. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -1971,47 +3000,75 @@
           "raw_output": "While fast food consumption is increasing in Nigeria, it is not yet a large-scale or dominant cultural practice compared to traditional foods. Therefore, it might not be considered a common aspect in the broader cultural context. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The candidate answer does not directly relate to the cultural context provided about the United States. The question asks about an aspect that is not uncommon in Nigeria, but the answer provided discusses fast food consumption in the United States. There is no information given about fast food consumption in Nigeria. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "cb_95b6f2fff77a",
-            "cb_009b8dc6c185",
-            "cb_3f038ea57270",
-            "cb_d79db15d004d",
-            "cb_a6a3b345f77e",
-            "cb_c0fbeb4bf896",
             "cb_83332a421299",
-            "cb_1e42aeb65bda"
-          ]
+            "cb_b78693d4ba5e",
+            "cb_60a7deab97fa",
+            "cb_11ad00625bdd",
+            "cb_d79db15d004d",
+            "cb_362fe558aee5",
+            "cb_781bba206952"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer does not directly relate to the cultural facts provided about dinner times in Nigeria. The facts provided discuss the timing and diversity of dinner times rather than fast food consumption. While large-scale consumption of fast food can be a cultural practice in Nigeria, it is not mentioned in the given context. ANSWER: FALSE",
-          "predicted": "false",
-          "correct": true,
+          "raw_output": "While the cultural context provided does not specifically mention Nigeria, it does indicate that people in the described culture consume a wide range of food, including fast food. This suggests that fast food consumption is not uncommon in the described culture. ANSWER: TRUE",
+          "predicted": "true",
+          "correct": false,
           "retrieved_ids": [
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab",
             "t_b3bb07961998",
             "t_dcf8c9ca5888",
             "t_57b0f79c8f0e",
             "t_311a849ed267"
-          ]
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "The provided cultural knowledge graph does not directly mention fast food consumption in Nigeria. However, the question asks for what is not an uncommon aspect, and the graph indicates that dinner times are a common and normative practice, reflecting diverse lifestyles and work routines. Given the information, large-scale consumption of fast food is not mentioned, and the context suggests that dinner times are a common practice, which could imply that traditional meals are still prevalent. ANSWER: FALSE",
+          "raw_output": "The provided cultural context does not mention Nigeria or any specific cultural practices related to Nigeria. The context provided is about food consumption in a general American cultural context, including fast food as part of a wide range of food options. Therefore, the candidate answer, which suggests that large-scale consumption of fast food is not an uncommon aspect in Nigeria, cannot be directly evaluated based on the given context. However, it is important to note that the consumption of fast food in Nigeria is indeed a common practice, influenced by globalization and urbanization. But this is not based on the provided context. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
+            "t_ab5f1c262eab",
             "t_b3bb07961998",
             "t_dcf8c9ca5888",
             "t_57b0f79c8f0e",
             "t_311a849ed267"
-          ]
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "While fast food consumption is increasing in Nigeria, it is not yet a large-scale or dominant cultural practice compared to traditional foods. Therefore, it might not be considered a common aspect in the broader cultural context. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2026,47 +3083,75 @@
           "raw_output": "While scrambled eggs are popular in Spain, they are not the preferred way of cooking eggs for all Spanish people. Other common methods include boiling (huevo cocido) and frying (tortilla Española). Therefore, the answer is too narrow. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The provided cultural references do not contain specific information about the preferred way of cooking eggs for Spanish people. The candidate answer \"Scrambled\" is not supported by the given passages. ANSWER: FALSE",
+          "raw_output": "The provided cultural references do not specifically mention the preferred way of cooking eggs for Spanish people. The candidate answer \"Scrambled\" is not supported by the given passages. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "cb_11ad00625bdd",
+            "cb_95b6f2fff77a",
+            "cb_b78693d4ba5e",
             "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
+            "cb_362fe558aee5",
             "cb_83332a421299",
             "cb_1e42aeb65bda",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_781bba206952"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The provided cultural facts do not give any information about the preferred way of cooking eggs for Spanish people. The facts are about dinner times and preferences, not about cooking methods. ANSWER: FALSE",
+          "raw_output": "The provided cultural facts do not specify the preferred way of cooking eggs for Spanish people. The facts provided are about dinner times, the range of food consumed, and general food preferences, but not specific to Spanish cuisine or egg preparation. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "ANSWER: FALSE",
+          "raw_output": "The provided cultural context does not specify the preferred way of cooking eggs for Spanish people. The information given is about dinner times, a wide range of food consumed, and general social norms regarding food and dinner times in a broad sense, but it does not provide specific details about Spanish cuisine or cooking preferences. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "While scrambled eggs are popular in Spain, they are not the preferred way of cooking eggs for all Spanish people. Other common methods include boiling (huevo cocido) and frying (tortilla Española). Therefore, the answer is too narrow. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2078,50 +3163,78 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "While poached eggs are popular in Spanish cuisine, they are not the most preferred method of cooking eggs for the majority of Spanish people. Scrambled eggs (huevos revueltos) and fried eggs (huevos fritos) are more commonly enjoyed. ANSWER: FALSE",
+          "raw_output": "While poached eggs are popular in Spanish cuisine, they are not the most preferred method of cooking eggs for the majority of Spanish people. Scrambled eggs (huevos revueltos) are more commonly enjoyed as a breakfast dish in Spain. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The provided cultural references do not contain specific information about the preferred way of cooking eggs for Spanish people. The candidate answer \"Poached\" is not supported by the given passages. ANSWER: FALSE",
+          "raw_output": "The provided cultural references do not contain specific information about the preferred way of cooking eggs for Spanish people. The references are more general and do not address Spanish culinary preferences. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
             "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_95b6f2fff77a",
+            "cb_d79db15d004d",
+            "cb_362fe558aee5",
+            "cb_781bba206952",
+            "cb_b78693d4ba5e",
+            "cb_f0ae83c7a7de",
+            "cb_1e42aeb65bda"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The provided cultural facts do not give any information about the preferred method of cooking eggs for Spanish people. Therefore, we cannot confirm if \"Poached\" is the correct answer based on the given context. ANSWER: FALSE",
+          "raw_output": "The provided cultural facts do not specify the preferred way of cooking eggs for Spanish people. The facts provided are about the general food consumption habits, dinner times, and preferences of people in a broad sense, not specific cooking methods for a particular culture or region. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
+            "t_70d19b187f53",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "ANSWER: FALSE",
+          "raw_output": "The provided cultural context does not contain any information about the preferred way of cooking eggs for Spanish people. The context focuses on dinner times, food consumption habits, and preferences in the American cultural context. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_ff101cc557f2",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
+            "t_70d19b187f53",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "While poached eggs are popular in Spanish cuisine, they are not the most preferred method of cooking eggs for the majority of Spanish people. Scrambled eggs (huevos revueltos) are more commonly enjoyed as a breakfast dish in Spain. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2133,50 +3246,78 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "While omelettes are popular in Spanish cuisine, they are not the only or the most preferred way of cooking eggs for Spanish people. Spanish people enjoy a variety of egg dishes, such as tortilla Española (Spanish omelette), huevos rotos (broken eggs), and tortilla de patatas (potato omelette). ANSWER: FALSE",
+          "raw_output": "While omelettes are popular in Spain and are a common way to cook eggs, they are not the only or the most preferred method. Spanish people also enjoy other ways of cooking eggs such as tortilla Española (Spanish omelette), huevos a la benito (eggs with ham and green pepper), and huevos a la mexicana (Mexican-style eggs). Therefore, the candidate answer is too narrow. ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The provided cultural references do not specifically mention the preferred way of cooking eggs for Spanish people. The candidate answer \"Omelette\" is a common dish in Spanish cuisine, but without direct evidence from the given passages, we cannot confirm it as the preferred method. ANSWER: FALSE",
+          "raw_output": "The provided cultural references do not specifically mention the preferred way of cooking eggs for Spanish people. The candidate answer \"Omelette\" is a common dish in Spanish cuisine, but it is not supported by the given cultural context. ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
+            "cb_11ad00625bdd",
+            "cb_95b6f2fff77a",
             "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
+            "cb_b78693d4ba5e",
+            "cb_d79db15d004d",
             "cb_83332a421299",
             "cb_1e42aeb65bda",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_781bba206952"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer does not address the cultural context provided about dinner times and preferences, but instead suggests a specific dish. The information given does not indicate any preference for omelettes over other dishes among Spanish people. Therefore, based on the provided cultural facts, we cannot confirm that an omelette is the preferred way of cooking eggs for Spanish people. ANSWER: FALSE",
+          "raw_output": "The candidate answer does not address the cultural context provided, which is about American dinner times and food preferences. There is no information given about Spanish people or their preferred way of cooking eggs. Therefore, we cannot determine if an omelette is the preferred way of cooking eggs for Spanish people based on the given context. ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "ANSWER: FALSE",
+          "raw_output": "The provided cultural context does not specify the preferred way of cooking eggs for Spanish people. The information given is about dinner times, a wide range of food consumed, and general social norms regarding food and dinner times. There is no specific mention of Spanish preferences for cooking eggs. ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "While omelettes are popular in Spain, they are not the only or the most preferred way to cook eggs. Spanish people enjoy a variety of egg dishes, such as tortilla española (a type of omelette), huevos rotos (broken eggs), and tortilla de patatas (potato omelette). The preference can vary based on region and personal taste. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2191,47 +3332,75 @@
           "raw_output": "The candidate answer \"Over-easy\" is not the preferred way of cooking eggs for Spanish people. In Spanish culture, a common way to cook eggs is \"a la plancha\" (pan-fried) or \"a la romana\" (boiled and then fried). Over-easy is more of an American term. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "The provided cultural references do not contain information about the preferred way of cooking eggs for Spanish people. The candidate answer \"Over-easy\" is a style of cooking eggs that is more commonly associated with American cuisine rather than Spanish cuisine. Therefore, based on the given information, the candidate answer is incorrect. ANSWER: FALSE",
+          "raw_output": "The provided cultural references do not contain specific information about the preferred way of cooking eggs for Spanish people. The candidate answer \"Over-easy\" is a style of cooking eggs that is more commonly associated with American cuisine rather than Spanish cuisine. Therefore, based on the given information, the candidate answer is incorrect. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
-            "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
             "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_95b6f2fff77a",
+            "cb_362fe558aee5",
+            "cb_b78693d4ba5e",
+            "cb_1e42aeb65bda",
+            "cb_781bba206952",
+            "cb_d79db15d004d",
+            "cb_83332a421299"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "ANSWER: FALSE",
+          "raw_output": "The candidate answer does not align with the provided cultural facts, as there is no information about the preferred way of cooking eggs for Spanish people in the given context. The facts provided are about dinner times, the range of food consumed, and the value placed on diverse and convenient food consumption, but not about specific cooking methods for eggs. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
-          "raw_output": "ANSWER: FALSE",
+          "raw_output": "The provided cultural context does not contain any specific information about the preferred way of cooking eggs for Spanish people. The context talks about dinner times, a wide range of food consumed, and general social values regarding food and dinner times, but it does not specify cooking preferences for any particular dish or culture. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
+            "t_b3bb07961998",
+            "t_ab5f1c262eab",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_70d19b187f53"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "The candidate answer \"Over-easy\" is not the preferred way of cooking eggs for Spanish people. In Spanish culture, a common way to cook eggs is \"a la plancha\" (pan-fried) or \"a la romana\" (boiled and then fried). Over-easy is more of an American term. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2246,7 +3415,10 @@
           "raw_output": "While \"peace be upon you\" (which is \"aleykum salam\" in Arabic) is a common greeting in many Islamic cultures, including Morocco, it is not the most common street greeting in Morocco. A more common greeting is \"salam alaykum\" (peace be upon you) followed by a handshake. ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -2254,27 +3426,36 @@
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
+            "cb_6037f536959c",
+            "cb_781bba206952",
             "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_87bde279ab67",
+            "cb_009b8dc6c185",
+            "cb_362fe558aee5",
+            "cb_04c1b92eeb66",
+            "cb_1e42aeb65bda"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer does not address the cultural context provided about dinner times in the given cultural facts. The question specifically asks about Moroccan street greetings, and the answer provided is about a greeting that is more commonly associated with Islamic cultures in general, not specifically Moroccan street greetings. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
+            "t_70d19b187f53",
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -2282,11 +3463,27 @@
           "predicted": "false",
           "correct": false,
           "retrieved_ids": [
+            "t_70d19b187f53",
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "While \"peace be upon you\" (which is \"aleykum salam\" in Arabic) is a common greeting in many Islamic cultures, including Morocco, it is not the most common street greeting in Morocco. A more common greeting is \"salam alaykum\" (peace be upon you) followed by a handshake. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": false,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2298,10 +3495,13 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "In Moroccan culture, people typically greet each other on the street with a handshake and a phrase like \"salam aleikum\" (peace be upon you), often followed by a question about health and family. ANSWER: FALSE",
+          "raw_output": "In Moroccan culture, people typically greet each other on the street with a handshake and a phrase like \"salam aleikum\" (peace be upon you), often followed by inquiries about family and well-being. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -2309,27 +3509,36 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "cb_6037f536959c",
+            "cb_781bba206952",
             "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_04c1b92eeb66",
+            "cb_362fe558aee5",
+            "cb_009b8dc6c185",
+            "cb_87bde279ab67",
+            "cb_d79db15d004d"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer does not address the cultural context provided about Moroccan dinner times and does not specifically answer the question about street greetings. However, saying \"hello\" is a common greeting in many cultures, including Moroccan culture. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -2337,11 +3546,27 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_70d19b187f53",
+            "t_ff101cc557f2",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In Moroccan culture, people typically greet each other on the street with a handshake and a phrase like \"salam aleikum\" (peace be upon you), often followed by inquiries about family and well-being. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2353,26 +3578,32 @@
       "answers": {
         "S0_no_kg": {
           "system": "S0_no_kg",
-          "raw_output": "In Moroccan culture, people typically greet each other with a handshake and a kiss on the cheek, not necessarily by hugging them, especially in more conservative settings. ANSWER: FALSE",
+          "raw_output": "In Moroccan culture, people typically greet each other with a handshake and a kiss on the cheek, not necessarily by hugging them. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
-          "raw_output": "ANSWER: FALSE",
+          "raw_output": "The provided cultural reference passages do not contain information about Moroccan culture or greetings in Morocco. The candidate answer \"By hugging them\" is a guess and not supported by the given context. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "cb_6037f536959c",
+            "cb_781bba206952",
             "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_009b8dc6c185",
+            "cb_362fe558aee5",
+            "cb_87bde279ab67",
+            "cb_04c1b92eeb66",
+            "cb_1e42aeb65bda"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
@@ -2380,11 +3611,17 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
+            "t_70d19b187f53",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -2392,11 +3629,27 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
+            "t_70d19b187f53",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_ff101cc557f2",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In Moroccan culture, people typically greet each other with a handshake and a kiss on the cheek, not necessarily by hugging them, especially in more conservative settings. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     },
@@ -2411,7 +3664,10 @@
           "raw_output": "In Moroccan culture, people typically greet each other on the street with a handshake and a verbal greeting, often followed by inquiries about family and well-being. A casual nod is not the typical greeting. ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
-          "retrieved_ids": []
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S1_raw_text_rag": {
           "system": "S1_raw_text_rag",
@@ -2419,27 +3675,36 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "cb_6037f536959c",
+            "cb_781bba206952",
+            "cb_362fe558aee5",
             "cb_f0ae83c7a7de",
-            "cb_a6a3b345f77e",
-            "cb_83332a421299",
-            "cb_1e42aeb65bda",
-            "cb_11ad00625bdd",
-            "cb_60a7deab97fa",
-            "cb_4cf2cee22f18",
-            "cb_b78693d4ba5e"
-          ]
+            "cb_04c1b92eeb66",
+            "cb_009b8dc6c185",
+            "cb_87bde279ab67",
+            "cb_83332a421299"
+          ],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         },
         "S2_flat_kg": {
           "system": "S2_flat_kg",
-          "raw_output": "The candidate answer does not address the cultural context of Moroccan dinner times or any typical greetings related to that context. The question asks about street greetings, and the provided answer suggests a nod, which is a common greeting in many cultures but does not specifically relate to Moroccan culture or the given cultural facts. ANSWER: FALSE",
+          "raw_output": "ANSWER: FALSE",
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_70d19b187f53",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_ff101cc557f2",
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
         },
         "S3_layered_kg": {
           "system": "S3_layered_kg",
@@ -2447,11 +3712,27 @@
           "predicted": "false",
           "correct": true,
           "retrieved_ids": [
+            "t_b3bb07961998",
             "t_57b0f79c8f0e",
-            "t_311a849ed267",
+            "t_70d19b187f53",
             "t_dcf8c9ca5888",
-            "t_b3bb07961998"
-          ]
+            "t_ff101cc557f2",
+            "t_311a849ed267",
+            "t_ab5f1c262eab"
+          ],
+          "completeness": "FULL",
+          "completeness_score": 1.0,
+          "shared_node_available": false
+        },
+        "S4_abstraction_refinement_kg": {
+          "system": "S4_abstraction_refinement_kg",
+          "raw_output": "In Moroccan culture, people typically greet each other on the street with a handshake and a verbal greeting, often followed by inquiries about family and well-being. A casual nod is not the typical greeting. ANSWER: FALSE",
+          "predicted": "false",
+          "correct": true,
+          "retrieved_ids": [],
+          "completeness": "NONE",
+          "completeness_score": 0.0,
+          "shared_node_available": false
         }
       }
     }

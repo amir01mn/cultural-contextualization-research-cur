@@ -1,5 +1,9 @@
 node_id,label,dominant_layer,layer_distribution,frequency,generated,sources
-n_ab3ccc8dba2a,people,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b78693d4ba5e
+n_ab3ccc8dba2a,people,LAYER_1_SURFACE,"[0.5625, 0.2875, 0.15]",4,False,cb_95b6f2fff77a;cb_b78693d4ba5e
+n_6362e86b3e29,"a wide range of food, including traditional American dishes, processed foods, and fast food like burgers, pizza, and wings",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
+n_acf7177f21ee,diverse and convenient food consumption,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
+n_39ccb32d95ed,food,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
+n_983123a1a843,"highly processed and elite food items, often with a lower fiber content",LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_95b6f2fff77a
 n_0719d882bc48,between 5:30pm and 10pm,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b78693d4ba5e
 n_5ac649742c73,early dinners,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",1,False,cb_b78693d4ba5e
 n_6dc348f2e0c6,dinner times,LAYER_1_SURFACE,"[0.7, 0.15, 0.15]",2,False,cb_b78693d4ba5e

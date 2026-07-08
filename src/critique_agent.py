@@ -330,19 +330,15 @@ def critique_records_batched_resumable(
     from .storage import (
         append_jsonl,
         generate_with_cache,
-        load_corpus_state,
         mark_completed,
+        prepare_stage_state,
         read_completed_ids,
         save_corpus_state,
     )
 
-    state = load_corpus_state(state_path) if resume else None
-    if state is None:
-        from .schemas import CorpusBuildState
-        state = CorpusBuildState()
-
+    state = prepare_stage_state(state_path, "critique", resume=resume)
     records_by_id = {r.get("instance_id", ""): r for r in records}
-    completed = read_completed_ids(state, "critique") if resume else set()
+    completed = read_completed_ids(state, "critique")
     pending = [r for r in records if r.get("instance_id") and r["instance_id"] not in completed]
 
     all_critiques: list[CritiqueResult] = []

@@ -5,11 +5,12 @@
 #SBATCH --gres=gpu:a100:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
-#SBATCH --time=02:00:00
+#SBATCH --time=03:00:00
+# Max on gpubase_bygpu_b1 for this account/partition.
 #SBATCH --output=slurm/logs/eval_%j.out
 #SBATCH --error=slurm/logs/eval_%j.err
 #
-# Evaluate systems S0-S3 on CulturalBench with the vLLM backend.
+# Evaluate systems S0-S4 on CulturalBench with the vLLM backend.
 # Requires the retrieval corpus (sbatch slurm/build_corpus.sh) and staged data.
 #
 #   sbatch slurm/eval_culturalbench.sh
@@ -38,13 +39,16 @@ LIMIT="${LIMIT:-250}"
 TOP_K="${TOP_K:-8}"
 SEED="${SEED:-42}"
 
-echo "Evaluating S0-S3 on CulturalBench with vLLM model: $VLLM_MODEL"
+SYSTEMS="${SYSTEMS:-S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg,S4_abstraction_refinement_kg}"
+
+echo "Evaluating on CulturalBench with vLLM model: $VLLM_MODEL"
 python scripts/07_eval_culturalbench.py \
   --provider vllm \
   --model "$VLLM_MODEL" \
   --variants easy,hard \
   --limit "$LIMIT" \
   --top_k "$TOP_K" \
-  --seed "$SEED"
+  --seed "$SEED" \
+  --systems "$SYSTEMS"
 
 echo "Eval job complete. See data/outputs/culturalbench_summary.md"

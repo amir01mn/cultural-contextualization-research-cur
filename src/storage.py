@@ -50,6 +50,19 @@ def load_corpus_state(path: str | Path) -> CorpusBuildState:
         return CorpusBuildState()
 
 
+def prepare_stage_state(path: str | Path, stage: str, *, resume: bool) -> CorpusBuildState:
+    """Load checkpoint state; when ``resume=False``, clear only this stage."""
+    state = load_corpus_state(path)
+    if not resume:
+        if stage == "extraction":
+            state.extraction_completed = []
+        elif stage == "critique":
+            state.critique_completed = []
+        else:
+            raise ValueError(f"Unknown stage: {stage}")
+    return state
+
+
 def save_corpus_state(path: str | Path, state: CorpusBuildState) -> None:
     state.updated_at = datetime.now(timezone.utc).isoformat()
     write_json(path, state.model_dump())

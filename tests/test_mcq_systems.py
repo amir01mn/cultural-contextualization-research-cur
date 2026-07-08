@@ -29,7 +29,7 @@ def test_parse_hard_answer():
 
 
 def test_s0_prompt_has_no_evidence(mcq_easy_question):
-    sp, up, ids = build_prompt(SYSTEM_S0, mcq_easy_question, None, top_k=5)
+    sp, up, ids, _meta = build_prompt(SYSTEM_S0, mcq_easy_question, None, top_k=5)
     assert ids == []
     assert "Retrieved" not in up
     assert "ANSWER:" in up
@@ -37,7 +37,7 @@ def test_s0_prompt_has_no_evidence(mcq_easy_question):
 
 def test_s3_layered_prompt_includes_layer_labels(mcq_easy_question, sample_triples):
     ctx = RetrievalContext(triples=sample_triples)
-    sp, up, ids = build_prompt(SYSTEM_S3, mcq_easy_question, ctx, top_k=5)
+    sp, up, ids, _meta = build_prompt(SYSTEM_S3, mcq_easy_question, ctx, top_k=5)
     # Layered evidence should reference abstraction layers.
     assert "LAYER_" in up
     assert len(ids) >= 1
@@ -45,7 +45,7 @@ def test_s3_layered_prompt_includes_layer_labels(mcq_easy_question, sample_tripl
 
 def test_s2_flat_prompt_excludes_layer_labels(mcq_easy_question, sample_triples):
     ctx = RetrievalContext(triples=sample_triples)
-    sp, up, ids = build_prompt(SYSTEM_S2, mcq_easy_question, ctx, top_k=5)
+    sp, up, ids, _meta = build_prompt(SYSTEM_S2, mcq_easy_question, ctx, top_k=5)
     assert "LAYER_" not in up
     assert len(ids) >= 1
 

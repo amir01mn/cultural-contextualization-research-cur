@@ -2,9 +2,16 @@
 # Shared Hugging Face cache paths for Narval (datasets + model weights live on $SCRATCH).
 
 setup_hf_cache() {
-  export HF_HOME="${HF_HOME:-${SCRATCH:?SCRATCH must be set}/hf_cache}"
+  local cache_root
+  if [[ -n "${SCRATCH:-}" ]]; then
+    # Always prefer $SCRATCH on Narval (login env may pre-set HF_HOME under $HOME).
+    cache_root="${SCRATCH}/hf_cache"
+  else
+    cache_root="${HF_HOME:-${HOME}/.cache/huggingface}"
+  fi
+  export HF_HOME="$cache_root"
   export HUGGINGFACE_HUB_CACHE="${HUGGINGFACE_HUB_CACHE:-${HF_HOME}/hub}"
-  export HF_DATASETS_CACHE="${HF_DATASETS_CACHE:-${HF_HOME}/datasets}"
+  export HF_DATASETS_CACHE="${HF_HOME}/datasets"
   mkdir -p "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$HF_DATASETS_CACHE"
 }
 

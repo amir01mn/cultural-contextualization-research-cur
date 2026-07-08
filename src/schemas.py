@@ -243,11 +243,14 @@ class MCQQuestion(BaseModel):
 class MCQSystemAnswer(BaseModel):
     """One system's answer to one MCQ item."""
 
-    system: str  # S0_no_kg | S1_raw_text_rag | S2_flat_kg | S3_layered_kg
+    system: str  # S0_no_kg | S1_raw_text_rag | S2_flat_kg | S3_layered_kg | S4_*
     raw_output: str = ""
     predicted: Optional[str] = None  # "A".."D" (easy) or "true"/"false" (hard)
     correct: bool = False
     retrieved_ids: list[str] = Field(default_factory=list)
+    completeness: Optional[str] = None  # PathwayCompleteness bucket for mechanism analysis
+    completeness_score: Optional[float] = None
+    shared_node_available: Optional[bool] = None
 
 
 class MCQItemResult(BaseModel):

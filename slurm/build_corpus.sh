@@ -6,6 +6,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=03:00:00
+# Max on gpubase_bygpu_b1; re-submit with RESUME=1 if the job times out.
 #SBATCH --output=slurm/logs/corpus_%j.out
 #SBATCH --error=slurm/logs/corpus_%j.err
 #

@@ -18,6 +18,7 @@ from typing import Optional
 
 from . import config
 from .mcq_systems import ALL_SYSTEMS
+from .mechanism_analysis import summarize_mechanisms
 from .schemas import MCQItemResult, MCQQuestion, MCQSystemAnswer, MCQVariant
 from .utils import ensure_dir, get_logger, write_json
 
@@ -195,6 +196,8 @@ def summarize(questions: list[MCQQuestion],
             pairwise[key] = mcnemar(combined[a], combined[bsys])
     summary["mcnemar_combined"] = pairwise
 
+    summary["mechanism_analysis"] = summarize_mechanisms(questions, answers_by_system)
+
     # Per-culture accuracy (combined units).
     per_culture: dict[str, dict] = defaultdict(lambda: {"n": 0})
     for i, m in enumerate(units_meta):
@@ -233,6 +236,8 @@ def save_outputs(questions: list[MCQQuestion],
         "csv": outputs_dir / "culturalbench_results.csv",
         "summary_md": outputs_dir / "culturalbench_summary.md",
         "plot": outputs_dir / "culturalbench_accuracy.png",
+        "mechanism_md": outputs_dir / "mechanism_analysis.md",
+        "mechanism_plot": outputs_dir / "mechanism_h2_completeness.png",
     }
 
     item_results = build_item_results(questions, answers_by_system)
@@ -256,7 +261,9 @@ def save_outputs(questions: list[MCQQuestion],
     pd.DataFrame(rows).to_csv(paths["csv"], index=False)
 
     _write_summary_md(paths["summary_md"], summary, run_meta or {})
+    _write_mechanism_md(paths["mechanism_md"], summary)
     _save_plot(paths["plot"], summary)
+    _save_mechanism_plot(paths["mechanism_plot"], summary)
     return {k: str(v) for k, v in paths.items()}
 
 
@@ -271,7 +278,7 @@ def _write_summary_md(path, summary: dict, run_meta: dict) -> None:
     hard = summary["accuracy"].get("hard", {})
 
     lines = [
-        "# CulturalBench Evaluation Summary (Phase 1: baselines S0-S3)",
+        "# CulturalBench Evaluation Summary",
         "",
         f"- LLM provider: {run_meta.get('provider', config.LLM_PROVIDER)}",
         f"- Model: {run_meta.get('model', config.active_model())}",
@@ -291,6 +298,9 @@ def _write_summary_md(path, summary: dict, run_meta: dict) -> None:
         "S1_raw_text_rag": "S1 Raw-text RAG",
         "S2_flat_kg": "S2 Flat KG",
         "S3_layered_kg": "S3 Layered KG",
+        "S4_abstraction_refinement_kg": "S4 Pathway KG",
+        "S4_triple_retrieval": "S4 Triple ablation",
+        "S4_no_shared_pivot": "S4 No-shared ablation",
     }
     for s in systems:
         c = combined.get(s, {})
@@ -314,10 +324,10 @@ def _write_summary_md(path, summary: dict, run_meta: dict) -> None:
     lines += [
         "",
         "## Notes",
-        "- This is Phase 1 (baselines only). S2/S3 use a raw KG without entity",
-        "  resolution; the S4 abstraction->refinement system is a later phase.",
-        "- Interpretation per docs/RESEARCH_DESIGN.md: we expect KG-augmented",
-        "  systems (S2/S3) to improve over S0/S1 if structure helps.",
+        "- S0–S3 are Phase 1 baselines (raw triple corpus for S2/S3).",
+        "- S4 uses critique-refined pathways from the Phase 2 corpus build.",
+        "- See mechanism_analysis.md for H2 completeness-bucket breakdown.",
+        "- Interpretation per docs/RESEARCH_DESIGN.md.",
     ]
     ensure_dir(path.parent)
     path.write_text("\n".join(lines), encoding="utf-8")
@@ -342,13 +352,109 @@ def _save_plot(path, summary: dict) -> None:
 
     fig, ax = plt.subplots(figsize=(7, 5))
     bars = ax.bar(labels, accs, yerr=yerr, capsize=6,
-                  color=["#999999", "#4C9F70", "#3A7CA5", "#A24C9F"][:len(systems)])
+                  color=["#999999", "#4C9F70", "#3A7CA5", "#A24C9F",
+                         "#D4A017", "#C44E52", "#8172B2"][:len(systems)])
     ax.set_ylabel("CulturalBench accuracy (%) - combined")
     ax.set_title("CulturalBench accuracy by system (95% CI)")
     ax.set_ylim(0, 100)
     for bar, acc in zip(bars, accs):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1,
                 f"{acc:.1f}", ha="center", va="bottom")
+    fig.tight_layout()
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
+def _write_mechanism_md(path, summary: dict) -> None:
+    mech = summary.get("mechanism_analysis") or {}
+    systems = mech.get("systems") or []
+    if not systems:
+        ensure_dir(path.parent)
+        path.write_text("# Mechanism Analysis (H2)\n\nNo KG systems in this run.\n", encoding="utf-8")
+        return
+
+    lines = [
+        "# Mechanism Analysis (H2)",
+        "",
+        "Accuracy by retrieved pathway completeness bucket and shared-node availability.",
+        "",
+        "## By completeness bucket",
+        "",
+        "| System | FULL | SOCIAL | SURFACE | NONE |",
+        "|---|---|---|---|---|",
+    ]
+    for system in systems:
+        by_comp = mech.get("by_completeness", {}).get(system, {})
+        cells = []
+        for bucket in ("FULL", "SOCIAL", "SURFACE", "NONE"):
+            entry = by_comp.get(bucket, {})
+            n = entry.get("n", 0)
+            acc = entry.get("accuracy")
+            if n and acc is not None:
+                cells.append(f"{acc*100:.1f}% (n={n})")
+            else:
+                cells.append("—")
+        lines.append(f"| {system} | " + " | ".join(cells) + " |")
+
+    lines += [
+        "",
+        "## By shared-node availability",
+        "",
+        "| System | shared pivot | no shared pivot |",
+        "|---|---|---|",
+    ]
+    for system in systems:
+        by_shared = mech.get("by_shared_node", {}).get(system, {})
+        cells = []
+        for key in ("shared", "not_shared"):
+            entry = by_shared.get(key, {})
+            n = entry.get("n", 0)
+            acc = entry.get("accuracy")
+            if n and acc is not None:
+                cells.append(f"{acc*100:.1f}% (n={n})")
+            else:
+                cells.append("—")
+        lines.append(f"| {system} | {cells[0]} | {cells[1]} |")
+
+    ensure_dir(path.parent)
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def _save_mechanism_plot(path, summary: dict) -> None:
+    mech = summary.get("mechanism_analysis") or {}
+    systems = mech.get("systems") or []
+    if not systems:
+        return
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        import numpy as np
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("matplotlib unavailable; skipping mechanism plot: %s", exc)
+        return
+
+    buckets = ["FULL", "SOCIAL", "SURFACE", "NONE"]
+    x = np.arange(len(buckets))
+    width = 0.8 / max(len(systems), 1)
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    for i, system in enumerate(systems):
+        by_comp = mech.get("by_completeness", {}).get(system, {})
+        accs = []
+        for bucket in buckets:
+            entry = by_comp.get(bucket, {})
+            acc = entry.get("accuracy")
+            accs.append(acc * 100 if acc is not None else 0.0)
+        offset = (i - (len(systems) - 1) / 2) * width
+        ax.bar(x + offset, accs, width, label=system.split("_", 1)[0])
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(buckets)
+    ax.set_ylabel("Accuracy (%)")
+    ax.set_title("H2: accuracy by pathway completeness bucket")
+    ax.legend(fontsize=8)
+    ax.set_ylim(0, 100)
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)

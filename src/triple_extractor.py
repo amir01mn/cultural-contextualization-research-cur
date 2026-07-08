@@ -173,19 +173,15 @@ def extract_triples_llm_batched_resumable(
     from .storage import (
         append_jsonl,
         generate_with_cache,
-        load_corpus_state,
         mark_completed,
+        prepare_stage_state,
         read_completed_ids,
         save_corpus_state,
     )
 
     recs = [_record_to_dict(r) for r in records]
-    state = load_corpus_state(state_path) if resume else None
-    if state is None:
-        from .schemas import CorpusBuildState
-        state = CorpusBuildState()
-
-    completed = read_completed_ids(state, "extraction") if resume else set()
+    state = prepare_stage_state(state_path, "extraction", resume=resume)
+    completed = read_completed_ids(state, "extraction")
     pending = [r for r in recs if r.get("instance_id") and r["instance_id"] not in completed]
 
     result: dict[str, list[CulturalTriple]] = {}

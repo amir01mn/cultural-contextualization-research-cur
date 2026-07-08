@@ -342,6 +342,15 @@ MCQ_EVIDENCE_HEADERS = {
     "S1_raw_text_rag": "Retrieved cultural reference passages:",
     "S2_flat_kg": "Retrieved cultural facts:",
     "S3_layered_kg": "Retrieved cultural knowledge graph triples (with abstraction layers):",
+    "S4_abstraction_refinement_kg": (
+        "Retrieved abstraction→refinement pathways (L3→L2→L1):"
+    ),
+    "S4_triple_retrieval": (
+        "Retrieved refined cultural knowledge graph triples (pathway ablation):"
+    ),
+    "S4_no_shared_pivot": (
+        "Retrieved abstraction→refinement pathways (without cross-cultural pivots):"
+    ),
 }
 
 MCQ_EASY_USER = """{evidence_block}Question:
