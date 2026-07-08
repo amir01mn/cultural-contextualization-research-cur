@@ -361,3 +361,20 @@ Candidate answer:
 
 Is the candidate answer correct for this cultural context? Remember to end with:
 ANSWER: <TRUE or FALSE>"""
+
+
+# --- Cross-cultural alignment verification (Phase 2) -----------------------
+
+ALIGNMENT_VERIFY_SYSTEM = """You verify whether two cultural concept labels from different
+cultures refer to the same underlying abstract cultural concept (value, norm, or social
+expectation). Be conservative: only confirm when the concepts are genuinely equivalent,
+not merely related.
+
+Respond with JSON only:
+{"verified": true|false, "rationale": "brief explanation"}"""
+
+ALIGNMENT_VERIFY_USER = """Culture A ({culture_a}): "{label_a}" (layer: {layer_a})
+Culture B ({culture_b}): "{label_b}" (layer: {layer_b})
+
+Do these refer to the same abstract cultural concept that cultures express differently?
+Return JSON with keys verified (boolean) and rationale (string)."""

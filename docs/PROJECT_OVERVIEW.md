@@ -826,14 +826,15 @@ Aligned with `RESEARCH_DESIGN.md` phases:
 - [x] Pluggable LLM backend (Ollama + vLLM)
 - [ ] First full CulturalBench numbers on meaningful corpus size
 
-### Phase 2 — Scalable pipeline (in progress)
+### Phase 2 — Scalable pipeline ✅ (implemented)
 
-- [ ] Batched inference with caching & checkpoint/resume
-- [ ] Parquet storage for triples
-- [ ] **Entity resolution / node canonicalization**
-- [ ] **Cross-cultural abstraction alignment** (shared nodes)
-- [ ] **Pathway construction** (L3→L2→L1 chains)
-- [ ] Persistent FAISS/Qdrant index; hybrid BM25+dense retrieval
+- [x] Batched inference with caching & checkpoint/resume
+- [x] Parquet storage for triples / entities / pathways
+- [x] **Entity resolution / node canonicalization**
+- [x] **Cross-cultural abstraction alignment** (shared nodes; embedding + LLM verify)
+- [x] **Pathway construction** (L3→L2→L1 chains)
+- [x] Persistent pathway embedding index (`pathway_retriever.py`)
+- [ ] FAISS/Qdrant hybrid index (optional upgrade; TF-IDF/MiniLM baseline in place)
 
 ### Phase 3 — Full construction + S4 + ablations
 
@@ -879,4 +880,4 @@ Aligned with `RESEARCH_DESIGN.md` phases:
 
 ---
 
-*Last updated: reflects codebase state including CulturalBench evaluation (S0–S3), pluggable LLM backends, and batched extraction. Pathway/S4 components are design-stage only.*
+*Last updated: reflects Phase 2 pipeline (entity resolution, alignment, pathways, checkpoint/resume). S4 MCQ system remains Phase 3.*

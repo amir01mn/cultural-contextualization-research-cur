@@ -37,6 +37,13 @@ def _dominant_layer(dist: list[float]) -> str:
     return labels[idx]
 
 
+def _culture_set(data: dict) -> set[str]:
+    raw = data.get("cultures", set())
+    if isinstance(raw, str):
+        return {c.strip() for c in raw.split(";") if c.strip()}
+    return set(raw or [])
+
+
 def _add_node(graph: nx.MultiDiGraph, label: str, layer: LayerLabel,
               instance_id: str, generated: bool) -> str:
     node_id = stable_id(normalize_node_label(label), prefix="n_")
@@ -91,6 +98,77 @@ def build_graph(triples: Iterable[CulturalTriple]) -> nx.MultiDiGraph:
     return graph
 
 
+def build_graph_resolved(
+    triples: Iterable[CulturalTriple],
+    entities: list,
+    label_layer_to_entity: dict[tuple[str, str], str],
+) -> nx.MultiDiGraph:
+    """Build graph with canonical entity IDs and culture metadata on nodes."""
+    from .entity_resolver import apply_entity_map
+    from .schemas import CanonicalEntity
+    from .utils import normalize_node_label
+
+    entity_objs = [e if isinstance(e, CanonicalEntity) else CanonicalEntity(**e) for e in entities]
+    entities_by_id = {e.entity_id: e for e in entity_objs}
+    resolved_triples = apply_entity_map(list(triples), label_layer_to_entity, entities_by_id)
+
+    graph = nx.MultiDiGraph()
+    entity_node_ids: dict[str, str] = {}
+
+    for e in entity_objs:
+        node_id = e.entity_id
+        entity_node_ids[e.entity_id] = node_id
+        dist = _layer_dist(e.layer)
+        graph.add_node(
+            node_id,
+            label=e.canonical_label,
+            layer=e.layer.value,
+            layer_distribution=list(dist),
+            cultures=set(e.cultures),
+            aliases=set(e.aliases),
+            sources=set(e.source_instance_ids),
+            frequency=1,
+            generated=False,
+            canonical_entity_id=e.entity_id,
+            is_shared_abstraction=bool(e.is_shared_abstraction),
+        )
+
+    for t in resolved_triples:
+        if not t.subject or not t.object:
+            continue
+        s_key = (normalize_node_label(t.subject), t.subject_layer.value)
+        o_key = (normalize_node_label(t.object), t.object_layer.value)
+        s_id = label_layer_to_entity.get(s_key)
+        o_id = label_layer_to_entity.get(o_key)
+        if not s_id or not o_id or s_id not in graph or o_id not in graph:
+            continue
+        graph.nodes[s_id]["frequency"] = graph.nodes[s_id].get("frequency", 1) + 1
+        graph.nodes[o_id]["frequency"] = graph.nodes[o_id].get("frequency", 1) + 1
+        if t.instance_id:
+            graph.nodes[s_id]["sources"].add(t.instance_id)
+            graph.nodes[o_id]["sources"].add(t.instance_id)
+        graph.add_edge(
+            s_id,
+            o_id,
+            key=t.triple_id,
+            triple_id=t.triple_id,
+            predicate=t.predicate,
+            predicate_layer=t.predicate_layer.value,
+            dataset_id=t.dataset_id,
+            instance_id=t.instance_id,
+            source_text=t.source_text,
+            confidence=float(t.confidence),
+            generated=bool(t.generated),
+            evidence=t.evidence or "",
+            notes=t.notes or "",
+            extraction_method=t.extraction_method,
+        )
+
+    LOGGER.info("Built resolved graph: %d nodes, %d edges",
+                graph.number_of_nodes(), graph.number_of_edges())
+    return graph
+
+
 def _normalized_node_view(graph: nx.MultiDiGraph) -> nx.MultiDiGraph:
     """Return a copy with serializable node/edge attributes for export."""
     g = nx.MultiDiGraph()
@@ -106,6 +184,9 @@ def _normalized_node_view(graph: nx.MultiDiGraph) -> nx.MultiDiGraph:
             sources=";".join(sorted(data.get("sources", set()))),
             frequency=int(data.get("frequency", 1)),
             generated=bool(data.get("generated", False)),
+            cultures=";".join(sorted(_culture_set(data))),
+            is_shared_abstraction=bool(data.get("is_shared_abstraction", False)),
+            canonical_entity_id=data.get("canonical_entity_id", node_id),
         )
     for s, o, key, data in graph.edges(keys=True, data=True):
         g.add_edge(s, o, key=key, **data)

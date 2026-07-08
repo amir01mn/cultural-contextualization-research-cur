@@ -9,14 +9,14 @@
 #SBATCH --output=slurm/logs/corpus_%j.out
 #SBATCH --error=slurm/logs/corpus_%j.err
 #
-# Build the CultureBank retrieval corpus (raw-text passages + LLM-extracted
-# triples) on a GPU node using the vLLM backend. Run prep_offline.sh first.
+# Build the CultureBank retrieval corpus (Phase 2 pipeline) on a GPU node.
+# Run prep_offline.sh first.
 #
-#   sbatch slurm/build_corpus.sh
+#   CORPUS_LIMIT=2000 BATCH_SIZE=32 sbatch slurm/build_corpus.sh
+#   CORPUS_LIMIT=50 sbatch slurm/build_corpus.sh   # smoke test
 
 set -euo pipefail
 
-# SLURM copies batch scripts to spool; use submit dir, not $0 or BASH_SOURCE.
 PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
 # shellcheck source=load_modules.sh
 source "${PROJECT_DIR}/slurm/load_modules.sh"
@@ -36,11 +36,24 @@ verify_torch_import "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/python"
 export LLM_PROVIDER=vllm
 export VLLM_MODEL="${VLLM_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
 CORPUS_LIMIT="${CORPUS_LIMIT:-2000}"
+BATCH_SIZE="${BATCH_SIZE:-32}"
+RESUME="${RESUME:-1}"
+SKIP_ALIGNMENT_VERIFY="${SKIP_ALIGNMENT_VERIFY:-0}"
 
-echo "Building corpus with vLLM model: $VLLM_MODEL (limit=$CORPUS_LIMIT)"
-python scripts/06_build_retrieval_corpus.py \
-  --provider vllm \
-  --model "$VLLM_MODEL" \
-  --limit "$CORPUS_LIMIT"
+EXTRA_ARGS=(--provider vllm --model "$VLLM_MODEL" --limit "$CORPUS_LIMIT" --batch_size "$BATCH_SIZE")
+if [[ "$RESUME" == "1" ]]; then
+  EXTRA_ARGS+=(--resume)
+else
+  EXTRA_ARGS+=(--no_resume)
+fi
+if [[ "$SKIP_ALIGNMENT_VERIFY" == "1" ]]; then
+  EXTRA_ARGS+=(--skip_alignment_verify)
+fi
+
+echo "Building Phase 2 corpus with vLLM model: $VLLM_MODEL (limit=$CORPUS_LIMIT batch=$BATCH_SIZE)"
+python scripts/06_build_retrieval_corpus.py "${EXTRA_ARGS[@]}"
+
+echo "Running Phase 2 validation..."
+python scripts/09_validate_phase2.py
 
 echo "Corpus build job complete."

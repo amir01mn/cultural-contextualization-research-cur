@@ -14,6 +14,7 @@ triples with critique suggestions, keeping (but annotating) flagged triples.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Optional
 
 from . import local_llm, prompts
@@ -79,34 +80,19 @@ def _build_suggested_triple(rec: dict, fields: dict) -> CulturalTriple:
 
 # --- LLM critique (MAIN) ---------------------------------------------------
 
-def critique_record_llm(record: dict,
-                        triples: list[CulturalTriple],
-                        *,
-                        model: Optional[str] = None) -> CritiqueResult:
-    """Critique one record's triples using the local LLM.
-
-    Raises local_llm.LLMUnavailableError if the server is unreachable.
-    """
+def _format_critique_prompt(record: dict, triples: list[CulturalTriple]) -> str:
     record_json = truncate(json.dumps(record, ensure_ascii=False, default=str), 2500)
     triples_json = json.dumps([_triple_to_compact(t) for t in triples],
                               ensure_ascii=False)
-    user_prompt = prompts.CRITIQUE_USER.format(
+    return prompts.CRITIQUE_USER.format(
         record_json=record_json,
         triples_json=truncate(triples_json, 4000),
     )
-    parsed = local_llm.generate_json(
-        user_prompt,
-        system_prompt=prompts.CRITIQUE_SYSTEM,
-        model=model,
-    )
-    rec_id = record.get("instance_id", "")
-    if not parsed or not isinstance(parsed, dict):
-        LOGGER.warning("Critique LLM returned no valid JSON for %s", rec_id)
-        return CritiqueResult(record_id=rec_id,
-                              original_triple_ids=[t.triple_id for t in triples],
-                              summary="No valid critique JSON returned.",
-                              method="llm_based")
 
+
+def _parse_critique_response(record: dict, triples: list[CulturalTriple],
+                             parsed: dict) -> CritiqueResult:
+    rec_id = record.get("instance_id", "")
     issues = []
     for it in parsed.get("issues", []) or []:
         if isinstance(it, dict):
@@ -140,6 +126,47 @@ def critique_record_llm(record: dict,
         summary=normalize_text(parsed.get("summary")),
         method="llm_based",
     )
+
+
+def critique_record_llm(record: dict,
+                        triples: list[CulturalTriple],
+                        *,
+                        model: Optional[str] = None) -> CritiqueResult:
+    """Critique one record's triples using the local LLM.
+
+    Raises local_llm.LLMUnavailableError if the server is unreachable.
+    """
+    user_prompt = _format_critique_prompt(record, triples)
+    parsed = local_llm.generate_json(
+        user_prompt,
+        system_prompt=prompts.CRITIQUE_SYSTEM,
+        model=model,
+    )
+    rec_id = record.get("instance_id", "")
+    if not parsed or not isinstance(parsed, dict):
+        LOGGER.warning("Critique LLM returned no valid JSON for %s", rec_id)
+        return CritiqueResult(record_id=rec_id,
+                              original_triple_ids=[t.triple_id for t in triples],
+                              summary="No valid critique JSON returned.",
+                              method="llm_based")
+    return _parse_critique_response(record, triples, parsed)
+
+
+def critique_record_llm_backend(record: dict,
+                                triples: list[CulturalTriple],
+                                backend) -> CritiqueResult:
+    """Critique one record using a pluggable LLM backend."""
+    user_prompt = _format_critique_prompt(record, triples)
+    text = backend.generate_one(user_prompt, system_prompt=prompts.CRITIQUE_SYSTEM)
+    parsed = local_llm.safe_parse_json(text)
+    rec_id = record.get("instance_id", "")
+    if not parsed or not isinstance(parsed, dict):
+        LOGGER.warning("Critique backend returned no valid JSON for %s", rec_id)
+        return CritiqueResult(record_id=rec_id,
+                              original_triple_ids=[t.triple_id for t in triples],
+                              summary="No valid critique JSON returned.",
+                              method="llm_based")
+    return _parse_critique_response(record, triples, parsed)
 
 
 # --- Rule-based critique (FALLBACK only) -----------------------------------
@@ -280,3 +307,101 @@ def build_refined_triples(records_by_id: dict[str, dict],
                 refined[k] = s
 
     return list(refined.values())
+
+
+def _chunked(items: list, size: int):
+    for i in range(0, len(items), size):
+        yield items[i:i + size]
+
+
+def critique_records_batched_resumable(
+    records: list[dict],
+    triples_by_record: dict[str, list[CulturalTriple]],
+    backend,
+    *,
+    state_path: str,
+    critiques_output: str,
+    cache_dir: str,
+    batch_size: int = 32,
+    allow_fallback: bool = False,
+    resume: bool = True,
+) -> tuple[list[CritiqueResult], list[CulturalTriple]]:
+    """Resumable batched critique; returns critiques and refined triple list."""
+    from .storage import (
+        append_jsonl,
+        generate_with_cache,
+        load_corpus_state,
+        mark_completed,
+        read_completed_ids,
+        save_corpus_state,
+    )
+
+    state = load_corpus_state(state_path) if resume else None
+    if state is None:
+        from .schemas import CorpusBuildState
+        state = CorpusBuildState()
+
+    records_by_id = {r.get("instance_id", ""): r for r in records}
+    completed = read_completed_ids(state, "critique") if resume else set()
+    pending = [r for r in records if r.get("instance_id") and r["instance_id"] not in completed]
+
+    all_critiques: list[CritiqueResult] = []
+    if resume and critiques_output:
+        from .storage import read_jsonl_list
+        for row in read_jsonl_list(critiques_output):
+            try:
+                all_critiques.append(CritiqueResult(**row))
+            except Exception:  # noqa: BLE001
+                continue
+
+    if not pending:
+        LOGGER.info("Critique: all %d records already complete.", len(records))
+        refined = build_refined_triples(records_by_id, triples_by_record, all_critiques)
+        return all_critiques, refined
+
+    critiques_path = Path(critiques_output)
+    if not resume or not critiques_path.exists():
+        critiques_path.parent.mkdir(parents=True, exist_ok=True)
+        critiques_path.write_text("", encoding="utf-8")
+
+    LOGGER.info("Critique: %d pending / %d total.", len(pending), len(records))
+
+    for batch in _chunked(pending, batch_size):
+        user_prompts = []
+        batch_recs = []
+        batch_triples = []
+        for rec in batch:
+            iid = rec.get("instance_id", "")
+            triples = triples_by_record.get(iid, [])
+            user_prompts.append(_format_critique_prompt(rec, triples))
+            batch_recs.append(rec)
+            batch_triples.append(triples)
+
+        outputs = generate_with_cache(
+            backend, "critique", user_prompts, prompts.CRITIQUE_SYSTEM, cache_dir)
+
+        batch_critiques: list[CritiqueResult] = []
+        done_ids: list[str] = []
+        for rec, triples, text in zip(batch_recs, batch_triples, outputs):
+            parsed = local_llm.safe_parse_json(text)
+            if parsed and isinstance(parsed, dict):
+                cr = _parse_critique_response(rec, triples, parsed)
+            elif allow_fallback:
+                cr = critique_record_rule_based(rec, triples)
+            else:
+                cr = CritiqueResult(
+                    record_id=rec.get("instance_id", ""),
+                    original_triple_ids=[t.triple_id for t in triples],
+                    summary="Critique parse failed.",
+                    method="llm_based",
+                )
+            batch_critiques.append(cr)
+            done_ids.append(rec.get("instance_id", ""))
+
+        append_jsonl(critiques_path, [c.model_dump() for c in batch_critiques])
+        all_critiques.extend(batch_critiques)
+        mark_completed(state, "critique", done_ids)
+        save_corpus_state(state_path, state)
+
+    refined = build_refined_triples(records_by_id, triples_by_record, all_critiques)
+    return all_critiques, refined

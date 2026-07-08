@@ -66,15 +66,44 @@ require `huggingface-cli login` and accepting the license first.
 Edit the `--account=def-CHANGEME` line in `slurm/build_corpus.sh` and
 `slurm/eval_culturalbench.sh` to your `def-<pi>` allocation.
 
-## 4. Build the retrieval corpus (GPU job)
+## 4. Build the retrieval corpus — Phase 2 pipeline (GPU job)
 
 ```bash
 export HF_HOME=$SCRATCH/hf_cache
-CORPUS_LIMIT=2000 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/build_corpus.sh
+# Full run (checkpoint/resume enabled by default):
+CORPUS_LIMIT=2000 BATCH_SIZE=32 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/build_corpus.sh
+
+# Smoke test:
+CORPUS_LIMIT=50 BATCH_SIZE=16 sbatch slurm/build_corpus.sh
 ```
 
-Outputs to `data/processed/`: `corpus_passages.jsonl`, `corpus_triples.jsonl`,
-and `data/outputs/corpus_cultural_kg.*`.
+Phase 2 outputs (in addition to Phase 1 artifacts):
+
+| Artifact | Path |
+|---|---|
+| Checkpoint state | `data/processed/corpus_build_state.json` |
+| Raw triples | `data/processed/corpus_triples.jsonl` |
+| Refined triples | `data/processed/corpus_triples_refined.jsonl` |
+| Entity map | `data/processed/entity_map.jsonl` |
+| Alignments | `data/processed/cross_cultural_alignments.jsonl` |
+| Pathways | `data/processed/corpus_pathways.jsonl` |
+| Pathway index | `data/processed/pathway_index/` |
+| Parquet mirrors | `data/processed/*.parquet` |
+| Resolved graph | `data/outputs/resolved_cultural_kg.*` |
+| Validation report | `data/outputs/phase2_validation.md` |
+
+The SLURM script runs `scripts/09_validate_phase2.py` automatically after the build.
+
+Optional env vars for `build_corpus.sh`:
+
+- `RESUME=0` — disable checkpoint resume (start fresh)
+- `SKIP_ALIGNMENT_VERIFY=1` — embedding-only alignment (faster smoke)
+
+Install optional embedding model for better entity resolution / pathway retrieval:
+
+```bash
+pip install sentence-transformers
+```
 
 ## 5. Evaluate S0-S3 on CulturalBench (GPU job)
 

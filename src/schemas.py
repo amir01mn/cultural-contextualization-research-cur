@@ -258,3 +258,99 @@ class MCQItemResult(BaseModel):
     variant: MCQVariant
     cultural_group: Optional[str] = None
     answers: dict[str, MCQSystemAnswer] = Field(default_factory=dict)
+
+
+# ===========================================================================
+# Phase 2: entity resolution, alignment, pathways
+# ===========================================================================
+
+class PathwayCompleteness(str, Enum):
+    """Pathway completeness bucket per RESEARCH_DESIGN.md §3.3."""
+
+    FULL = "FULL"
+    SOCIAL = "SOCIAL"
+    SURFACE = "SURFACE"
+    NONE = "NONE"
+
+
+class CanonicalEntity(BaseModel):
+    """A canonical graph node after entity resolution."""
+
+    entity_id: str
+    canonical_label: str
+    layer: LayerLabel = LayerLabel.UNKNOWN
+    cultures: list[str] = Field(default_factory=list)
+    aliases: list[str] = Field(default_factory=list)
+    source_instance_ids: list[str] = Field(default_factory=list)
+    is_shared_abstraction: bool = False
+
+    @field_validator("layer", mode="before")
+    @classmethod
+    def _coerce_layer(cls, v: Any) -> LayerLabel:
+        return LayerLabel.coerce(v)
+
+
+class CrossCulturalAlignment(BaseModel):
+    """Links refinements from two cultures under a shared abstraction pivot."""
+
+    alignment_id: str
+    abstraction_node_id: str
+    culture_a: str
+    culture_b: str
+    entity_ids: list[str] = Field(default_factory=list)
+    entity_label_a: str = ""
+    entity_label_b: str = ""
+    similarity: float = 0.0
+    verified: bool = False
+    verification_rationale: str = ""
+
+    @field_validator("similarity", mode="before")
+    @classmethod
+    def _clamp_sim(cls, v: Any) -> float:
+        try:
+            f = float(v)
+        except (TypeError, ValueError):
+            return 0.0
+        return max(0.0, min(1.0, f))
+
+
+class PathwayNodeRef(BaseModel):
+    entity_id: str
+    label: str
+    layer: LayerLabel = LayerLabel.UNKNOWN
+
+    @field_validator("layer", mode="before")
+    @classmethod
+    def _coerce_layer(cls, v: Any) -> LayerLabel:
+        return LayerLabel.coerce(v)
+
+
+class CulturalPathway(BaseModel):
+    """An abstraction→refinement pathway (L3→L2→L1 when complete)."""
+
+    pathway_id: str
+    culture: str
+    nodes: list[PathwayNodeRef] = Field(default_factory=list)
+    triple_ids: list[str] = Field(default_factory=list)
+    completeness: PathwayCompleteness = PathwayCompleteness.NONE
+    has_shared_pivot: bool = False
+    shared_pivot_id: Optional[str] = None
+
+    @field_validator("completeness", mode="before")
+    @classmethod
+    def _coerce_completeness(cls, v: Any) -> PathwayCompleteness:
+        if isinstance(v, PathwayCompleteness):
+            return v
+        key = str(v).strip().upper()
+        for member in PathwayCompleteness:
+            if key == member.value:
+                return member
+        return PathwayCompleteness.NONE
+
+
+class CorpusBuildState(BaseModel):
+    """Checkpoint state for resumable corpus construction."""
+
+    extraction_completed: list[str] = Field(default_factory=list)
+    critique_completed: list[str] = Field(default_factory=list)
+    updated_at: Optional[str] = None

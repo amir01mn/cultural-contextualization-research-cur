@@ -50,6 +50,22 @@ CULTURALBENCH_HF_ID = os.getenv("CULTURALBENCH_HF_ID", "kellycyy/CulturalBench")
 # (The KG is built from CultureBank; CulturalBench is held out for evaluation.)
 CORPUS_LIMIT = int(os.getenv("CORPUS_LIMIT", "2000"))
 
+# Phase 2 artifact paths
+CORPUS_STATE_PATH = PROCESSED_DIR / "corpus_build_state.json"
+LLM_CACHE_DIR = PROCESSED_DIR / "llm_cache"
+CORPUS_TRIPLES_REFINED_PATH = PROCESSED_DIR / "corpus_triples_refined.jsonl"
+ENTITY_MAP_PATH = PROCESSED_DIR / "entity_map.jsonl"
+ALIGNMENTS_PATH = PROCESSED_DIR / "cross_cultural_alignments.jsonl"
+PATHWAYS_PATH = PROCESSED_DIR / "corpus_pathways.jsonl"
+PATHWAY_INDEX_DIR = PROCESSED_DIR / "pathway_index"
+PHASE2_VALIDATION_PATH = OUTPUTS_DIR / "phase2_validation.md"
+
+# Phase 2 knobs
+CORPUS_BATCH_SIZE = int(os.getenv("CORPUS_BATCH_SIZE", "32"))
+ER_SIMILARITY_THRESHOLD = float(os.getenv("ER_SIMILARITY_THRESHOLD", "0.88"))
+ALIGNMENT_SIMILARITY_THRESHOLD = float(os.getenv("ALIGNMENT_SIMILARITY_THRESHOLD", "0.82"))
+MAX_PATHWAYS_PER_CULTURE = int(os.getenv("MAX_PATHWAYS_PER_CULTURE", "500"))
+
 
 # --- LLM provider selection ------------------------------------------------
 # 'ollama' for local development; 'vllm' for batched GPU inference on Narval.

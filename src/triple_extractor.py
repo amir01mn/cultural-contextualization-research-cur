@@ -13,6 +13,7 @@ Modes:
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Optional
 
 from . import config, local_llm, prompts
@@ -149,6 +150,91 @@ def extract_triples_llm_batched(records: list,
         if not triples and allow_fallback:
             triples = extract_triples_schema(rec)
         result[rec.get("instance_id", "")] = triples
+    return result
+
+
+def _chunked(items: list, size: int):
+    for i in range(0, len(items), size):
+        yield items[i:i + size]
+
+
+def extract_triples_llm_batched_resumable(
+    records: list,
+    backend,
+    *,
+    state_path: str,
+    output_path: str,
+    cache_dir: str,
+    batch_size: int = 32,
+    allow_fallback: bool = False,
+    resume: bool = True,
+) -> dict[str, list[CulturalTriple]]:
+    """Resumable chunked extraction with LLM response cache and JSONL append."""
+    from .storage import (
+        append_jsonl,
+        generate_with_cache,
+        load_corpus_state,
+        mark_completed,
+        read_completed_ids,
+        save_corpus_state,
+    )
+
+    recs = [_record_to_dict(r) for r in records]
+    state = load_corpus_state(state_path) if resume else None
+    if state is None:
+        from .schemas import CorpusBuildState
+        state = CorpusBuildState()
+
+    completed = read_completed_ids(state, "extraction") if resume else set()
+    pending = [r for r in recs if r.get("instance_id") and r["instance_id"] not in completed]
+
+    result: dict[str, list[CulturalTriple]] = {}
+    if resume:
+        for rec in recs:
+            iid = rec.get("instance_id", "")
+            if iid in completed:
+                result[iid] = []
+
+    if not pending:
+        LOGGER.info("Extraction: all %d records already complete.", len(recs))
+        return result
+
+    out_path = Path(output_path)
+    if not resume or not out_path.exists():
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text("", encoding="utf-8")
+
+    LOGGER.info("Extraction: %d pending / %d total (batch_size=%d).",
+                len(pending), len(recs), batch_size)
+
+    for batch in _chunked(pending, batch_size):
+        user_prompts = [_format_user_prompt(r) for r in batch]
+        outputs = generate_with_cache(
+            backend,
+            "extraction",
+            user_prompts,
+            prompts.TRIPLE_EXTRACTION_SYSTEM,
+            cache_dir,
+        )
+        batch_rows: list[dict] = []
+        done_ids: list[str] = []
+        for rec, text in zip(batch, outputs):
+            iid = rec.get("instance_id", "")
+            parsed = local_llm.safe_parse_json(text)
+            triples = _triples_from_parsed(rec, parsed) if parsed else []
+            if not triples and allow_fallback:
+                triples = extract_triples_schema(rec)
+            result[iid] = triples
+            batch_rows.extend(t.model_dump() for t in triples)
+            done_ids.append(iid)
+
+        if batch_rows:
+            append_jsonl(out_path, batch_rows)
+        mark_completed(state, "extraction", done_ids)
+        save_corpus_state(state_path, state)
+        LOGGER.info("Extraction batch done: %d records, %d triples appended.",
+                    len(done_ids), len(batch_rows))
+
     return result
 
 
