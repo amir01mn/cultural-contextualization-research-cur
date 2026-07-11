@@ -1,11 +1,11 @@
 unit_id,variant,cultural_group,system,correct
 easy_0,easy,Netherlands,S0_no_kg,0
-easy_0,easy,Netherlands,S1_raw_text_rag,0
+easy_0,easy,Netherlands,S1_raw_text_rag,1
 easy_0,easy,Netherlands,S2_flat_kg,0
-easy_0,easy,Netherlands,S3_layered_kg,0
+easy_0,easy,Netherlands,S3_layered_kg,1
 easy_0,easy,Netherlands,S4_abstraction_refinement_kg,0
 easy_1,easy,South Korea,S0_no_kg,1
-easy_1,easy,South Korea,S1_raw_text_rag,1
+easy_1,easy,South Korea,S1_raw_text_rag,0
 easy_1,easy,South Korea,S2_flat_kg,1
 easy_1,easy,South Korea,S3_layered_kg,1
 easy_1,easy,South Korea,S4_abstraction_refinement_kg,1
@@ -20,14 +20,14 @@ easy_3,easy,Spain,S2_flat_kg,0
 easy_3,easy,Spain,S3_layered_kg,0
 easy_3,easy,Spain,S4_abstraction_refinement_kg,0
 easy_4,easy,Morocco,S0_no_kg,1
-easy_4,easy,Morocco,S1_raw_text_rag,1
-easy_4,easy,Morocco,S2_flat_kg,1
-easy_4,easy,Morocco,S3_layered_kg,1
+easy_4,easy,Morocco,S1_raw_text_rag,0
+easy_4,easy,Morocco,S2_flat_kg,0
+easy_4,easy,Morocco,S3_layered_kg,0
 easy_4,easy,Morocco,S4_abstraction_refinement_kg,1
 easy_5,easy,India,S0_no_kg,1
-easy_5,easy,India,S1_raw_text_rag,0
-easy_5,easy,India,S2_flat_kg,0
-easy_5,easy,India,S3_layered_kg,1
+easy_5,easy,India,S1_raw_text_rag,1
+easy_5,easy,India,S2_flat_kg,1
+easy_5,easy,India,S3_layered_kg,0
 easy_5,easy,India,S4_abstraction_refinement_kg,1
 easy_6,easy,United Kingdom,S0_no_kg,1
 easy_6,easy,United Kingdom,S1_raw_text_rag,1
@@ -35,9 +35,9 @@ easy_6,easy,United Kingdom,S2_flat_kg,1
 easy_6,easy,United Kingdom,S3_layered_kg,1
 easy_6,easy,United Kingdom,S4_abstraction_refinement_kg,1
 easy_7,easy,Vietnam,S0_no_kg,1
-easy_7,easy,Vietnam,S1_raw_text_rag,0
-easy_7,easy,Vietnam,S2_flat_kg,0
-easy_7,easy,Vietnam,S3_layered_kg,0
+easy_7,easy,Vietnam,S1_raw_text_rag,1
+easy_7,easy,Vietnam,S2_flat_kg,1
+easy_7,easy,Vietnam,S3_layered_kg,1
 easy_7,easy,Vietnam,S4_abstraction_refinement_kg,1
 easy_8,easy,Malaysia,S0_no_kg,1
 easy_8,easy,Malaysia,S1_raw_text_rag,1
@@ -53,16 +53,16 @@ easy_10,easy,Chile,S0_no_kg,0
 easy_10,easy,Chile,S1_raw_text_rag,0
 easy_10,easy,Chile,S2_flat_kg,0
 easy_10,easy,Chile,S3_layered_kg,0
-easy_10,easy,Chile,S4_abstraction_refinement_kg,1
+easy_10,easy,Chile,S4_abstraction_refinement_kg,0
 easy_11,easy,Zimbabwe,S0_no_kg,1
 easy_11,easy,Zimbabwe,S1_raw_text_rag,1
 easy_11,easy,Zimbabwe,S2_flat_kg,1
 easy_11,easy,Zimbabwe,S3_layered_kg,1
 easy_11,easy,Zimbabwe,S4_abstraction_refinement_kg,1
 easy_12,easy,Egypt,S0_no_kg,1
-easy_12,easy,Egypt,S1_raw_text_rag,0
-easy_12,easy,Egypt,S2_flat_kg,0
-easy_12,easy,Egypt,S3_layered_kg,0
+easy_12,easy,Egypt,S1_raw_text_rag,1
+easy_12,easy,Egypt,S2_flat_kg,1
+easy_12,easy,Egypt,S3_layered_kg,1
 easy_12,easy,Egypt,S4_abstraction_refinement_kg,1
 easy_13,easy,India,S0_no_kg,1
 easy_13,easy,India,S1_raw_text_rag,1
@@ -86,8 +86,8 @@ easy_16,easy,Iran,S3_layered_kg,1
 easy_16,easy,Iran,S4_abstraction_refinement_kg,1
 easy_17,easy,South Korea,S0_no_kg,0
 easy_17,easy,South Korea,S1_raw_text_rag,0
-easy_17,easy,South Korea,S2_flat_kg,1
-easy_17,easy,South Korea,S3_layered_kg,1
+easy_17,easy,South Korea,S2_flat_kg,0
+easy_17,easy,South Korea,S3_layered_kg,0
 easy_17,easy,South Korea,S4_abstraction_refinement_kg,0
 easy_18,easy,Philippines,S0_no_kg,1
 easy_18,easy,Philippines,S1_raw_text_rag,1
@@ -106,18 +106,18 @@ easy_20,easy,Iran,S3_layered_kg,1
 easy_20,easy,Iran,S4_abstraction_refinement_kg,1
 easy_21,easy,Israel,S0_no_kg,0
 easy_21,easy,Israel,S1_raw_text_rag,0
-easy_21,easy,Israel,S2_flat_kg,0
+easy_21,easy,Israel,S2_flat_kg,1
 easy_21,easy,Israel,S3_layered_kg,0
 easy_21,easy,Israel,S4_abstraction_refinement_kg,0
 easy_22,easy,Nigeria,S0_no_kg,1
 easy_22,easy,Nigeria,S1_raw_text_rag,0
-easy_22,easy,Nigeria,S2_flat_kg,0
+easy_22,easy,Nigeria,S2_flat_kg,1
 easy_22,easy,Nigeria,S3_layered_kg,0
-easy_22,easy,Nigeria,S4_abstraction_refinement_kg,0
+easy_22,easy,Nigeria,S4_abstraction_refinement_kg,1
 easy_23,easy,Bangladesh,S0_no_kg,1
 easy_23,easy,Bangladesh,S1_raw_text_rag,0
-easy_23,easy,Bangladesh,S2_flat_kg,0
-easy_23,easy,Bangladesh,S3_layered_kg,0
+easy_23,easy,Bangladesh,S2_flat_kg,1
+easy_23,easy,Bangladesh,S3_layered_kg,1
 easy_23,easy,Bangladesh,S4_abstraction_refinement_kg,0
 easy_24,easy,Lebanon,S0_no_kg,0
 easy_24,easy,Lebanon,S1_raw_text_rag,0
@@ -131,22 +131,22 @@ easy_25,easy,Ukraine,S3_layered_kg,1
 easy_25,easy,Ukraine,S4_abstraction_refinement_kg,1
 easy_26,easy,United States,S0_no_kg,0
 easy_26,easy,United States,S1_raw_text_rag,0
-easy_26,easy,United States,S2_flat_kg,1
-easy_26,easy,United States,S3_layered_kg,1
-easy_26,easy,United States,S4_abstraction_refinement_kg,1
+easy_26,easy,United States,S2_flat_kg,0
+easy_26,easy,United States,S3_layered_kg,0
+easy_26,easy,United States,S4_abstraction_refinement_kg,0
 easy_27,easy,Philippines,S0_no_kg,1
 easy_27,easy,Philippines,S1_raw_text_rag,1
 easy_27,easy,Philippines,S2_flat_kg,1
 easy_27,easy,Philippines,S3_layered_kg,1
 easy_27,easy,Philippines,S4_abstraction_refinement_kg,1
 easy_28,easy,Czech Republic,S0_no_kg,1
-easy_28,easy,Czech Republic,S1_raw_text_rag,0
-easy_28,easy,Czech Republic,S2_flat_kg,1
-easy_28,easy,Czech Republic,S3_layered_kg,1
-easy_28,easy,Czech Republic,S4_abstraction_refinement_kg,0
+easy_28,easy,Czech Republic,S1_raw_text_rag,1
+easy_28,easy,Czech Republic,S2_flat_kg,0
+easy_28,easy,Czech Republic,S3_layered_kg,0
+easy_28,easy,Czech Republic,S4_abstraction_refinement_kg,1
 easy_29,easy,Vietnam,S0_no_kg,0
-easy_29,easy,Vietnam,S1_raw_text_rag,1
-easy_29,easy,Vietnam,S2_flat_kg,1
+easy_29,easy,Vietnam,S1_raw_text_rag,0
+easy_29,easy,Vietnam,S2_flat_kg,0
 easy_29,easy,Vietnam,S3_layered_kg,0
 easy_29,easy,Vietnam,S4_abstraction_refinement_kg,0
 easy_30,easy,Italy,S0_no_kg,1
@@ -155,14 +155,14 @@ easy_30,easy,Italy,S2_flat_kg,1
 easy_30,easy,Italy,S3_layered_kg,1
 easy_30,easy,Italy,S4_abstraction_refinement_kg,1
 easy_31,easy,Spain,S0_no_kg,1
-easy_31,easy,Spain,S1_raw_text_rag,0
+easy_31,easy,Spain,S1_raw_text_rag,1
 easy_31,easy,Spain,S2_flat_kg,1
 easy_31,easy,Spain,S3_layered_kg,1
-easy_31,easy,Spain,S4_abstraction_refinement_kg,1
+easy_31,easy,Spain,S4_abstraction_refinement_kg,0
 easy_32,easy,Indonesia,S0_no_kg,1
-easy_32,easy,Indonesia,S1_raw_text_rag,1
-easy_32,easy,Indonesia,S2_flat_kg,1
-easy_32,easy,Indonesia,S3_layered_kg,1
+easy_32,easy,Indonesia,S1_raw_text_rag,0
+easy_32,easy,Indonesia,S2_flat_kg,0
+easy_32,easy,Indonesia,S3_layered_kg,0
 easy_32,easy,Indonesia,S4_abstraction_refinement_kg,1
 easy_33,easy,Indonesia,S0_no_kg,1
 easy_33,easy,Indonesia,S1_raw_text_rag,1
@@ -217,7 +217,7 @@ easy_42,easy,Zimbabwe,S4_abstraction_refinement_kg,1
 easy_43,easy,Mexico,S0_no_kg,0
 easy_43,easy,Mexico,S1_raw_text_rag,0
 easy_43,easy,Mexico,S2_flat_kg,0
-easy_43,easy,Mexico,S3_layered_kg,0
+easy_43,easy,Mexico,S3_layered_kg,1
 easy_43,easy,Mexico,S4_abstraction_refinement_kg,0
 easy_44,easy,Vietnam,S0_no_kg,1
 easy_44,easy,Vietnam,S1_raw_text_rag,1
@@ -240,8 +240,8 @@ easy_47,easy,Czech Republic,S2_flat_kg,1
 easy_47,easy,Czech Republic,S3_layered_kg,1
 easy_47,easy,Czech Republic,S4_abstraction_refinement_kg,1
 easy_48,easy,France,S0_no_kg,1
-easy_48,easy,France,S1_raw_text_rag,1
-easy_48,easy,France,S2_flat_kg,0
+easy_48,easy,France,S1_raw_text_rag,0
+easy_48,easy,France,S2_flat_kg,1
 easy_48,easy,France,S3_layered_kg,0
 easy_48,easy,France,S4_abstraction_refinement_kg,1
 easy_49,easy,Nepal,S0_no_kg,1
@@ -272,7 +272,7 @@ easy_53,easy,Netherlands,S4_abstraction_refinement_kg,1
 easy_54,easy,Japan,S0_no_kg,0
 easy_54,easy,Japan,S1_raw_text_rag,0
 easy_54,easy,Japan,S2_flat_kg,0
-easy_54,easy,Japan,S3_layered_kg,1
+easy_54,easy,Japan,S3_layered_kg,0
 easy_54,easy,Japan,S4_abstraction_refinement_kg,0
 easy_55,easy,Netherlands,S0_no_kg,1
 easy_55,easy,Netherlands,S1_raw_text_rag,1
@@ -293,7 +293,7 @@ easy_58,easy,Germany,S0_no_kg,1
 easy_58,easy,Germany,S1_raw_text_rag,1
 easy_58,easy,Germany,S2_flat_kg,1
 easy_58,easy,Germany,S3_layered_kg,1
-easy_58,easy,Germany,S4_abstraction_refinement_kg,1
+easy_58,easy,Germany,S4_abstraction_refinement_kg,0
 easy_59,easy,Czech Republic,S0_no_kg,0
 easy_59,easy,Czech Republic,S1_raw_text_rag,0
 easy_59,easy,Czech Republic,S2_flat_kg,0
@@ -306,7 +306,7 @@ easy_60,easy,Pakistan,S3_layered_kg,1
 easy_60,easy,Pakistan,S4_abstraction_refinement_kg,1
 easy_61,easy,Indonesia,S0_no_kg,0
 easy_61,easy,Indonesia,S1_raw_text_rag,0
-easy_61,easy,Indonesia,S2_flat_kg,0
+easy_61,easy,Indonesia,S2_flat_kg,1
 easy_61,easy,Indonesia,S3_layered_kg,0
 easy_61,easy,Indonesia,S4_abstraction_refinement_kg,0
 easy_62,easy,Brazil,S0_no_kg,1
@@ -365,9 +365,9 @@ easy_72,easy,Brazil,S2_flat_kg,1
 easy_72,easy,Brazil,S3_layered_kg,1
 easy_72,easy,Brazil,S4_abstraction_refinement_kg,1
 easy_73,easy,Vietnam,S0_no_kg,1
-easy_73,easy,Vietnam,S1_raw_text_rag,1
+easy_73,easy,Vietnam,S1_raw_text_rag,0
 easy_73,easy,Vietnam,S2_flat_kg,1
-easy_73,easy,Vietnam,S3_layered_kg,1
+easy_73,easy,Vietnam,S3_layered_kg,0
 easy_73,easy,Vietnam,S4_abstraction_refinement_kg,1
 easy_74,easy,Peru,S0_no_kg,1
 easy_74,easy,Peru,S1_raw_text_rag,1
@@ -387,7 +387,7 @@ easy_76,easy,Iran,S4_abstraction_refinement_kg,1
 easy_77,easy,Hong Kong,S0_no_kg,0
 easy_77,easy,Hong Kong,S1_raw_text_rag,0
 easy_77,easy,Hong Kong,S2_flat_kg,1
-easy_77,easy,Hong Kong,S3_layered_kg,0
+easy_77,easy,Hong Kong,S3_layered_kg,1
 easy_77,easy,Hong Kong,S4_abstraction_refinement_kg,0
 easy_78,easy,Israel,S0_no_kg,1
 easy_78,easy,Israel,S1_raw_text_rag,1
@@ -396,8 +396,8 @@ easy_78,easy,Israel,S3_layered_kg,1
 easy_78,easy,Israel,S4_abstraction_refinement_kg,1
 easy_79,easy,Taiwan,S0_no_kg,1
 easy_79,easy,Taiwan,S1_raw_text_rag,1
-easy_79,easy,Taiwan,S2_flat_kg,1
-easy_79,easy,Taiwan,S3_layered_kg,1
+easy_79,easy,Taiwan,S2_flat_kg,0
+easy_79,easy,Taiwan,S3_layered_kg,0
 easy_79,easy,Taiwan,S4_abstraction_refinement_kg,1
 easy_80,easy,Russia,S0_no_kg,0
 easy_80,easy,Russia,S1_raw_text_rag,0
@@ -405,25 +405,25 @@ easy_80,easy,Russia,S2_flat_kg,0
 easy_80,easy,Russia,S3_layered_kg,0
 easy_80,easy,Russia,S4_abstraction_refinement_kg,0
 easy_81,easy,Iran,S0_no_kg,0
-easy_81,easy,Iran,S1_raw_text_rag,1
-easy_81,easy,Iran,S2_flat_kg,1
-easy_81,easy,Iran,S3_layered_kg,1
-easy_81,easy,Iran,S4_abstraction_refinement_kg,1
+easy_81,easy,Iran,S1_raw_text_rag,0
+easy_81,easy,Iran,S2_flat_kg,0
+easy_81,easy,Iran,S3_layered_kg,0
+easy_81,easy,Iran,S4_abstraction_refinement_kg,0
 easy_82,easy,Lebanon,S0_no_kg,1
 easy_82,easy,Lebanon,S1_raw_text_rag,1
 easy_82,easy,Lebanon,S2_flat_kg,1
 easy_82,easy,Lebanon,S3_layered_kg,1
-easy_82,easy,Lebanon,S4_abstraction_refinement_kg,0
+easy_82,easy,Lebanon,S4_abstraction_refinement_kg,1
 easy_83,easy,Turkey,S0_no_kg,0
-easy_83,easy,Turkey,S1_raw_text_rag,0
-easy_83,easy,Turkey,S2_flat_kg,0
-easy_83,easy,Turkey,S3_layered_kg,0
-easy_83,easy,Turkey,S4_abstraction_refinement_kg,1
+easy_83,easy,Turkey,S1_raw_text_rag,1
+easy_83,easy,Turkey,S2_flat_kg,1
+easy_83,easy,Turkey,S3_layered_kg,1
+easy_83,easy,Turkey,S4_abstraction_refinement_kg,0
 easy_84,easy,Netherlands,S0_no_kg,1
 easy_84,easy,Netherlands,S1_raw_text_rag,1
 easy_84,easy,Netherlands,S2_flat_kg,1
 easy_84,easy,Netherlands,S3_layered_kg,1
-easy_84,easy,Netherlands,S4_abstraction_refinement_kg,0
+easy_84,easy,Netherlands,S4_abstraction_refinement_kg,1
 easy_85,easy,Indonesia,S0_no_kg,0
 easy_85,easy,Indonesia,S1_raw_text_rag,0
 easy_85,easy,Indonesia,S2_flat_kg,0
@@ -441,7 +441,7 @@ easy_87,easy,United Kingdom,S3_layered_kg,0
 easy_87,easy,United Kingdom,S4_abstraction_refinement_kg,0
 easy_88,easy,Saudi Arabia,S0_no_kg,0
 easy_88,easy,Saudi Arabia,S1_raw_text_rag,1
-easy_88,easy,Saudi Arabia,S2_flat_kg,1
+easy_88,easy,Saudi Arabia,S2_flat_kg,0
 easy_88,easy,Saudi Arabia,S3_layered_kg,1
 easy_88,easy,Saudi Arabia,S4_abstraction_refinement_kg,1
 easy_89,easy,Ukraine,S0_no_kg,1
@@ -450,12 +450,12 @@ easy_89,easy,Ukraine,S2_flat_kg,1
 easy_89,easy,Ukraine,S3_layered_kg,1
 easy_89,easy,Ukraine,S4_abstraction_refinement_kg,1
 easy_90,easy,Japan,S0_no_kg,1
-easy_90,easy,Japan,S1_raw_text_rag,1
-easy_90,easy,Japan,S2_flat_kg,0
-easy_90,easy,Japan,S3_layered_kg,0
-easy_90,easy,Japan,S4_abstraction_refinement_kg,0
+easy_90,easy,Japan,S1_raw_text_rag,0
+easy_90,easy,Japan,S2_flat_kg,1
+easy_90,easy,Japan,S3_layered_kg,1
+easy_90,easy,Japan,S4_abstraction_refinement_kg,1
 easy_91,easy,Japan,S0_no_kg,0
-easy_91,easy,Japan,S1_raw_text_rag,1
+easy_91,easy,Japan,S1_raw_text_rag,0
 easy_91,easy,Japan,S2_flat_kg,0
 easy_91,easy,Japan,S3_layered_kg,0
 easy_91,easy,Japan,S4_abstraction_refinement_kg,0
@@ -465,9 +465,9 @@ easy_92,easy,Japan,S2_flat_kg,1
 easy_92,easy,Japan,S3_layered_kg,1
 easy_92,easy,Japan,S4_abstraction_refinement_kg,1
 easy_93,easy,Peru,S0_no_kg,0
-easy_93,easy,Peru,S1_raw_text_rag,1
-easy_93,easy,Peru,S2_flat_kg,1
-easy_93,easy,Peru,S3_layered_kg,1
+easy_93,easy,Peru,S1_raw_text_rag,0
+easy_93,easy,Peru,S2_flat_kg,0
+easy_93,easy,Peru,S3_layered_kg,0
 easy_93,easy,Peru,S4_abstraction_refinement_kg,1
 easy_94,easy,Bangladesh,S0_no_kg,1
 easy_94,easy,Bangladesh,S1_raw_text_rag,1
@@ -477,7 +477,7 @@ easy_94,easy,Bangladesh,S4_abstraction_refinement_kg,1
 easy_95,easy,Spain,S0_no_kg,1
 easy_95,easy,Spain,S1_raw_text_rag,1
 easy_95,easy,Spain,S2_flat_kg,0
-easy_95,easy,Spain,S3_layered_kg,0
+easy_95,easy,Spain,S3_layered_kg,1
 easy_95,easy,Spain,S4_abstraction_refinement_kg,0
 easy_96,easy,Saudi Arabia,S0_no_kg,0
 easy_96,easy,Saudi Arabia,S1_raw_text_rag,0
@@ -500,15 +500,15 @@ easy_99,easy,Philippines,S2_flat_kg,0
 easy_99,easy,Philippines,S3_layered_kg,0
 easy_99,easy,Philippines,S4_abstraction_refinement_kg,0
 easy_100,easy,Philippines,S0_no_kg,0
-easy_100,easy,Philippines,S1_raw_text_rag,0
+easy_100,easy,Philippines,S1_raw_text_rag,1
 easy_100,easy,Philippines,S2_flat_kg,0
 easy_100,easy,Philippines,S3_layered_kg,0
-easy_100,easy,Philippines,S4_abstraction_refinement_kg,0
+easy_100,easy,Philippines,S4_abstraction_refinement_kg,1
 easy_101,easy,Philippines,S0_no_kg,1
 easy_101,easy,Philippines,S1_raw_text_rag,0
 easy_101,easy,Philippines,S2_flat_kg,0
 easy_101,easy,Philippines,S3_layered_kg,0
-easy_101,easy,Philippines,S4_abstraction_refinement_kg,1
+easy_101,easy,Philippines,S4_abstraction_refinement_kg,0
 easy_102,easy,Netherlands,S0_no_kg,1
 easy_102,easy,Netherlands,S1_raw_text_rag,1
 easy_102,easy,Netherlands,S2_flat_kg,1
@@ -517,13 +517,13 @@ easy_102,easy,Netherlands,S4_abstraction_refinement_kg,1
 easy_103,easy,New Zealand,S0_no_kg,0
 easy_103,easy,New Zealand,S1_raw_text_rag,1
 easy_103,easy,New Zealand,S2_flat_kg,1
-easy_103,easy,New Zealand,S3_layered_kg,0
+easy_103,easy,New Zealand,S3_layered_kg,1
 easy_103,easy,New Zealand,S4_abstraction_refinement_kg,0
 easy_104,easy,Poland,S0_no_kg,1
-easy_104,easy,Poland,S1_raw_text_rag,0
+easy_104,easy,Poland,S1_raw_text_rag,1
 easy_104,easy,Poland,S2_flat_kg,1
 easy_104,easy,Poland,S3_layered_kg,1
-easy_104,easy,Poland,S4_abstraction_refinement_kg,1
+easy_104,easy,Poland,S4_abstraction_refinement_kg,0
 easy_105,easy,Argentina,S0_no_kg,1
 easy_105,easy,Argentina,S1_raw_text_rag,1
 easy_105,easy,Argentina,S2_flat_kg,1
@@ -541,8 +541,8 @@ easy_107,easy,Argentina,S3_layered_kg,1
 easy_107,easy,Argentina,S4_abstraction_refinement_kg,1
 easy_108,easy,China,S0_no_kg,0
 easy_108,easy,China,S1_raw_text_rag,1
-easy_108,easy,China,S2_flat_kg,0
-easy_108,easy,China,S3_layered_kg,0
+easy_108,easy,China,S2_flat_kg,1
+easy_108,easy,China,S3_layered_kg,1
 easy_108,easy,China,S4_abstraction_refinement_kg,0
 easy_109,easy,Iran,S0_no_kg,0
 easy_109,easy,Iran,S1_raw_text_rag,0
@@ -550,24 +550,24 @@ easy_109,easy,Iran,S2_flat_kg,0
 easy_109,easy,Iran,S3_layered_kg,0
 easy_109,easy,Iran,S4_abstraction_refinement_kg,0
 easy_110,easy,Iran,S0_no_kg,1
-easy_110,easy,Iran,S1_raw_text_rag,1
+easy_110,easy,Iran,S1_raw_text_rag,0
 easy_110,easy,Iran,S2_flat_kg,1
 easy_110,easy,Iran,S3_layered_kg,1
 easy_110,easy,Iran,S4_abstraction_refinement_kg,1
 easy_111,easy,Nigeria,S0_no_kg,0
-easy_111,easy,Nigeria,S1_raw_text_rag,1
+easy_111,easy,Nigeria,S1_raw_text_rag,0
 easy_111,easy,Nigeria,S2_flat_kg,0
 easy_111,easy,Nigeria,S3_layered_kg,0
 easy_111,easy,Nigeria,S4_abstraction_refinement_kg,0
 easy_112,easy,Germany,S0_no_kg,1
 easy_112,easy,Germany,S1_raw_text_rag,1
-easy_112,easy,Germany,S2_flat_kg,0
+easy_112,easy,Germany,S2_flat_kg,1
 easy_112,easy,Germany,S3_layered_kg,1
 easy_112,easy,Germany,S4_abstraction_refinement_kg,1
 easy_113,easy,Peru,S0_no_kg,1
 easy_113,easy,Peru,S1_raw_text_rag,1
 easy_113,easy,Peru,S2_flat_kg,1
-easy_113,easy,Peru,S3_layered_kg,1
+easy_113,easy,Peru,S3_layered_kg,0
 easy_113,easy,Peru,S4_abstraction_refinement_kg,1
 easy_114,easy,Peru,S0_no_kg,1
 easy_114,easy,Peru,S1_raw_text_rag,1
@@ -591,16 +591,16 @@ easy_117,easy,South Africa,S3_layered_kg,1
 easy_117,easy,South Africa,S4_abstraction_refinement_kg,1
 easy_118,easy,Japan,S0_no_kg,0
 easy_118,easy,Japan,S1_raw_text_rag,0
-easy_118,easy,Japan,S2_flat_kg,0
-easy_118,easy,Japan,S3_layered_kg,0
+easy_118,easy,Japan,S2_flat_kg,1
+easy_118,easy,Japan,S3_layered_kg,1
 easy_118,easy,Japan,S4_abstraction_refinement_kg,0
 easy_119,easy,South Korea,S0_no_kg,1
-easy_119,easy,South Korea,S1_raw_text_rag,1
+easy_119,easy,South Korea,S1_raw_text_rag,0
 easy_119,easy,South Korea,S2_flat_kg,0
 easy_119,easy,South Korea,S3_layered_kg,0
 easy_119,easy,South Korea,S4_abstraction_refinement_kg,1
 easy_120,easy,South Africa,S0_no_kg,1
-easy_120,easy,South Africa,S1_raw_text_rag,1
+easy_120,easy,South Africa,S1_raw_text_rag,0
 easy_120,easy,South Africa,S2_flat_kg,0
 easy_120,easy,South Africa,S3_layered_kg,0
 easy_120,easy,South Africa,S4_abstraction_refinement_kg,1
@@ -630,9 +630,9 @@ easy_125,easy,Nigeria,S2_flat_kg,0
 easy_125,easy,Nigeria,S3_layered_kg,0
 easy_125,easy,Nigeria,S4_abstraction_refinement_kg,0
 easy_126,easy,Brazil,S0_no_kg,0
-easy_126,easy,Brazil,S1_raw_text_rag,0
-easy_126,easy,Brazil,S2_flat_kg,0
-easy_126,easy,Brazil,S3_layered_kg,0
+easy_126,easy,Brazil,S1_raw_text_rag,1
+easy_126,easy,Brazil,S2_flat_kg,1
+easy_126,easy,Brazil,S3_layered_kg,1
 easy_126,easy,Brazil,S4_abstraction_refinement_kg,0
 easy_127,easy,Turkey,S0_no_kg,1
 easy_127,easy,Turkey,S1_raw_text_rag,1
@@ -641,17 +641,17 @@ easy_127,easy,Turkey,S3_layered_kg,1
 easy_127,easy,Turkey,S4_abstraction_refinement_kg,1
 easy_128,easy,Turkey,S0_no_kg,1
 easy_128,easy,Turkey,S1_raw_text_rag,1
-easy_128,easy,Turkey,S2_flat_kg,0
+easy_128,easy,Turkey,S2_flat_kg,1
 easy_128,easy,Turkey,S3_layered_kg,1
 easy_128,easy,Turkey,S4_abstraction_refinement_kg,1
 easy_129,easy,Turkey,S0_no_kg,0
 easy_129,easy,Turkey,S1_raw_text_rag,0
-easy_129,easy,Turkey,S2_flat_kg,1
-easy_129,easy,Turkey,S3_layered_kg,1
-easy_129,easy,Turkey,S4_abstraction_refinement_kg,0
+easy_129,easy,Turkey,S2_flat_kg,0
+easy_129,easy,Turkey,S3_layered_kg,0
+easy_129,easy,Turkey,S4_abstraction_refinement_kg,1
 easy_130,easy,Turkey,S0_no_kg,1
 easy_130,easy,Turkey,S1_raw_text_rag,0
-easy_130,easy,Turkey,S2_flat_kg,1
+easy_130,easy,Turkey,S2_flat_kg,0
 easy_130,easy,Turkey,S3_layered_kg,0
 easy_130,easy,Turkey,S4_abstraction_refinement_kg,0
 easy_131,easy,Spain,S0_no_kg,0
@@ -666,8 +666,8 @@ easy_132,easy,Hong Kong,S3_layered_kg,1
 easy_132,easy,Hong Kong,S4_abstraction_refinement_kg,1
 easy_133,easy,Czech Republic,S0_no_kg,1
 easy_133,easy,Czech Republic,S1_raw_text_rag,1
-easy_133,easy,Czech Republic,S2_flat_kg,0
-easy_133,easy,Czech Republic,S3_layered_kg,0
+easy_133,easy,Czech Republic,S2_flat_kg,1
+easy_133,easy,Czech Republic,S3_layered_kg,1
 easy_133,easy,Czech Republic,S4_abstraction_refinement_kg,1
 easy_134,easy,Germany,S0_no_kg,1
 easy_134,easy,Germany,S1_raw_text_rag,1
@@ -686,7 +686,7 @@ easy_136,easy,Saudi Arabia,S3_layered_kg,0
 easy_136,easy,Saudi Arabia,S4_abstraction_refinement_kg,0
 easy_137,easy,South Korea,S0_no_kg,1
 easy_137,easy,South Korea,S1_raw_text_rag,1
-easy_137,easy,South Korea,S2_flat_kg,0
+easy_137,easy,South Korea,S2_flat_kg,1
 easy_137,easy,South Korea,S3_layered_kg,1
 easy_137,easy,South Korea,S4_abstraction_refinement_kg,1
 easy_138,easy,Nigeria,S0_no_kg,1
@@ -703,14 +703,14 @@ easy_140,easy,Netherlands,S0_no_kg,1
 easy_140,easy,Netherlands,S1_raw_text_rag,1
 easy_140,easy,Netherlands,S2_flat_kg,1
 easy_140,easy,Netherlands,S3_layered_kg,1
-easy_140,easy,Netherlands,S4_abstraction_refinement_kg,0
+easy_140,easy,Netherlands,S4_abstraction_refinement_kg,1
 easy_141,easy,United States,S0_no_kg,1
 easy_141,easy,United States,S1_raw_text_rag,1
 easy_141,easy,United States,S2_flat_kg,1
 easy_141,easy,United States,S3_layered_kg,1
 easy_141,easy,United States,S4_abstraction_refinement_kg,1
 easy_142,easy,Iran,S0_no_kg,1
-easy_142,easy,Iran,S1_raw_text_rag,1
+easy_142,easy,Iran,S1_raw_text_rag,0
 easy_142,easy,Iran,S2_flat_kg,0
 easy_142,easy,Iran,S3_layered_kg,0
 easy_142,easy,Iran,S4_abstraction_refinement_kg,1
@@ -720,8 +720,8 @@ easy_143,easy,South Africa,S2_flat_kg,1
 easy_143,easy,South Africa,S3_layered_kg,1
 easy_143,easy,South Africa,S4_abstraction_refinement_kg,1
 easy_144,easy,Russia,S0_no_kg,0
-easy_144,easy,Russia,S1_raw_text_rag,1
-easy_144,easy,Russia,S2_flat_kg,0
+easy_144,easy,Russia,S1_raw_text_rag,0
+easy_144,easy,Russia,S2_flat_kg,1
 easy_144,easy,Russia,S3_layered_kg,0
 easy_144,easy,Russia,S4_abstraction_refinement_kg,0
 easy_145,easy,Hong Kong,S0_no_kg,1
@@ -775,10 +775,10 @@ easy_154,easy,Brazil,S2_flat_kg,1
 easy_154,easy,Brazil,S3_layered_kg,1
 easy_154,easy,Brazil,S4_abstraction_refinement_kg,1
 easy_155,easy,Taiwan,S0_no_kg,1
-easy_155,easy,Taiwan,S1_raw_text_rag,1
+easy_155,easy,Taiwan,S1_raw_text_rag,0
 easy_155,easy,Taiwan,S2_flat_kg,1
 easy_155,easy,Taiwan,S3_layered_kg,0
-easy_155,easy,Taiwan,S4_abstraction_refinement_kg,0
+easy_155,easy,Taiwan,S4_abstraction_refinement_kg,1
 easy_156,easy,Italy,S0_no_kg,0
 easy_156,easy,Italy,S1_raw_text_rag,0
 easy_156,easy,Italy,S2_flat_kg,0
@@ -786,14 +786,14 @@ easy_156,easy,Italy,S3_layered_kg,0
 easy_156,easy,Italy,S4_abstraction_refinement_kg,0
 easy_157,easy,Italy,S0_no_kg,0
 easy_157,easy,Italy,S1_raw_text_rag,0
-easy_157,easy,Italy,S2_flat_kg,0
+easy_157,easy,Italy,S2_flat_kg,1
 easy_157,easy,Italy,S3_layered_kg,0
 easy_157,easy,Italy,S4_abstraction_refinement_kg,0
 easy_158,easy,Italy,S0_no_kg,1
 easy_158,easy,Italy,S1_raw_text_rag,1
 easy_158,easy,Italy,S2_flat_kg,1
 easy_158,easy,Italy,S3_layered_kg,1
-easy_158,easy,Italy,S4_abstraction_refinement_kg,0
+easy_158,easy,Italy,S4_abstraction_refinement_kg,1
 easy_159,easy,Italy,S0_no_kg,0
 easy_159,easy,Italy,S1_raw_text_rag,0
 easy_159,easy,Italy,S2_flat_kg,0
@@ -805,9 +805,9 @@ easy_160,easy,Peru,S2_flat_kg,1
 easy_160,easy,Peru,S3_layered_kg,1
 easy_160,easy,Peru,S4_abstraction_refinement_kg,1
 easy_161,easy,South Africa,S0_no_kg,0
-easy_161,easy,South Africa,S1_raw_text_rag,1
-easy_161,easy,South Africa,S2_flat_kg,1
-easy_161,easy,South Africa,S3_layered_kg,1
+easy_161,easy,South Africa,S1_raw_text_rag,0
+easy_161,easy,South Africa,S2_flat_kg,0
+easy_161,easy,South Africa,S3_layered_kg,0
 easy_161,easy,South Africa,S4_abstraction_refinement_kg,0
 easy_162,easy,Germany,S0_no_kg,1
 easy_162,easy,Germany,S1_raw_text_rag,1
@@ -820,10 +820,10 @@ easy_163,easy,China,S2_flat_kg,0
 easy_163,easy,China,S3_layered_kg,0
 easy_163,easy,China,S4_abstraction_refinement_kg,0
 easy_164,easy,Iran,S0_no_kg,1
-easy_164,easy,Iran,S1_raw_text_rag,0
-easy_164,easy,Iran,S2_flat_kg,0
+easy_164,easy,Iran,S1_raw_text_rag,1
+easy_164,easy,Iran,S2_flat_kg,1
 easy_164,easy,Iran,S3_layered_kg,0
-easy_164,easy,Iran,S4_abstraction_refinement_kg,0
+easy_164,easy,Iran,S4_abstraction_refinement_kg,1
 easy_165,easy,Indonesia,S0_no_kg,1
 easy_165,easy,Indonesia,S1_raw_text_rag,1
 easy_165,easy,Indonesia,S2_flat_kg,1
@@ -856,7 +856,7 @@ easy_170,easy,Saudi Arabia,S3_layered_kg,1
 easy_170,easy,Saudi Arabia,S4_abstraction_refinement_kg,1
 easy_171,easy,Saudi Arabia,S0_no_kg,1
 easy_171,easy,Saudi Arabia,S1_raw_text_rag,1
-easy_171,easy,Saudi Arabia,S2_flat_kg,1
+easy_171,easy,Saudi Arabia,S2_flat_kg,0
 easy_171,easy,Saudi Arabia,S3_layered_kg,1
 easy_171,easy,Saudi Arabia,S4_abstraction_refinement_kg,1
 easy_172,easy,Saudi Arabia,S0_no_kg,1
@@ -865,13 +865,13 @@ easy_172,easy,Saudi Arabia,S2_flat_kg,1
 easy_172,easy,Saudi Arabia,S3_layered_kg,1
 easy_172,easy,Saudi Arabia,S4_abstraction_refinement_kg,1
 easy_173,easy,Iran,S0_no_kg,1
-easy_173,easy,Iran,S1_raw_text_rag,0
-easy_173,easy,Iran,S2_flat_kg,1
-easy_173,easy,Iran,S3_layered_kg,1
+easy_173,easy,Iran,S1_raw_text_rag,1
+easy_173,easy,Iran,S2_flat_kg,0
+easy_173,easy,Iran,S3_layered_kg,0
 easy_173,easy,Iran,S4_abstraction_refinement_kg,0
 easy_174,easy,Argentina,S0_no_kg,0
 easy_174,easy,Argentina,S1_raw_text_rag,0
-easy_174,easy,Argentina,S2_flat_kg,0
+easy_174,easy,Argentina,S2_flat_kg,1
 easy_174,easy,Argentina,S3_layered_kg,0
 easy_174,easy,Argentina,S4_abstraction_refinement_kg,0
 easy_175,easy,Argentina,S0_no_kg,1
@@ -890,14 +890,14 @@ easy_177,easy,Australia,S2_flat_kg,0
 easy_177,easy,Australia,S3_layered_kg,0
 easy_177,easy,Australia,S4_abstraction_refinement_kg,0
 easy_178,easy,Australia,S0_no_kg,1
-easy_178,easy,Australia,S1_raw_text_rag,1
+easy_178,easy,Australia,S1_raw_text_rag,0
 easy_178,easy,Australia,S2_flat_kg,0
-easy_178,easy,Australia,S3_layered_kg,1
+easy_178,easy,Australia,S3_layered_kg,0
 easy_178,easy,Australia,S4_abstraction_refinement_kg,1
 easy_179,easy,Argentina,S0_no_kg,1
-easy_179,easy,Argentina,S1_raw_text_rag,1
-easy_179,easy,Argentina,S2_flat_kg,1
-easy_179,easy,Argentina,S3_layered_kg,1
+easy_179,easy,Argentina,S1_raw_text_rag,0
+easy_179,easy,Argentina,S2_flat_kg,0
+easy_179,easy,Argentina,S3_layered_kg,0
 easy_179,easy,Argentina,S4_abstraction_refinement_kg,1
 easy_180,easy,Argentina,S0_no_kg,0
 easy_180,easy,Argentina,S1_raw_text_rag,0
@@ -906,7 +906,7 @@ easy_180,easy,Argentina,S3_layered_kg,0
 easy_180,easy,Argentina,S4_abstraction_refinement_kg,0
 easy_181,easy,Argentina,S0_no_kg,1
 easy_181,easy,Argentina,S1_raw_text_rag,1
-easy_181,easy,Argentina,S2_flat_kg,0
+easy_181,easy,Argentina,S2_flat_kg,1
 easy_181,easy,Argentina,S3_layered_kg,1
 easy_181,easy,Argentina,S4_abstraction_refinement_kg,1
 easy_182,easy,Turkey,S0_no_kg,1
@@ -935,9 +935,9 @@ easy_186,easy,Lebanon,S2_flat_kg,0
 easy_186,easy,Lebanon,S3_layered_kg,0
 easy_186,easy,Lebanon,S4_abstraction_refinement_kg,0
 easy_187,easy,France,S0_no_kg,1
-easy_187,easy,France,S1_raw_text_rag,1
+easy_187,easy,France,S1_raw_text_rag,0
 easy_187,easy,France,S2_flat_kg,1
-easy_187,easy,France,S3_layered_kg,1
+easy_187,easy,France,S3_layered_kg,0
 easy_187,easy,France,S4_abstraction_refinement_kg,1
 easy_188,easy,Nigeria,S0_no_kg,1
 easy_188,easy,Nigeria,S1_raw_text_rag,1
@@ -948,10 +948,10 @@ easy_189,easy,Argentina,S0_no_kg,1
 easy_189,easy,Argentina,S1_raw_text_rag,0
 easy_189,easy,Argentina,S2_flat_kg,1
 easy_189,easy,Argentina,S3_layered_kg,1
-easy_189,easy,Argentina,S4_abstraction_refinement_kg,0
+easy_189,easy,Argentina,S4_abstraction_refinement_kg,1
 easy_190,easy,Argentina,S0_no_kg,1
-easy_190,easy,Argentina,S1_raw_text_rag,0
-easy_190,easy,Argentina,S2_flat_kg,1
+easy_190,easy,Argentina,S1_raw_text_rag,1
+easy_190,easy,Argentina,S2_flat_kg,0
 easy_190,easy,Argentina,S3_layered_kg,1
 easy_190,easy,Argentina,S4_abstraction_refinement_kg,1
 easy_191,easy,Japan,S0_no_kg,0
@@ -986,8 +986,8 @@ easy_196,easy,Mexico,S3_layered_kg,1
 easy_196,easy,Mexico,S4_abstraction_refinement_kg,1
 easy_197,easy,Mexico,S0_no_kg,1
 easy_197,easy,Mexico,S1_raw_text_rag,1
-easy_197,easy,Mexico,S2_flat_kg,0
-easy_197,easy,Mexico,S3_layered_kg,0
+easy_197,easy,Mexico,S2_flat_kg,1
+easy_197,easy,Mexico,S3_layered_kg,1
 easy_197,easy,Mexico,S4_abstraction_refinement_kg,1
 easy_198,easy,Philippines,S0_no_kg,0
 easy_198,easy,Philippines,S1_raw_text_rag,0
@@ -1001,12 +1001,12 @@ easy_199,easy,Peru,S3_layered_kg,1
 easy_199,easy,Peru,S4_abstraction_refinement_kg,1
 easy_200,easy,Romania,S0_no_kg,1
 easy_200,easy,Romania,S1_raw_text_rag,0
-easy_200,easy,Romania,S2_flat_kg,1
+easy_200,easy,Romania,S2_flat_kg,0
 easy_200,easy,Romania,S3_layered_kg,0
-easy_200,easy,Romania,S4_abstraction_refinement_kg,1
+easy_200,easy,Romania,S4_abstraction_refinement_kg,0
 easy_201,easy,Turkey,S0_no_kg,1
 easy_201,easy,Turkey,S1_raw_text_rag,0
-easy_201,easy,Turkey,S2_flat_kg,1
+easy_201,easy,Turkey,S2_flat_kg,0
 easy_201,easy,Turkey,S3_layered_kg,0
 easy_201,easy,Turkey,S4_abstraction_refinement_kg,0
 easy_202,easy,Japan,S0_no_kg,1
@@ -1016,8 +1016,8 @@ easy_202,easy,Japan,S3_layered_kg,1
 easy_202,easy,Japan,S4_abstraction_refinement_kg,1
 easy_203,easy,Iran,S0_no_kg,0
 easy_203,easy,Iran,S1_raw_text_rag,1
-easy_203,easy,Iran,S2_flat_kg,1
-easy_203,easy,Iran,S3_layered_kg,1
+easy_203,easy,Iran,S2_flat_kg,0
+easy_203,easy,Iran,S3_layered_kg,0
 easy_203,easy,Iran,S4_abstraction_refinement_kg,1
 easy_204,easy,Nepal,S0_no_kg,1
 easy_204,easy,Nepal,S1_raw_text_rag,1
@@ -1030,9 +1030,9 @@ easy_205,easy,India,S2_flat_kg,1
 easy_205,easy,India,S3_layered_kg,1
 easy_205,easy,India,S4_abstraction_refinement_kg,1
 easy_206,easy,South Africa,S0_no_kg,1
-easy_206,easy,South Africa,S1_raw_text_rag,1
-easy_206,easy,South Africa,S2_flat_kg,1
-easy_206,easy,South Africa,S3_layered_kg,1
+easy_206,easy,South Africa,S1_raw_text_rag,0
+easy_206,easy,South Africa,S2_flat_kg,0
+easy_206,easy,South Africa,S3_layered_kg,0
 easy_206,easy,South Africa,S4_abstraction_refinement_kg,1
 easy_207,easy,South Africa,S0_no_kg,0
 easy_207,easy,South Africa,S1_raw_text_rag,1
@@ -1040,7 +1040,7 @@ easy_207,easy,South Africa,S2_flat_kg,0
 easy_207,easy,South Africa,S3_layered_kg,0
 easy_207,easy,South Africa,S4_abstraction_refinement_kg,1
 easy_208,easy,South Africa,S0_no_kg,1
-easy_208,easy,South Africa,S1_raw_text_rag,0
+easy_208,easy,South Africa,S1_raw_text_rag,1
 easy_208,easy,South Africa,S2_flat_kg,1
 easy_208,easy,South Africa,S3_layered_kg,1
 easy_208,easy,South Africa,S4_abstraction_refinement_kg,1
@@ -1057,8 +1057,8 @@ easy_210,easy,New Zealand,S4_abstraction_refinement_kg,1
 easy_211,easy,Bangladesh,S0_no_kg,1
 easy_211,easy,Bangladesh,S1_raw_text_rag,1
 easy_211,easy,Bangladesh,S2_flat_kg,1
-easy_211,easy,Bangladesh,S3_layered_kg,0
-easy_211,easy,Bangladesh,S4_abstraction_refinement_kg,0
+easy_211,easy,Bangladesh,S3_layered_kg,1
+easy_211,easy,Bangladesh,S4_abstraction_refinement_kg,1
 easy_212,easy,Russia,S0_no_kg,1
 easy_212,easy,Russia,S1_raw_text_rag,0
 easy_212,easy,Russia,S2_flat_kg,0
@@ -1066,8 +1066,8 @@ easy_212,easy,Russia,S3_layered_kg,0
 easy_212,easy,Russia,S4_abstraction_refinement_kg,0
 easy_213,easy,Spain,S0_no_kg,1
 easy_213,easy,Spain,S1_raw_text_rag,1
-easy_213,easy,Spain,S2_flat_kg,0
-easy_213,easy,Spain,S3_layered_kg,0
+easy_213,easy,Spain,S2_flat_kg,1
+easy_213,easy,Spain,S3_layered_kg,1
 easy_213,easy,Spain,S4_abstraction_refinement_kg,1
 easy_214,easy,Japan,S0_no_kg,1
 easy_214,easy,Japan,S1_raw_text_rag,1
@@ -1085,10 +1085,10 @@ easy_216,easy,Nepal,S2_flat_kg,1
 easy_216,easy,Nepal,S3_layered_kg,1
 easy_216,easy,Nepal,S4_abstraction_refinement_kg,1
 easy_217,easy,Japan,S0_no_kg,1
-easy_217,easy,Japan,S1_raw_text_rag,1
+easy_217,easy,Japan,S1_raw_text_rag,0
 easy_217,easy,Japan,S2_flat_kg,1
-easy_217,easy,Japan,S3_layered_kg,1
-easy_217,easy,Japan,S4_abstraction_refinement_kg,0
+easy_217,easy,Japan,S3_layered_kg,0
+easy_217,easy,Japan,S4_abstraction_refinement_kg,1
 easy_218,easy,Philippines,S0_no_kg,1
 easy_218,easy,Philippines,S1_raw_text_rag,1
 easy_218,easy,Philippines,S2_flat_kg,1
@@ -1101,9 +1101,9 @@ easy_219,easy,Philippines,S3_layered_kg,1
 easy_219,easy,Philippines,S4_abstraction_refinement_kg,1
 easy_220,easy,Russia,S0_no_kg,0
 easy_220,easy,Russia,S1_raw_text_rag,1
-easy_220,easy,Russia,S2_flat_kg,1
-easy_220,easy,Russia,S3_layered_kg,1
-easy_220,easy,Russia,S4_abstraction_refinement_kg,0
+easy_220,easy,Russia,S2_flat_kg,0
+easy_220,easy,Russia,S3_layered_kg,0
+easy_220,easy,Russia,S4_abstraction_refinement_kg,1
 easy_221,easy,Spain,S0_no_kg,0
 easy_221,easy,Spain,S1_raw_text_rag,0
 easy_221,easy,Spain,S2_flat_kg,0
@@ -1130,9 +1130,9 @@ easy_225,easy,South Africa,S2_flat_kg,0
 easy_225,easy,South Africa,S3_layered_kg,0
 easy_225,easy,South Africa,S4_abstraction_refinement_kg,0
 easy_226,easy,Argentina,S0_no_kg,0
-easy_226,easy,Argentina,S1_raw_text_rag,0
+easy_226,easy,Argentina,S1_raw_text_rag,1
 easy_226,easy,Argentina,S2_flat_kg,1
-easy_226,easy,Argentina,S3_layered_kg,1
+easy_226,easy,Argentina,S3_layered_kg,0
 easy_226,easy,Argentina,S4_abstraction_refinement_kg,0
 easy_227,easy,Brazil,S0_no_kg,1
 easy_227,easy,Brazil,S1_raw_text_rag,1
@@ -1163,11 +1163,11 @@ easy_232,easy,Hong Kong,S0_no_kg,1
 easy_232,easy,Hong Kong,S1_raw_text_rag,1
 easy_232,easy,Hong Kong,S2_flat_kg,1
 easy_232,easy,Hong Kong,S3_layered_kg,1
-easy_232,easy,Hong Kong,S4_abstraction_refinement_kg,1
+easy_232,easy,Hong Kong,S4_abstraction_refinement_kg,0
 easy_233,easy,Hong Kong,S0_no_kg,1
 easy_233,easy,Hong Kong,S1_raw_text_rag,1
 easy_233,easy,Hong Kong,S2_flat_kg,0
-easy_233,easy,Hong Kong,S3_layered_kg,1
+easy_233,easy,Hong Kong,S3_layered_kg,0
 easy_233,easy,Hong Kong,S4_abstraction_refinement_kg,1
 easy_234,easy,Netherlands,S0_no_kg,0
 easy_234,easy,Netherlands,S1_raw_text_rag,0
@@ -1185,7 +1185,7 @@ easy_236,easy,Spain,S2_flat_kg,1
 easy_236,easy,Spain,S3_layered_kg,1
 easy_236,easy,Spain,S4_abstraction_refinement_kg,1
 easy_237,easy,Vietnam,S0_no_kg,0
-easy_237,easy,Vietnam,S1_raw_text_rag,0
+easy_237,easy,Vietnam,S1_raw_text_rag,1
 easy_237,easy,Vietnam,S2_flat_kg,0
 easy_237,easy,Vietnam,S3_layered_kg,0
 easy_237,easy,Vietnam,S4_abstraction_refinement_kg,0
@@ -1196,8 +1196,8 @@ easy_238,easy,Morocco,S3_layered_kg,1
 easy_238,easy,Morocco,S4_abstraction_refinement_kg,1
 easy_239,easy,Morocco,S0_no_kg,1
 easy_239,easy,Morocco,S1_raw_text_rag,1
-easy_239,easy,Morocco,S2_flat_kg,0
-easy_239,easy,Morocco,S3_layered_kg,0
+easy_239,easy,Morocco,S2_flat_kg,1
+easy_239,easy,Morocco,S3_layered_kg,1
 easy_239,easy,Morocco,S4_abstraction_refinement_kg,0
 easy_240,easy,Spain,S0_no_kg,1
 easy_240,easy,Spain,S1_raw_text_rag,1
@@ -1230,7 +1230,7 @@ easy_245,easy,Mexico,S2_flat_kg,0
 easy_245,easy,Mexico,S3_layered_kg,0
 easy_245,easy,Mexico,S4_abstraction_refinement_kg,0
 easy_246,easy,Germany,S0_no_kg,0
-easy_246,easy,Germany,S1_raw_text_rag,1
+easy_246,easy,Germany,S1_raw_text_rag,0
 easy_246,easy,Germany,S2_flat_kg,0
 easy_246,easy,Germany,S3_layered_kg,0
 easy_246,easy,Germany,S4_abstraction_refinement_kg,0
@@ -1261,13 +1261,13 @@ hard_1,hard,Netherlands,S3_layered_kg,1
 hard_1,hard,Netherlands,S4_abstraction_refinement_kg,1
 hard_2,hard,Netherlands,S0_no_kg,0
 hard_2,hard,Netherlands,S1_raw_text_rag,0
-hard_2,hard,Netherlands,S2_flat_kg,0
-hard_2,hard,Netherlands,S3_layered_kg,0
+hard_2,hard,Netherlands,S2_flat_kg,1
+hard_2,hard,Netherlands,S3_layered_kg,1
 hard_2,hard,Netherlands,S4_abstraction_refinement_kg,0
 hard_3,hard,Netherlands,S0_no_kg,0
 hard_3,hard,Netherlands,S1_raw_text_rag,1
-hard_3,hard,Netherlands,S2_flat_kg,0
-hard_3,hard,Netherlands,S3_layered_kg,0
+hard_3,hard,Netherlands,S2_flat_kg,1
+hard_3,hard,Netherlands,S3_layered_kg,1
 hard_3,hard,Netherlands,S4_abstraction_refinement_kg,0
 hard_4,hard,South Korea,S0_no_kg,1
 hard_4,hard,South Korea,S1_raw_text_rag,1
@@ -1278,21 +1278,21 @@ hard_5,hard,South Korea,S0_no_kg,1
 hard_5,hard,South Korea,S1_raw_text_rag,0
 hard_5,hard,South Korea,S2_flat_kg,0
 hard_5,hard,South Korea,S3_layered_kg,0
-hard_5,hard,South Korea,S4_abstraction_refinement_kg,0
+hard_5,hard,South Korea,S4_abstraction_refinement_kg,1
 hard_6,hard,South Korea,S0_no_kg,1
 hard_6,hard,South Korea,S1_raw_text_rag,1
 hard_6,hard,South Korea,S2_flat_kg,1
 hard_6,hard,South Korea,S3_layered_kg,1
-hard_6,hard,South Korea,S4_abstraction_refinement_kg,1
+hard_6,hard,South Korea,S4_abstraction_refinement_kg,0
 hard_7,hard,South Korea,S0_no_kg,1
 hard_7,hard,South Korea,S1_raw_text_rag,1
 hard_7,hard,South Korea,S2_flat_kg,1
 hard_7,hard,South Korea,S3_layered_kg,1
 hard_7,hard,South Korea,S4_abstraction_refinement_kg,1
 hard_8,hard,Nigeria,S0_no_kg,0
-hard_8,hard,Nigeria,S1_raw_text_rag,1
-hard_8,hard,Nigeria,S2_flat_kg,1
-hard_8,hard,Nigeria,S3_layered_kg,1
+hard_8,hard,Nigeria,S1_raw_text_rag,0
+hard_8,hard,Nigeria,S2_flat_kg,0
+hard_8,hard,Nigeria,S3_layered_kg,0
 hard_8,hard,Nigeria,S4_abstraction_refinement_kg,0
 hard_9,hard,Nigeria,S0_no_kg,0
 hard_9,hard,Nigeria,S1_raw_text_rag,0
@@ -1301,14 +1301,14 @@ hard_9,hard,Nigeria,S3_layered_kg,0
 hard_9,hard,Nigeria,S4_abstraction_refinement_kg,0
 hard_10,hard,Nigeria,S0_no_kg,1
 hard_10,hard,Nigeria,S1_raw_text_rag,1
-hard_10,hard,Nigeria,S2_flat_kg,1
+hard_10,hard,Nigeria,S2_flat_kg,0
 hard_10,hard,Nigeria,S3_layered_kg,1
 hard_10,hard,Nigeria,S4_abstraction_refinement_kg,1
 hard_11,hard,Nigeria,S0_no_kg,1
 hard_11,hard,Nigeria,S1_raw_text_rag,1
 hard_11,hard,Nigeria,S2_flat_kg,1
 hard_11,hard,Nigeria,S3_layered_kg,1
-hard_11,hard,Nigeria,S4_abstraction_refinement_kg,0
+hard_11,hard,Nigeria,S4_abstraction_refinement_kg,1
 hard_12,hard,Spain,S0_no_kg,1
 hard_12,hard,Spain,S1_raw_text_rag,1
 hard_12,hard,Spain,S2_flat_kg,1
@@ -1350,19 +1350,19 @@ hard_19,hard,Morocco,S2_flat_kg,1
 hard_19,hard,Morocco,S3_layered_kg,1
 hard_19,hard,Morocco,S4_abstraction_refinement_kg,1
 hard_20,hard,India,S0_no_kg,1
-hard_20,hard,India,S1_raw_text_rag,1
-hard_20,hard,India,S2_flat_kg,1
-hard_20,hard,India,S3_layered_kg,1
+hard_20,hard,India,S1_raw_text_rag,0
+hard_20,hard,India,S2_flat_kg,0
+hard_20,hard,India,S3_layered_kg,0
 hard_20,hard,India,S4_abstraction_refinement_kg,1
 hard_21,hard,India,S0_no_kg,1
-hard_21,hard,India,S1_raw_text_rag,0
-hard_21,hard,India,S2_flat_kg,0
-hard_21,hard,India,S3_layered_kg,1
+hard_21,hard,India,S1_raw_text_rag,1
+hard_21,hard,India,S2_flat_kg,1
+hard_21,hard,India,S3_layered_kg,0
 hard_21,hard,India,S4_abstraction_refinement_kg,0
 hard_22,hard,India,S0_no_kg,1
-hard_22,hard,India,S1_raw_text_rag,0
-hard_22,hard,India,S2_flat_kg,0
-hard_22,hard,India,S3_layered_kg,0
+hard_22,hard,India,S1_raw_text_rag,1
+hard_22,hard,India,S2_flat_kg,1
+hard_22,hard,India,S3_layered_kg,1
 hard_22,hard,India,S4_abstraction_refinement_kg,0
 hard_23,hard,India,S0_no_kg,1
 hard_23,hard,India,S1_raw_text_rag,1
@@ -1370,10 +1370,10 @@ hard_23,hard,India,S2_flat_kg,1
 hard_23,hard,India,S3_layered_kg,1
 hard_23,hard,India,S4_abstraction_refinement_kg,1
 hard_24,hard,United Kingdom,S0_no_kg,1
-hard_24,hard,United Kingdom,S1_raw_text_rag,0
-hard_24,hard,United Kingdom,S2_flat_kg,0
-hard_24,hard,United Kingdom,S3_layered_kg,0
-hard_24,hard,United Kingdom,S4_abstraction_refinement_kg,0
+hard_24,hard,United Kingdom,S1_raw_text_rag,1
+hard_24,hard,United Kingdom,S2_flat_kg,1
+hard_24,hard,United Kingdom,S3_layered_kg,1
+hard_24,hard,United Kingdom,S4_abstraction_refinement_kg,1
 hard_25,hard,United Kingdom,S0_no_kg,1
 hard_25,hard,United Kingdom,S1_raw_text_rag,1
 hard_25,hard,United Kingdom,S2_flat_kg,1
@@ -1410,10 +1410,10 @@ hard_31,hard,Vietnam,S2_flat_kg,1
 hard_31,hard,Vietnam,S3_layered_kg,1
 hard_31,hard,Vietnam,S4_abstraction_refinement_kg,1
 hard_32,hard,Malaysia,S0_no_kg,1
-hard_32,hard,Malaysia,S1_raw_text_rag,0
-hard_32,hard,Malaysia,S2_flat_kg,0
+hard_32,hard,Malaysia,S1_raw_text_rag,1
+hard_32,hard,Malaysia,S2_flat_kg,1
 hard_32,hard,Malaysia,S3_layered_kg,0
-hard_32,hard,Malaysia,S4_abstraction_refinement_kg,0
+hard_32,hard,Malaysia,S4_abstraction_refinement_kg,1
 hard_33,hard,Malaysia,S0_no_kg,1
 hard_33,hard,Malaysia,S1_raw_text_rag,1
 hard_33,hard,Malaysia,S2_flat_kg,1
@@ -1430,9 +1430,9 @@ hard_35,hard,Malaysia,S2_flat_kg,1
 hard_35,hard,Malaysia,S3_layered_kg,1
 hard_35,hard,Malaysia,S4_abstraction_refinement_kg,1
 hard_36,hard,Malaysia,S0_no_kg,1
-hard_36,hard,Malaysia,S1_raw_text_rag,0
+hard_36,hard,Malaysia,S1_raw_text_rag,1
 hard_36,hard,Malaysia,S2_flat_kg,0
-hard_36,hard,Malaysia,S3_layered_kg,0
+hard_36,hard,Malaysia,S3_layered_kg,1
 hard_36,hard,Malaysia,S4_abstraction_refinement_kg,0
 hard_37,hard,Malaysia,S0_no_kg,0
 hard_37,hard,Malaysia,S1_raw_text_rag,1
@@ -1455,8 +1455,8 @@ hard_40,hard,Chile,S2_flat_kg,1
 hard_40,hard,Chile,S3_layered_kg,1
 hard_40,hard,Chile,S4_abstraction_refinement_kg,1
 hard_41,hard,Chile,S0_no_kg,1
-hard_41,hard,Chile,S1_raw_text_rag,1
-hard_41,hard,Chile,S2_flat_kg,1
+hard_41,hard,Chile,S1_raw_text_rag,0
+hard_41,hard,Chile,S2_flat_kg,0
 hard_41,hard,Chile,S3_layered_kg,1
 hard_41,hard,Chile,S4_abstraction_refinement_kg,1
 hard_42,hard,Chile,S0_no_kg,1
@@ -1497,7 +1497,7 @@ hard_48,hard,Egypt,S4_abstraction_refinement_kg,1
 hard_49,hard,Egypt,S0_no_kg,1
 hard_49,hard,Egypt,S1_raw_text_rag,1
 hard_49,hard,Egypt,S2_flat_kg,1
-hard_49,hard,Egypt,S3_layered_kg,0
+hard_49,hard,Egypt,S3_layered_kg,1
 hard_49,hard,Egypt,S4_abstraction_refinement_kg,1
 hard_50,hard,Egypt,S0_no_kg,0
 hard_50,hard,Egypt,S1_raw_text_rag,0
@@ -1510,8 +1510,8 @@ hard_51,hard,Egypt,S2_flat_kg,1
 hard_51,hard,Egypt,S3_layered_kg,1
 hard_51,hard,Egypt,S4_abstraction_refinement_kg,1
 hard_52,hard,India,S0_no_kg,0
-hard_52,hard,India,S1_raw_text_rag,1
-hard_52,hard,India,S2_flat_kg,1
+hard_52,hard,India,S1_raw_text_rag,0
+hard_52,hard,India,S2_flat_kg,0
 hard_52,hard,India,S3_layered_kg,0
 hard_52,hard,India,S4_abstraction_refinement_kg,0
 hard_53,hard,India,S0_no_kg,1
@@ -1531,7 +1531,7 @@ hard_55,hard,India,S3_layered_kg,1
 hard_55,hard,India,S4_abstraction_refinement_kg,1
 hard_56,hard,India,S0_no_kg,1
 hard_56,hard,India,S1_raw_text_rag,0
-hard_56,hard,India,S2_flat_kg,1
+hard_56,hard,India,S2_flat_kg,0
 hard_56,hard,India,S3_layered_kg,0
 hard_56,hard,India,S4_abstraction_refinement_kg,1
 hard_57,hard,India,S0_no_kg,1
@@ -1550,7 +1550,7 @@ hard_59,hard,India,S2_flat_kg,1
 hard_59,hard,India,S3_layered_kg,1
 hard_59,hard,India,S4_abstraction_refinement_kg,1
 hard_60,hard,Japan,S0_no_kg,1
-hard_60,hard,Japan,S1_raw_text_rag,0
+hard_60,hard,Japan,S1_raw_text_rag,1
 hard_60,hard,Japan,S2_flat_kg,1
 hard_60,hard,Japan,S3_layered_kg,1
 hard_60,hard,Japan,S4_abstraction_refinement_kg,1
@@ -1610,9 +1610,9 @@ hard_71,hard,South Korea,S2_flat_kg,1
 hard_71,hard,South Korea,S3_layered_kg,1
 hard_71,hard,South Korea,S4_abstraction_refinement_kg,1
 hard_72,hard,Philippines,S0_no_kg,1
-hard_72,hard,Philippines,S1_raw_text_rag,0
-hard_72,hard,Philippines,S2_flat_kg,0
-hard_72,hard,Philippines,S3_layered_kg,0
+hard_72,hard,Philippines,S1_raw_text_rag,1
+hard_72,hard,Philippines,S2_flat_kg,1
+hard_72,hard,Philippines,S3_layered_kg,1
 hard_72,hard,Philippines,S4_abstraction_refinement_kg,1
 hard_73,hard,Philippines,S0_no_kg,1
 hard_73,hard,Philippines,S1_raw_text_rag,1
@@ -1663,7 +1663,7 @@ hard_82,hard,Iran,S0_no_kg,1
 hard_82,hard,Iran,S1_raw_text_rag,0
 hard_82,hard,Iran,S2_flat_kg,0
 hard_82,hard,Iran,S3_layered_kg,0
-hard_82,hard,Iran,S4_abstraction_refinement_kg,0
+hard_82,hard,Iran,S4_abstraction_refinement_kg,1
 hard_83,hard,Iran,S0_no_kg,1
 hard_83,hard,Iran,S1_raw_text_rag,1
 hard_83,hard,Iran,S2_flat_kg,1
@@ -1690,29 +1690,29 @@ hard_87,hard,Israel,S2_flat_kg,1
 hard_87,hard,Israel,S3_layered_kg,1
 hard_87,hard,Israel,S4_abstraction_refinement_kg,1
 hard_88,hard,Nigeria,S0_no_kg,0
-hard_88,hard,Nigeria,S1_raw_text_rag,0
+hard_88,hard,Nigeria,S1_raw_text_rag,1
 hard_88,hard,Nigeria,S2_flat_kg,0
 hard_88,hard,Nigeria,S3_layered_kg,0
-hard_88,hard,Nigeria,S4_abstraction_refinement_kg,0
+hard_88,hard,Nigeria,S4_abstraction_refinement_kg,1
 hard_89,hard,Nigeria,S0_no_kg,0
-hard_89,hard,Nigeria,S1_raw_text_rag,0
-hard_89,hard,Nigeria,S2_flat_kg,0
-hard_89,hard,Nigeria,S3_layered_kg,0
-hard_89,hard,Nigeria,S4_abstraction_refinement_kg,1
+hard_89,hard,Nigeria,S1_raw_text_rag,1
+hard_89,hard,Nigeria,S2_flat_kg,1
+hard_89,hard,Nigeria,S3_layered_kg,1
+hard_89,hard,Nigeria,S4_abstraction_refinement_kg,0
 hard_90,hard,Nigeria,S0_no_kg,1
 hard_90,hard,Nigeria,S1_raw_text_rag,1
 hard_90,hard,Nigeria,S2_flat_kg,1
-hard_90,hard,Nigeria,S3_layered_kg,0
+hard_90,hard,Nigeria,S3_layered_kg,1
 hard_90,hard,Nigeria,S4_abstraction_refinement_kg,1
 hard_91,hard,Nigeria,S0_no_kg,0
-hard_91,hard,Nigeria,S1_raw_text_rag,0
+hard_91,hard,Nigeria,S1_raw_text_rag,1
 hard_91,hard,Nigeria,S2_flat_kg,1
 hard_91,hard,Nigeria,S3_layered_kg,0
-hard_91,hard,Nigeria,S4_abstraction_refinement_kg,1
+hard_91,hard,Nigeria,S4_abstraction_refinement_kg,0
 hard_92,hard,Bangladesh,S0_no_kg,1
 hard_92,hard,Bangladesh,S1_raw_text_rag,1
-hard_92,hard,Bangladesh,S2_flat_kg,0
-hard_92,hard,Bangladesh,S3_layered_kg,0
+hard_92,hard,Bangladesh,S2_flat_kg,1
+hard_92,hard,Bangladesh,S3_layered_kg,1
 hard_92,hard,Bangladesh,S4_abstraction_refinement_kg,1
 hard_93,hard,Bangladesh,S0_no_kg,0
 hard_93,hard,Bangladesh,S1_raw_text_rag,0
@@ -1741,7 +1741,7 @@ hard_97,hard,Lebanon,S3_layered_kg,1
 hard_97,hard,Lebanon,S4_abstraction_refinement_kg,1
 hard_98,hard,Lebanon,S0_no_kg,1
 hard_98,hard,Lebanon,S1_raw_text_rag,0
-hard_98,hard,Lebanon,S2_flat_kg,0
+hard_98,hard,Lebanon,S2_flat_kg,1
 hard_98,hard,Lebanon,S3_layered_kg,0
 hard_98,hard,Lebanon,S4_abstraction_refinement_kg,0
 hard_99,hard,Lebanon,S0_no_kg,0
@@ -1751,8 +1751,8 @@ hard_99,hard,Lebanon,S3_layered_kg,1
 hard_99,hard,Lebanon,S4_abstraction_refinement_kg,1
 hard_100,hard,Ukraine,S0_no_kg,0
 hard_100,hard,Ukraine,S1_raw_text_rag,0
-hard_100,hard,Ukraine,S2_flat_kg,0
-hard_100,hard,Ukraine,S3_layered_kg,0
+hard_100,hard,Ukraine,S2_flat_kg,1
+hard_100,hard,Ukraine,S3_layered_kg,1
 hard_100,hard,Ukraine,S4_abstraction_refinement_kg,0
 hard_101,hard,Ukraine,S0_no_kg,1
 hard_101,hard,Ukraine,S1_raw_text_rag,1
@@ -1771,8 +1771,8 @@ hard_103,hard,Ukraine,S3_layered_kg,1
 hard_103,hard,Ukraine,S4_abstraction_refinement_kg,1
 hard_104,hard,United States,S0_no_kg,1
 hard_104,hard,United States,S1_raw_text_rag,0
-hard_104,hard,United States,S2_flat_kg,0
-hard_104,hard,United States,S3_layered_kg,0
+hard_104,hard,United States,S2_flat_kg,1
+hard_104,hard,United States,S3_layered_kg,1
 hard_104,hard,United States,S4_abstraction_refinement_kg,1
 hard_105,hard,United States,S0_no_kg,1
 hard_105,hard,United States,S1_raw_text_rag,1
@@ -1782,7 +1782,7 @@ hard_105,hard,United States,S4_abstraction_refinement_kg,0
 hard_106,hard,United States,S0_no_kg,1
 hard_106,hard,United States,S1_raw_text_rag,1
 hard_106,hard,United States,S2_flat_kg,1
-hard_106,hard,United States,S3_layered_kg,1
+hard_106,hard,United States,S3_layered_kg,0
 hard_106,hard,United States,S4_abstraction_refinement_kg,1
 hard_107,hard,United States,S0_no_kg,1
 hard_107,hard,United States,S1_raw_text_rag,1
@@ -1791,24 +1791,24 @@ hard_107,hard,United States,S3_layered_kg,1
 hard_107,hard,United States,S4_abstraction_refinement_kg,1
 hard_108,hard,Philippines,S0_no_kg,1
 hard_108,hard,Philippines,S1_raw_text_rag,0
-hard_108,hard,Philippines,S2_flat_kg,0
+hard_108,hard,Philippines,S2_flat_kg,1
 hard_108,hard,Philippines,S3_layered_kg,1
-hard_108,hard,Philippines,S4_abstraction_refinement_kg,0
+hard_108,hard,Philippines,S4_abstraction_refinement_kg,1
 hard_109,hard,Philippines,S0_no_kg,1
 hard_109,hard,Philippines,S1_raw_text_rag,1
 hard_109,hard,Philippines,S2_flat_kg,1
-hard_109,hard,Philippines,S3_layered_kg,1
+hard_109,hard,Philippines,S3_layered_kg,0
 hard_109,hard,Philippines,S4_abstraction_refinement_kg,1
 hard_110,hard,Philippines,S0_no_kg,1
 hard_110,hard,Philippines,S1_raw_text_rag,1
 hard_110,hard,Philippines,S2_flat_kg,1
-hard_110,hard,Philippines,S3_layered_kg,1
-hard_110,hard,Philippines,S4_abstraction_refinement_kg,0
+hard_110,hard,Philippines,S3_layered_kg,0
+hard_110,hard,Philippines,S4_abstraction_refinement_kg,1
 hard_111,hard,Philippines,S0_no_kg,1
 hard_111,hard,Philippines,S1_raw_text_rag,1
 hard_111,hard,Philippines,S2_flat_kg,1
 hard_111,hard,Philippines,S3_layered_kg,1
-hard_111,hard,Philippines,S4_abstraction_refinement_kg,0
+hard_111,hard,Philippines,S4_abstraction_refinement_kg,1
 hard_112,hard,Czech Republic,S0_no_kg,1
 hard_112,hard,Czech Republic,S1_raw_text_rag,0
 hard_112,hard,Czech Republic,S2_flat_kg,0
@@ -1845,14 +1845,14 @@ hard_118,hard,Vietnam,S2_flat_kg,0
 hard_118,hard,Vietnam,S3_layered_kg,0
 hard_118,hard,Vietnam,S4_abstraction_refinement_kg,0
 hard_119,hard,Vietnam,S0_no_kg,0
-hard_119,hard,Vietnam,S1_raw_text_rag,0
+hard_119,hard,Vietnam,S1_raw_text_rag,1
 hard_119,hard,Vietnam,S2_flat_kg,1
 hard_119,hard,Vietnam,S3_layered_kg,1
 hard_119,hard,Vietnam,S4_abstraction_refinement_kg,1
 hard_120,hard,Italy,S0_no_kg,0
 hard_120,hard,Italy,S1_raw_text_rag,0
-hard_120,hard,Italy,S2_flat_kg,1
-hard_120,hard,Italy,S3_layered_kg,0
+hard_120,hard,Italy,S2_flat_kg,0
+hard_120,hard,Italy,S3_layered_kg,1
 hard_120,hard,Italy,S4_abstraction_refinement_kg,1
 hard_121,hard,Italy,S0_no_kg,1
 hard_121,hard,Italy,S1_raw_text_rag,1
@@ -1870,10 +1870,10 @@ hard_123,hard,Italy,S2_flat_kg,1
 hard_123,hard,Italy,S3_layered_kg,1
 hard_123,hard,Italy,S4_abstraction_refinement_kg,1
 hard_124,hard,Spain,S0_no_kg,1
-hard_124,hard,Spain,S1_raw_text_rag,0
-hard_124,hard,Spain,S2_flat_kg,0
-hard_124,hard,Spain,S3_layered_kg,0
-hard_124,hard,Spain,S4_abstraction_refinement_kg,1
+hard_124,hard,Spain,S1_raw_text_rag,1
+hard_124,hard,Spain,S2_flat_kg,1
+hard_124,hard,Spain,S3_layered_kg,1
+hard_124,hard,Spain,S4_abstraction_refinement_kg,0
 hard_125,hard,Spain,S0_no_kg,1
 hard_125,hard,Spain,S1_raw_text_rag,1
 hard_125,hard,Spain,S2_flat_kg,1
@@ -1893,7 +1893,7 @@ hard_128,hard,Indonesia,S0_no_kg,1
 hard_128,hard,Indonesia,S1_raw_text_rag,0
 hard_128,hard,Indonesia,S2_flat_kg,0
 hard_128,hard,Indonesia,S3_layered_kg,1
-hard_128,hard,Indonesia,S4_abstraction_refinement_kg,1
+hard_128,hard,Indonesia,S4_abstraction_refinement_kg,0
 hard_129,hard,Indonesia,S0_no_kg,1
 hard_129,hard,Indonesia,S1_raw_text_rag,1
 hard_129,hard,Indonesia,S2_flat_kg,1
@@ -1933,7 +1933,7 @@ hard_136,hard,Indonesia,S0_no_kg,1
 hard_136,hard,Indonesia,S1_raw_text_rag,0
 hard_136,hard,Indonesia,S2_flat_kg,0
 hard_136,hard,Indonesia,S3_layered_kg,0
-hard_136,hard,Indonesia,S4_abstraction_refinement_kg,0
+hard_136,hard,Indonesia,S4_abstraction_refinement_kg,1
 hard_137,hard,Indonesia,S0_no_kg,1
 hard_137,hard,Indonesia,S1_raw_text_rag,1
 hard_137,hard,Indonesia,S2_flat_kg,1
@@ -1950,10 +1950,10 @@ hard_139,hard,Indonesia,S2_flat_kg,1
 hard_139,hard,Indonesia,S3_layered_kg,1
 hard_139,hard,Indonesia,S4_abstraction_refinement_kg,1
 hard_140,hard,Lebanon,S0_no_kg,1
-hard_140,hard,Lebanon,S1_raw_text_rag,0
-hard_140,hard,Lebanon,S2_flat_kg,0
-hard_140,hard,Lebanon,S3_layered_kg,0
-hard_140,hard,Lebanon,S4_abstraction_refinement_kg,0
+hard_140,hard,Lebanon,S1_raw_text_rag,1
+hard_140,hard,Lebanon,S2_flat_kg,1
+hard_140,hard,Lebanon,S3_layered_kg,1
+hard_140,hard,Lebanon,S4_abstraction_refinement_kg,1
 hard_141,hard,Lebanon,S0_no_kg,1
 hard_141,hard,Lebanon,S1_raw_text_rag,1
 hard_141,hard,Lebanon,S2_flat_kg,1
@@ -1991,7 +1991,7 @@ hard_147,hard,Lebanon,S3_layered_kg,0
 hard_147,hard,Lebanon,S4_abstraction_refinement_kg,0
 hard_148,hard,Lebanon,S0_no_kg,1
 hard_148,hard,Lebanon,S1_raw_text_rag,0
-hard_148,hard,Lebanon,S2_flat_kg,1
+hard_148,hard,Lebanon,S2_flat_kg,0
 hard_148,hard,Lebanon,S3_layered_kg,0
 hard_148,hard,Lebanon,S4_abstraction_refinement_kg,0
 hard_149,hard,Lebanon,S0_no_kg,1
@@ -2011,7 +2011,7 @@ hard_151,hard,Lebanon,S3_layered_kg,1
 hard_151,hard,Lebanon,S4_abstraction_refinement_kg,1
 hard_152,hard,Ukraine,S0_no_kg,0
 hard_152,hard,Ukraine,S1_raw_text_rag,0
-hard_152,hard,Ukraine,S2_flat_kg,1
+hard_152,hard,Ukraine,S2_flat_kg,0
 hard_152,hard,Ukraine,S3_layered_kg,0
 hard_152,hard,Ukraine,S4_abstraction_refinement_kg,0
 hard_153,hard,Ukraine,S0_no_kg,1
@@ -2071,8 +2071,8 @@ hard_163,hard,France,S3_layered_kg,1
 hard_163,hard,France,S4_abstraction_refinement_kg,1
 hard_164,hard,Zimbabwe,S0_no_kg,1
 hard_164,hard,Zimbabwe,S1_raw_text_rag,0
-hard_164,hard,Zimbabwe,S2_flat_kg,0
-hard_164,hard,Zimbabwe,S3_layered_kg,0
+hard_164,hard,Zimbabwe,S2_flat_kg,1
+hard_164,hard,Zimbabwe,S3_layered_kg,1
 hard_164,hard,Zimbabwe,S4_abstraction_refinement_kg,0
 hard_165,hard,Zimbabwe,S0_no_kg,1
 hard_165,hard,Zimbabwe,S1_raw_text_rag,1
@@ -2111,13 +2111,13 @@ hard_171,hard,Zimbabwe,S3_layered_kg,1
 hard_171,hard,Zimbabwe,S4_abstraction_refinement_kg,1
 hard_172,hard,Mexico,S0_no_kg,1
 hard_172,hard,Mexico,S1_raw_text_rag,1
-hard_172,hard,Mexico,S2_flat_kg,1
+hard_172,hard,Mexico,S2_flat_kg,0
 hard_172,hard,Mexico,S3_layered_kg,1
 hard_172,hard,Mexico,S4_abstraction_refinement_kg,1
 hard_173,hard,Mexico,S0_no_kg,0
 hard_173,hard,Mexico,S1_raw_text_rag,0
 hard_173,hard,Mexico,S2_flat_kg,0
-hard_173,hard,Mexico,S3_layered_kg,0
+hard_173,hard,Mexico,S3_layered_kg,1
 hard_173,hard,Mexico,S4_abstraction_refinement_kg,0
 hard_174,hard,Mexico,S0_no_kg,1
 hard_174,hard,Mexico,S1_raw_text_rag,1
@@ -2151,8 +2151,8 @@ hard_179,hard,Vietnam,S3_layered_kg,1
 hard_179,hard,Vietnam,S4_abstraction_refinement_kg,1
 hard_180,hard,Saudi Arabia,S0_no_kg,1
 hard_180,hard,Saudi Arabia,S1_raw_text_rag,0
-hard_180,hard,Saudi Arabia,S2_flat_kg,1
-hard_180,hard,Saudi Arabia,S3_layered_kg,1
+hard_180,hard,Saudi Arabia,S2_flat_kg,0
+hard_180,hard,Saudi Arabia,S3_layered_kg,0
 hard_180,hard,Saudi Arabia,S4_abstraction_refinement_kg,0
 hard_181,hard,Saudi Arabia,S0_no_kg,1
 hard_181,hard,Saudi Arabia,S1_raw_text_rag,1
@@ -2211,23 +2211,23 @@ hard_191,hard,Czech Republic,S3_layered_kg,1
 hard_191,hard,Czech Republic,S4_abstraction_refinement_kg,1
 hard_192,hard,France,S0_no_kg,1
 hard_192,hard,France,S1_raw_text_rag,1
-hard_192,hard,France,S2_flat_kg,0
+hard_192,hard,France,S2_flat_kg,1
 hard_192,hard,France,S3_layered_kg,1
 hard_192,hard,France,S4_abstraction_refinement_kg,1
 hard_193,hard,France,S0_no_kg,1
-hard_193,hard,France,S1_raw_text_rag,1
+hard_193,hard,France,S1_raw_text_rag,0
 hard_193,hard,France,S2_flat_kg,1
 hard_193,hard,France,S3_layered_kg,1
 hard_193,hard,France,S4_abstraction_refinement_kg,1
 hard_194,hard,France,S0_no_kg,0
-hard_194,hard,France,S1_raw_text_rag,1
+hard_194,hard,France,S1_raw_text_rag,0
 hard_194,hard,France,S2_flat_kg,0
-hard_194,hard,France,S3_layered_kg,1
+hard_194,hard,France,S3_layered_kg,0
 hard_194,hard,France,S4_abstraction_refinement_kg,0
 hard_195,hard,France,S0_no_kg,1
-hard_195,hard,France,S1_raw_text_rag,0
+hard_195,hard,France,S1_raw_text_rag,1
 hard_195,hard,France,S2_flat_kg,1
-hard_195,hard,France,S3_layered_kg,0
+hard_195,hard,France,S3_layered_kg,1
 hard_195,hard,France,S4_abstraction_refinement_kg,1
 hard_196,hard,Nepal,S0_no_kg,1
 hard_196,hard,Nepal,S1_raw_text_rag,1
@@ -2241,9 +2241,9 @@ hard_197,hard,Nepal,S3_layered_kg,1
 hard_197,hard,Nepal,S4_abstraction_refinement_kg,1
 hard_198,hard,Nepal,S0_no_kg,1
 hard_198,hard,Nepal,S1_raw_text_rag,0
-hard_198,hard,Nepal,S2_flat_kg,0
+hard_198,hard,Nepal,S2_flat_kg,1
 hard_198,hard,Nepal,S3_layered_kg,0
-hard_198,hard,Nepal,S4_abstraction_refinement_kg,1
+hard_198,hard,Nepal,S4_abstraction_refinement_kg,0
 hard_199,hard,Nepal,S0_no_kg,1
 hard_199,hard,Nepal,S1_raw_text_rag,1
 hard_199,hard,Nepal,S2_flat_kg,1
@@ -2265,9 +2265,9 @@ hard_202,hard,Morocco,S2_flat_kg,0
 hard_202,hard,Morocco,S3_layered_kg,0
 hard_202,hard,Morocco,S4_abstraction_refinement_kg,0
 hard_203,hard,Morocco,S0_no_kg,0
-hard_203,hard,Morocco,S1_raw_text_rag,1
-hard_203,hard,Morocco,S2_flat_kg,1
-hard_203,hard,Morocco,S3_layered_kg,1
+hard_203,hard,Morocco,S1_raw_text_rag,0
+hard_203,hard,Morocco,S2_flat_kg,0
+hard_203,hard,Morocco,S3_layered_kg,0
 hard_203,hard,Morocco,S4_abstraction_refinement_kg,1
 hard_204,hard,South Korea,S0_no_kg,1
 hard_204,hard,South Korea,S1_raw_text_rag,1
@@ -2291,7 +2291,7 @@ hard_207,hard,South Korea,S3_layered_kg,0
 hard_207,hard,South Korea,S4_abstraction_refinement_kg,0
 hard_208,hard,Romania,S0_no_kg,1
 hard_208,hard,Romania,S1_raw_text_rag,1
-hard_208,hard,Romania,S2_flat_kg,1
+hard_208,hard,Romania,S2_flat_kg,0
 hard_208,hard,Romania,S3_layered_kg,1
 hard_208,hard,Romania,S4_abstraction_refinement_kg,1
 hard_209,hard,Romania,S0_no_kg,0
@@ -2346,7 +2346,7 @@ hard_218,hard,Japan,S3_layered_kg,0
 hard_218,hard,Japan,S4_abstraction_refinement_kg,0
 hard_219,hard,Japan,S0_no_kg,1
 hard_219,hard,Japan,S1_raw_text_rag,1
-hard_219,hard,Japan,S2_flat_kg,1
+hard_219,hard,Japan,S2_flat_kg,0
 hard_219,hard,Japan,S3_layered_kg,1
 hard_219,hard,Japan,S4_abstraction_refinement_kg,1
 hard_220,hard,Netherlands,S0_no_kg,1
@@ -2355,8 +2355,8 @@ hard_220,hard,Netherlands,S2_flat_kg,1
 hard_220,hard,Netherlands,S3_layered_kg,1
 hard_220,hard,Netherlands,S4_abstraction_refinement_kg,1
 hard_221,hard,Netherlands,S0_no_kg,1
-hard_221,hard,Netherlands,S1_raw_text_rag,0
-hard_221,hard,Netherlands,S2_flat_kg,1
+hard_221,hard,Netherlands,S1_raw_text_rag,1
+hard_221,hard,Netherlands,S2_flat_kg,0
 hard_221,hard,Netherlands,S3_layered_kg,1
 hard_221,hard,Netherlands,S4_abstraction_refinement_kg,1
 hard_222,hard,Netherlands,S0_no_kg,1
@@ -2368,7 +2368,7 @@ hard_223,hard,Netherlands,S0_no_kg,1
 hard_223,hard,Netherlands,S1_raw_text_rag,1
 hard_223,hard,Netherlands,S2_flat_kg,1
 hard_223,hard,Netherlands,S3_layered_kg,1
-hard_223,hard,Netherlands,S4_abstraction_refinement_kg,1
+hard_223,hard,Netherlands,S4_abstraction_refinement_kg,0
 hard_224,hard,Egypt,S0_no_kg,1
 hard_224,hard,Egypt,S1_raw_text_rag,1
 hard_224,hard,Egypt,S2_flat_kg,1
@@ -2377,8 +2377,8 @@ hard_224,hard,Egypt,S4_abstraction_refinement_kg,1
 hard_225,hard,Egypt,S0_no_kg,1
 hard_225,hard,Egypt,S1_raw_text_rag,0
 hard_225,hard,Egypt,S2_flat_kg,0
-hard_225,hard,Egypt,S3_layered_kg,1
-hard_225,hard,Egypt,S4_abstraction_refinement_kg,1
+hard_225,hard,Egypt,S3_layered_kg,0
+hard_225,hard,Egypt,S4_abstraction_refinement_kg,0
 hard_226,hard,Egypt,S0_no_kg,1
 hard_226,hard,Egypt,S1_raw_text_rag,1
 hard_226,hard,Egypt,S2_flat_kg,1
@@ -2413,7 +2413,7 @@ hard_232,hard,Germany,S0_no_kg,0
 hard_232,hard,Germany,S1_raw_text_rag,0
 hard_232,hard,Germany,S2_flat_kg,0
 hard_232,hard,Germany,S3_layered_kg,0
-hard_232,hard,Germany,S4_abstraction_refinement_kg,0
+hard_232,hard,Germany,S4_abstraction_refinement_kg,1
 hard_233,hard,Germany,S0_no_kg,1
 hard_233,hard,Germany,S1_raw_text_rag,1
 hard_233,hard,Germany,S2_flat_kg,1
@@ -2450,9 +2450,9 @@ hard_239,hard,Czech Republic,S2_flat_kg,1
 hard_239,hard,Czech Republic,S3_layered_kg,1
 hard_239,hard,Czech Republic,S4_abstraction_refinement_kg,1
 hard_240,hard,Pakistan,S0_no_kg,0
-hard_240,hard,Pakistan,S1_raw_text_rag,0
-hard_240,hard,Pakistan,S2_flat_kg,0
-hard_240,hard,Pakistan,S3_layered_kg,0
+hard_240,hard,Pakistan,S1_raw_text_rag,1
+hard_240,hard,Pakistan,S2_flat_kg,1
+hard_240,hard,Pakistan,S3_layered_kg,1
 hard_240,hard,Pakistan,S4_abstraction_refinement_kg,0
 hard_241,hard,Pakistan,S0_no_kg,1
 hard_241,hard,Pakistan,S1_raw_text_rag,1
@@ -2473,7 +2473,7 @@ hard_244,hard,Indonesia,S0_no_kg,0
 hard_244,hard,Indonesia,S1_raw_text_rag,0
 hard_244,hard,Indonesia,S2_flat_kg,0
 hard_244,hard,Indonesia,S3_layered_kg,0
-hard_244,hard,Indonesia,S4_abstraction_refinement_kg,0
+hard_244,hard,Indonesia,S4_abstraction_refinement_kg,1
 hard_245,hard,Indonesia,S0_no_kg,1
 hard_245,hard,Indonesia,S1_raw_text_rag,1
 hard_245,hard,Indonesia,S2_flat_kg,1
@@ -2482,7 +2482,7 @@ hard_245,hard,Indonesia,S4_abstraction_refinement_kg,1
 hard_246,hard,Indonesia,S0_no_kg,1
 hard_246,hard,Indonesia,S1_raw_text_rag,1
 hard_246,hard,Indonesia,S2_flat_kg,1
-hard_246,hard,Indonesia,S3_layered_kg,1
+hard_246,hard,Indonesia,S3_layered_kg,0
 hard_246,hard,Indonesia,S4_abstraction_refinement_kg,1
 hard_247,hard,Indonesia,S0_no_kg,1
 hard_247,hard,Indonesia,S1_raw_text_rag,1

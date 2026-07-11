@@ -17,7 +17,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from . import local_llm, prompts
+from . import config, local_llm, prompts
 from .layer_classifier import validate_triple_layers
 from .schemas import (
     CritiqueIssue,
