@@ -279,7 +279,7 @@ Important:
 - Avoid stereotypes.
 - Be practical and respectful."""
 
-RAW_KG_USER = """Answer this cultural scenario question using the retrieved cultural knowledge graph triples.
+RAW_KG_USER = """Answer this cultural scenario question using the retrieved cultural knowledge graph triples as additional context.
 
 Question:
 {question}
@@ -288,13 +288,15 @@ Retrieved raw KG triples:
 {retrieved_raw_triples_json}
 
 Instructions:
-- Use only the retrieved triples as cultural evidence.
+- Treat the retrieved triples as additional cultural evidence, not as a replacement for the question.
+- If the triples are incomplete, irrelevant, or insufficient, do not force them.
+- Answer using the base question and the most relevant evidence.
 - Mention uncertainty if the triples are limited.
 - Avoid stereotypes.
 - Give a practical answer.
 - Explain surface behavior, social expectation, and deeper value if supported."""
 
-REFINED_KG_USER = """Answer this cultural scenario question using the critique-refined cultural knowledge graph.
+REFINED_KG_USER = """Answer this cultural scenario question using the critique-refined cultural knowledge graph as additional context.
 
 Question:
 {question}
@@ -303,9 +305,12 @@ Retrieved refined KG triples:
 {retrieved_refined_triples_json}
 
 Instructions:
+- Treat the retrieved triples as additional cultural evidence, not as a replacement for the question.
 - Use dataset-grounded triples first.
 - Use generated critique triples only as cautious interpretations.
 - If a triple has generated=true, do not treat it as guaranteed fact.
+- If the triples are incomplete, irrelevant, or insufficient, do not force them.
+- Answer using the base question and the most relevant evidence.
 - Mention uncertainty if needed.
 - Avoid stereotypes.
 - Give a practical answer.
@@ -313,15 +318,17 @@ Instructions:
 
 
 # --- CulturalBench multiple-choice answering -------------------------------
-# These are the prompts used by the S0-S3 systems. They share one system prompt
+# These are the prompts used by the S0-S4 systems. They share one system prompt
 # and one answer format so the only thing that varies across systems is the
 # injected cultural evidence block. This keeps the comparison fair.
 
 MCQ_SYSTEM = """You are answering multiple-choice questions about cultural norms and practices.
 
-Read the question carefully. If cultural evidence is provided, use it to inform your answer.
+Read the question carefully. If cultural evidence is provided, use it as additional context.
+Treat retrieved evidence as helpful support, not as a replacement for the question and options.
+If the evidence is incomplete, irrelevant, or insufficient, do not force it.
 Avoid stereotyping and do not assume all members of a culture behave identically.
-Base your choice on the most likely culturally appropriate answer.
+Base your choice on the question, the options, and the most relevant evidence.
 
 You must end your response with the answer on its own line in EXACTLY this format:
 ANSWER: <letter>
@@ -329,7 +336,9 @@ where <letter> is one of the provided option letters. Output nothing after that 
 
 MCQ_HARD_SYSTEM = """You are judging whether a candidate answer to a cultural question is correct.
 
-Consider the cultural context carefully. If cultural evidence is provided, use it.
+Consider the cultural context carefully. If cultural evidence is provided, use it as additional context.
+Treat retrieved evidence as helpful support, not as a replacement for the question and candidate answer.
+If the evidence is incomplete, irrelevant, or insufficient, do not force it.
 Avoid stereotyping and do not assume all members of a culture behave identically.
 
 You must end your response with your judgment on its own line in EXACTLY this format:
@@ -359,6 +368,7 @@ MCQ_EASY_USER = """{evidence_block}Question:
 Options:
 {options_block}
 
+Use the question and options as the base input. Treat retrieved evidence, if shown above, as additional context only.
 Choose the single best option. Remember to end with:
 ANSWER: <letter>"""
 
@@ -368,6 +378,7 @@ MCQ_HARD_USER = """{evidence_block}Question:
 Candidate answer:
 {option_text}
 
+Use the question and candidate answer as the base input. Treat retrieved evidence, if shown above, as additional context only.
 Is the candidate answer correct for this cultural context? Remember to end with:
 ANSWER: <TRUE or FALSE>"""
 
