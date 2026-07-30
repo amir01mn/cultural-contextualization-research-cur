@@ -94,14 +94,23 @@ def main(argv=None) -> None:
     p.add_argument("--refined_output", default=str(config.CORPUS_TRIPLES_REFINED_PATH))
     p.add_argument("--state_path", default=str(config.CORPUS_STATE_PATH))
     p.add_argument("--cache_dir", default=str(config.LLM_CACHE_DIR))
+    p.add_argument("--input_records", default=None)
     args = p.parse_args(argv)
 
     resume = args.resume and not args.no_resume
 
     LOGGER.info("Loading up to %d CultureBank records...", args.limit)
-    records = load_culturebank(args.dataset, args.split, args.limit)
-    LOGGER.info("Loaded %d records.", len(records))
 
+    if args.input_records:
+        LOGGER.info("Loading records from %s...", args.input_records)
+        records = list(read_jsonl(args.input_records))
+        if args.limit:
+            records = records[:args.limit]
+    else:
+        LOGGER.info("Loading up to %d CultureBank records...", args.limit)
+        records = load_culturebank(args.dataset, args.split, args.limit)
+
+    LOGGER.info("Loaded %d records.", len(records))
     passages = [_record_passage(r) for r in records]
     write_jsonl(args.passages_output, passages)
     LOGGER.info("Wrote %d passages -> %s", len(passages), args.passages_output)
