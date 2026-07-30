@@ -15,6 +15,8 @@
 #
 #   CORPUS_LIMIT=2000 BATCH_SIZE=32 sbatch slurm/build_corpus.sh
 #   CORPUS_LIMIT=50 sbatch slurm/build_corpus.sh   # smoke test
+#   INPUT_RECORDS=data/controlled/food_hospitality_records_keep_only.jsonl CORPUS_LIMIT=10 BATCH_SIZE=8 sbatch slurm/build_corpus.sh
+#   SKIP_VALIDATION=1 INPUT_RECORDS=data/controlled/food_hospitality_records_keep_only.jsonl CORPUS_LIMIT=10 BATCH_SIZE=8 sbatch slurm/build_corpus.sh
 
 set -euo pipefail
 
@@ -40,6 +42,10 @@ CORPUS_LIMIT="${CORPUS_LIMIT:-2000}"
 BATCH_SIZE="${BATCH_SIZE:-32}"
 RESUME="${RESUME:-1}"
 SKIP_ALIGNMENT_VERIFY="${SKIP_ALIGNMENT_VERIFY:-0}"
+INPUT_RECORDS="${INPUT_RECORDS:-}"
+SKIP_CRITIQUE="${SKIP_CRITIQUE:-0}"
+SKIP_ALIGNMENT="${SKIP_ALIGNMENT:-0}"
+SKIP_VALIDATION="${SKIP_VALIDATION:-0}"
 
 EXTRA_ARGS=(--provider vllm --model "$VLLM_MODEL" --limit "$CORPUS_LIMIT" --batch_size "$BATCH_SIZE")
 if [[ "$RESUME" == "1" ]]; then
@@ -50,11 +56,24 @@ fi
 if [[ "$SKIP_ALIGNMENT_VERIFY" == "1" ]]; then
   EXTRA_ARGS+=(--skip_alignment_verify)
 fi
+if [[ -n "$INPUT_RECORDS" ]]; then
+  EXTRA_ARGS+=(--input_records "$INPUT_RECORDS")
+fi
+if [[ "$SKIP_CRITIQUE" == "1" ]]; then
+  EXTRA_ARGS+=(--skip_critique)
+fi
+if [[ "$SKIP_ALIGNMENT" == "1" ]]; then
+  EXTRA_ARGS+=(--skip_alignment)
+fi
 
-echo "Building Phase 2 corpus with vLLM model: $VLLM_MODEL (limit=$CORPUS_LIMIT batch=$BATCH_SIZE)"
+echo "Building Phase 2 corpus with vLLM model: $VLLM_MODEL (limit=$CORPUS_LIMIT batch=$BATCH_SIZE input_records=${INPUT_RECORDS:-default CultureBank})"
 python scripts/06_build_retrieval_corpus.py "${EXTRA_ARGS[@]}"
 
-echo "Running Phase 2 validation..."
-python scripts/09_validate_phase2.py
+if [[ "$SKIP_VALIDATION" == "1" ]]; then
+  echo "Skipping Phase 2 validation because SKIP_VALIDATION=1."
+else
+  echo "Running Phase 2 validation..."
+  python scripts/09_validate_phase2.py
+fi
 
 echo "Corpus build job complete."
