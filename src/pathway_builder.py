@@ -68,6 +68,23 @@ _WEAK_TOPIC_LABELS = {
     "work-life balance",
 }
 
+# These labels can be valid entities in a graph, but they are too broad to be
+# useful as pathway nodes. Keep specific social roles such as guests, hosts,
+# restaurant staff, birthday person, customers, and servers.
+_WEAK_NODE_LABELS = {
+    "american",
+    "americans",
+    "people",
+    "person",
+    "individual",
+    "individuals",
+    "someone",
+    "others",
+    "other people",
+    "community",
+    "society",
+}
+
 
 def _layer_rank(layer: LayerLabel | str) -> int:
     if isinstance(layer, LayerLabel):
@@ -103,6 +120,26 @@ def _node_label(graph: nx.MultiDiGraph, node_id: str) -> str:
     return normalize_text(graph.nodes[node_id].get("label", node_id))
 
 
+def _is_weak_pathway_node(graph: nx.MultiDiGraph, node_id: str, culture: str) -> bool:
+    """Return True for nodes that should not be used as pathway evidence."""
+    label = _node_label(graph, node_id).lower()
+    culture_label = normalize_text(culture).lower()
+
+    if not label:
+        return True
+
+    if label == culture_label:
+        return True
+
+    if label in _WEAK_NODE_LABELS:
+        return True
+
+    if label in _WEAK_TOPIC_LABELS:
+        return True
+
+    return False
+
+
 def _is_weak_metadata_edge(
     graph: nx.MultiDiGraph,
     source: str,
@@ -110,7 +147,7 @@ def _is_weak_metadata_edge(
     data: dict,
     culture: str,
 ) -> bool:
-    """Return True for metadata/topic edges that should not become pathways."""
+    """Return True for metadata/topic/generic edges that should not become pathways."""
     predicate = normalize_text(data.get("predicate", "")).lower()
     source_label = _node_label(graph, source).lower()
     target_label = _node_label(graph, target).lower()
@@ -127,6 +164,13 @@ def _is_weak_metadata_edge(
     if source_label == culture_label and (
         "topic" in predicate or "category" in predicate or "cultural group" in predicate
     ):
+        return True
+
+    # Avoid pathways whose explanation node is only a broad culture/group/actor.
+    # These nodes can remain in the graph, but they are not useful retrieval paths.
+    if _is_weak_pathway_node(graph, source, culture):
+        return True
+    if _is_weak_pathway_node(graph, target, culture):
         return True
 
     return False
@@ -155,6 +199,9 @@ def _add_pathway(
 ) -> bool:
     """Add a pathway if it is non-empty, meaningful, and not duplicated."""
     if len(node_ids) < 2:
+        return False
+
+    if any(_is_weak_pathway_node(graph, n, culture) for n in node_ids):
         return False
 
     layers = {_node_layer(graph.nodes[n]) for n in node_ids}
@@ -242,8 +289,14 @@ def _representative_by_layer(
     graph: nx.MultiDiGraph,
     nodes: set[str],
     layer: LayerLabel,
+    culture: str,
 ) -> Optional[str]:
-    candidates = [n for n in nodes if _node_layer(graph.nodes[n]) == layer]
+    candidates = [
+        n
+        for n in nodes
+        if _node_layer(graph.nodes[n]) == layer
+        and not _is_weak_pathway_node(graph, n, culture)
+    ]
     if not candidates:
         return None
     return sorted(
@@ -261,11 +314,11 @@ def build_pathways(
 ) -> list[CulturalPathway]:
     """Enumerate flexible, layer-aware cultural evidence pathways.
 
-    The builder now keeps meaningful partial paths instead of requiring every
-    path to start at L3 and move downward. FULL pathways are built when L1, L2,
-    and L3 evidence occurs in the same connected record component. Partial
-    pathways such as L2->L1, L2->L3, and L1->L3 are retained when they are the
-    strongest evidence available.
+    The builder keeps meaningful partial paths instead of requiring every path
+    to start at L3 and move downward. FULL pathways are built when L1, L2, and
+    L3 evidence occurs in the same connected record component. Partial pathways
+    such as L2->L1, L2->L3, and L1->L3 are retained when they are the strongest
+    evidence available.
     """
     max_per_culture = max_per_culture or config.MAX_PATHWAYS_PER_CULTURE
     pivot_ids = {a.abstraction_node_id for a in alignments}
@@ -290,9 +343,15 @@ def build_pathways(
             for comp_nodes, comp_edge_ids in _connected_components_for_record(edges):
                 if count >= max_per_culture:
                     break
-                l3 = _representative_by_layer(graph, comp_nodes, LayerLabel.LAYER_3_DEEP_VALUE)
-                l2 = _representative_by_layer(graph, comp_nodes, LayerLabel.LAYER_2_SOCIAL)
-                l1 = _representative_by_layer(graph, comp_nodes, LayerLabel.LAYER_1_SURFACE)
+                l3 = _representative_by_layer(
+                    graph, comp_nodes, LayerLabel.LAYER_3_DEEP_VALUE, culture
+                )
+                l2 = _representative_by_layer(
+                    graph, comp_nodes, LayerLabel.LAYER_2_SOCIAL, culture
+                )
+                l1 = _representative_by_layer(
+                    graph, comp_nodes, LayerLabel.LAYER_1_SURFACE, culture
+                )
                 if l1 and l2 and l3:
                     if _add_pathway(
                         graph=graph,
