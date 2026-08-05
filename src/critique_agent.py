@@ -30,6 +30,13 @@ from .utils import get_logger, normalize_text, stable_id, truncate
 
 LOGGER = get_logger("critique_agent")
 
+_LAYER_LABEL_TEXT = {
+    "LAYER_1_SURFACE",
+    "LAYER_2_SOCIAL",
+    "LAYER_3_DEEP_VALUE",
+    "UNKNOWN",
+}
+
 _TOPIC_METADATA_PREDICATES = {
     "has cultural topic",
     "has topic",
@@ -100,8 +107,21 @@ def _triple_to_compact(t: CulturalTriple) -> dict:
     }
 
 
+def _label_key(text: str) -> str:
+    return normalize_text(text).strip().upper().replace(" ", "_").replace("-", "_")
+
+
+def _is_layer_placeholder(text: str) -> bool:
+    return _label_key(text) in _LAYER_LABEL_TEXT
+
+
 def _looks_like_topic_label(text: str) -> bool:
     return normalize_text(text).lower() in _TOPIC_CATEGORY_LABELS
+
+
+def _is_invalid_label_triple(t: CulturalTriple) -> bool:
+    """Return True when subject/object is a schema layer label, not an entity."""
+    return _is_layer_placeholder(t.subject) or _is_layer_placeholder(t.object)
 
 
 def _is_topic_metadata_triple(t: CulturalTriple) -> bool:
@@ -124,7 +144,9 @@ def _is_topic_metadata_triple(t: CulturalTriple) -> bool:
 
 
 def _is_supported_value_suggestion(t: CulturalTriple) -> bool:
-    """Reject critique suggestions that only restate metadata as values."""
+    """Reject critique suggestions that only restate metadata/schema labels as values."""
+    if _is_invalid_label_triple(t):
+        return False
     if _is_topic_metadata_triple(t):
         return False
     if t.object_layer == LayerLabel.LAYER_3_DEEP_VALUE and _looks_like_topic_label(t.object):
@@ -242,6 +264,18 @@ def _parse_critique_response(record: dict, triples: list[CulturalTriple],
                 description="Topic/category metadata was labeled as a deep value.",
                 affected_triple_ids=[t.triple_id],
             ))
+        if _is_invalid_label_triple(t) and t.triple_id not in flagged_ids:
+            flagged_ids.add(t.triple_id)
+            flagged.append(FlaggedTriple(
+                triple_id=t.triple_id,
+                reason="Subject/object is a schema layer label, not a cultural entity.",
+            ))
+            issues.append(CritiqueIssue(
+                issue_type="layer_label_as_entity",
+                severity="high",
+                description="A schema layer label was used as subject/object text.",
+                affected_triple_ids=[t.triple_id],
+            ))
 
     suggested = []
     for st in parsed.get("suggested_triples", []) or []:
@@ -316,7 +350,10 @@ def critique_record_rule_based(record: dict,
     suggested: list[CulturalTriple] = []
     flagged: list[FlaggedTriple] = []
 
-    usable_triples = [t for t in triples if not _is_topic_metadata_triple(t)]
+    usable_triples = [
+        t for t in triples
+        if not _is_topic_metadata_triple(t) and not _is_invalid_label_triple(t)
+    ]
 
     for t in triples:
         if _is_topic_metadata_triple(t):
@@ -328,6 +365,17 @@ def critique_record_rule_based(record: dict,
                 issue_type="topic_metadata_as_value",
                 severity="high",
                 description="Topic/category metadata was labeled as a deep value.",
+                affected_triple_ids=[t.triple_id],
+            ))
+        if _is_invalid_label_triple(t):
+            flagged.append(FlaggedTriple(
+                triple_id=t.triple_id,
+                reason="Subject/object is a schema layer label, not a cultural entity.",
+            ))
+            issues.append(CritiqueIssue(
+                issue_type="layer_label_as_entity",
+                severity="high",
+                description="A schema layer label was used as subject/object text.",
                 affected_triple_ids=[t.triple_id],
             ))
 
@@ -428,6 +476,7 @@ def build_refined_triples(records_by_id: dict[str, dict],
 
     - Keep original non-metadata triples (annotate flagged ones in notes).
     - Drop dataset topic/category triples that were miscast as values.
+    - Drop triples whose subject/object is a schema layer label.
     - Add suggested triples (generated=true) if they are not topic metadata.
     - Deduplicate exact (subject, predicate, object) per instance, keeping the
       grounded (non-generated) version when there is a conflict.
@@ -447,12 +496,15 @@ def build_refined_triples(records_by_id: dict[str, dict],
                          t.predicate.lower(), t.object.lower())
 
     # Original triples first (grounded take priority), but remove topic/category
-    # metadata triples because they corrupt L3 pathway diagnostics.
+    # metadata triples and schema-label nodes because they corrupt pathways.
     for rec_id, triples in triples_by_record.items():
         for t in triples:
             t2 = t.model_copy(deep=True)
             if _is_topic_metadata_triple(t2):
                 LOGGER.debug("Dropping topic metadata triple from refined KG: %s", t2.triple_id)
+                continue
+            if _is_invalid_label_triple(t2):
+                LOGGER.debug("Dropping layer-placeholder triple from refined KG: %s", t2.triple_id)
                 continue
             if t2.triple_id in flagged_map:
                 reason = flagged_map[t2.triple_id]
