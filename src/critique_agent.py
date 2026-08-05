@@ -30,6 +30,60 @@ from .utils import get_logger, normalize_text, stable_id, truncate
 
 LOGGER = get_logger("critique_agent")
 
+_TOPIC_METADATA_PREDICATES = {
+    "has cultural topic",
+    "has topic",
+    "topic",
+    "is topic",
+    "belongs to topic",
+    "has category",
+    "category",
+    "has cultural category",
+}
+
+_TOPIC_CATEGORY_LABELS = {
+    "community and identity",
+    "consumer behavior",
+    "cultural and environmental appreciation",
+    "cultural exchange",
+    "cultural traditions and festivals",
+    "drinking and alcohol",
+    "family dynamics",
+    "family traditions and heritage",
+    "finance and economy",
+    "food and dining",
+    "health and hygiene",
+    "household and daily life",
+    "lifestyles",
+    "miscellaneous",
+    "social interactions",
+    "social norms and etiquette",
+    "work-life balance",
+}
+
+_VALUE_KEYWORDS = {
+    "hospitality": "hospitality",
+    "guest": "hospitality",
+    "host": "hospitality",
+    "gratitude": "gratitude",
+    "thank": "gratitude",
+    "appreciation": "appreciation",
+    "appreciate": "appreciation",
+    "reciprocat": "reciprocity",
+    "gift": "reciprocity",
+    "respect": "respect",
+    "polite": "politeness",
+    "etiquette": "politeness",
+    "generous": "generosity",
+    "generosity": "generosity",
+    "care": "care",
+    "family": "family connection",
+    "clean": "cleanliness",
+    "hygien": "cleanliness",
+    "comfort": "comfort",
+    "welcome": "welcoming",
+}
+
 
 def _triple_to_compact(t: CulturalTriple) -> dict:
     return {
@@ -44,6 +98,40 @@ def _triple_to_compact(t: CulturalTriple) -> dict:
         "generated": t.generated,
         "evidence": t.evidence,
     }
+
+
+def _looks_like_topic_label(text: str) -> bool:
+    return normalize_text(text).lower() in _TOPIC_CATEGORY_LABELS
+
+
+def _is_topic_metadata_triple(t: CulturalTriple) -> bool:
+    """Return True for dataset-topic triples miscast as cultural values."""
+    predicate = normalize_text(t.predicate).lower()
+    obj = normalize_text(t.object).lower()
+
+    if predicate in _TOPIC_METADATA_PREDICATES:
+        return True
+
+    if _looks_like_topic_label(obj):
+        return True
+
+    if t.object_layer == LayerLabel.LAYER_3_DEEP_VALUE and (
+        "topic" in predicate or "category" in predicate
+    ):
+        return True
+
+    return False
+
+
+def _is_supported_value_suggestion(t: CulturalTriple) -> bool:
+    """Reject critique suggestions that only restate metadata as values."""
+    if _is_topic_metadata_triple(t):
+        return False
+    if t.object_layer == LayerLabel.LAYER_3_DEEP_VALUE and _looks_like_topic_label(t.object):
+        return False
+    if t.subject_layer == LayerLabel.LAYER_3_DEEP_VALUE and _looks_like_topic_label(t.subject):
+        return False
+    return True
 
 
 def _build_suggested_triple(rec: dict, fields: dict) -> CulturalTriple:
@@ -78,6 +166,33 @@ def _build_suggested_triple(rec: dict, fields: dict) -> CulturalTriple:
     )
 
 
+def _infer_value_from_record(record: dict, triples: list[CulturalTriple]) -> Optional[str]:
+    """Very conservative fallback value cue from record/triple text."""
+    parts = [
+        record.get("context"),
+        record.get("goal"),
+        record.get("actor_behavior"),
+        record.get("recipient_behavior"),
+        record.get("source_text"),
+    ]
+    parts.extend(f"{t.subject} {t.predicate} {t.object}" for t in triples)
+    blob = normalize_text(" ".join(p for p in parts if p)).lower()
+    for key, value in _VALUE_KEYWORDS.items():
+        if key in blob:
+            return value
+    return None
+
+
+def _best_surface_triple(triples: list[CulturalTriple]) -> Optional[CulturalTriple]:
+    for t in triples:
+        if t.object_layer == LayerLabel.LAYER_1_SURFACE and not _is_topic_metadata_triple(t):
+            return t
+    for t in triples:
+        if t.subject_layer == LayerLabel.LAYER_1_SURFACE and not _is_topic_metadata_triple(t):
+            return t
+    return None
+
+
 # --- LLM critique (MAIN) ---------------------------------------------------
 
 def _format_critique_prompt(record: dict, triples: list[CulturalTriple]) -> str:
@@ -103,21 +218,41 @@ def _parse_critique_response(record: dict, triples: list[CulturalTriple],
                 affected_triple_ids=[str(x) for x in (it.get("affected_triple_ids") or [])],
             ))
 
+    flagged = []
+    flagged_ids: set[str] = set()
+    for ft in parsed.get("triples_to_flag", []) or []:
+        if isinstance(ft, dict) and ft.get("triple_id"):
+            tid = str(ft.get("triple_id"))
+            flagged_ids.add(tid)
+            flagged.append(FlaggedTriple(
+                triple_id=tid,
+                reason=normalize_text(ft.get("reason")),
+            ))
+
+    for t in triples:
+        if _is_topic_metadata_triple(t) and t.triple_id not in flagged_ids:
+            flagged_ids.add(t.triple_id)
+            flagged.append(FlaggedTriple(
+                triple_id=t.triple_id,
+                reason="Dataset topic/category metadata is not a real L3 deep value.",
+            ))
+            issues.append(CritiqueIssue(
+                issue_type="topic_metadata_as_value",
+                severity="high",
+                description="Topic/category metadata was labeled as a deep value.",
+                affected_triple_ids=[t.triple_id],
+            ))
+
     suggested = []
     for st in parsed.get("suggested_triples", []) or []:
         if isinstance(st, dict) and normalize_text(st.get("subject")) and normalize_text(st.get("object")):
             st = validate_triple_layers(st)
-            suggested.append(_build_suggested_triple(record, st))
+            candidate = _build_suggested_triple(record, st)
+            if not _is_supported_value_suggestion(candidate):
+                continue
+            suggested.append(candidate)
             if len(suggested) >= config.MAX_CRITIQUE_SUGGESTIONS:
                 break
-
-    flagged = []
-    for ft in parsed.get("triples_to_flag", []) or []:
-        if isinstance(ft, dict) and ft.get("triple_id"):
-            flagged.append(FlaggedTriple(
-                triple_id=str(ft.get("triple_id")),
-                reason=normalize_text(ft.get("reason")),
-            ))
 
     return CritiqueResult(
         record_id=rec_id,
@@ -179,9 +314,25 @@ def critique_record_rule_based(record: dict,
     rec_id = record.get("instance_id", "")
     issues: list[CritiqueIssue] = []
     suggested: list[CulturalTriple] = []
+    flagged: list[FlaggedTriple] = []
+
+    usable_triples = [t for t in triples if not _is_topic_metadata_triple(t)]
+
+    for t in triples:
+        if _is_topic_metadata_triple(t):
+            flagged.append(FlaggedTriple(
+                triple_id=t.triple_id,
+                reason="Dataset topic/category metadata is not a real L3 deep value.",
+            ))
+            issues.append(CritiqueIssue(
+                issue_type="topic_metadata_as_value",
+                severity="high",
+                description="Topic/category metadata was labeled as a deep value.",
+                affected_triple_ids=[t.triple_id],
+            ))
 
     layers_present = set()
-    for t in triples:
+    for t in usable_triples:
         layers_present.update({t.subject_layer, t.predicate_layer, t.object_layer})
 
     cg = normalize_text(record.get("cultural_group"))
@@ -191,41 +342,43 @@ def critique_record_rule_based(record: dict,
             issue_type="missing_layer_2_social",
             severity="medium",
             description="No Layer 2 social-expectation triple present.",
-            affected_triple_ids=[t.triple_id for t in triples],
+            affected_triple_ids=[t.triple_id for t in usable_triples],
         ))
     if LayerLabel.LAYER_3_DEEP_VALUE not in layers_present:
         issues.append(CritiqueIssue(
             issue_type="missing_layer_3_value",
             severity="medium",
-            description="No Layer 3 deep-value triple present.",
-            affected_triple_ids=[t.triple_id for t in triples],
+            description="No real Layer 3 deep-value triple present.",
+            affected_triple_ids=[t.triple_id for t in usable_triples],
         ))
-        topic = normalize_text(record.get("topic"))
-        if cg and topic:
+        surface = _best_surface_triple(usable_triples)
+        value = _infer_value_from_record(record, usable_triples)
+        if surface and value:
+            subject = surface.object if surface.object_layer == LayerLabel.LAYER_1_SURFACE else surface.subject
             suggested.append(_build_suggested_triple(record, {
-                "subject": cg,
-                "predicate": "may reflect value of",
-                "object": topic,
-                "subject_layer": "LAYER_2_SOCIAL",
+                "subject": subject,
+                "predicate": "may express",
+                "object": value,
+                "subject_layer": "LAYER_1_SURFACE",
                 "predicate_layer": "LAYER_3_DEEP_VALUE",
                 "object_layer": "LAYER_3_DEEP_VALUE",
                 "confidence": 0.35,
-                "evidence": "topic",
-                "notes": "Cautious value bridge inferred from topic; interpretation only.",
+                "evidence": surface.triple_id,
+                "notes": "Cautious value bridge inferred from record wording; not from Topic metadata.",
             }))
 
     # Surface practice without a social/value bridge.
     has_surface = any(LayerLabel.LAYER_1_SURFACE in
-                      {t.subject_layer, t.object_layer} for t in triples)
+                      {t.subject_layer, t.object_layer} for t in usable_triples)
     has_bridge = any(LayerLabel.LAYER_2_SOCIAL in {t.subject_layer, t.predicate_layer, t.object_layer}
                      or LayerLabel.LAYER_3_DEEP_VALUE in {t.subject_layer, t.predicate_layer, t.object_layer}
-                     for t in triples)
+                     for t in usable_triples)
     if has_surface and not has_bridge:
         issues.append(CritiqueIssue(
             issue_type="surface_without_bridge",
             severity="high",
             description="Surface practices present without social/value mediation.",
-            affected_triple_ids=[t.triple_id for t in triples],
+            affected_triple_ids=[t.triple_id for t in usable_triples],
         ))
 
     if not cg:
@@ -240,7 +393,7 @@ def critique_record_rule_based(record: dict,
         original_triple_ids=[t.triple_id for t in triples],
         issues=issues,
         suggested_triples=suggested,
-        triples_to_flag=[],
+        triples_to_flag=flagged,
         summary="Rule-based fallback critique.",
         method="rule_based",
     )
@@ -273,11 +426,13 @@ def build_refined_triples(records_by_id: dict[str, dict],
                           critiques: list[CritiqueResult]) -> list[CulturalTriple]:
     """Combine original valid triples with critique suggestions.
 
-    - Keep all original triples (annotate flagged ones in notes).
-    - Add suggested triples (generated=true).
+    - Keep original non-metadata triples (annotate flagged ones in notes).
+    - Drop dataset topic/category triples that were miscast as values.
+    - Add suggested triples (generated=true) if they are not topic metadata.
     - Deduplicate exact (subject, predicate, object) per instance, keeping the
       grounded (non-generated) version when there is a conflict.
     """
+    _ = records_by_id  # Kept for API compatibility and future record-aware checks.
     flagged_map: dict[str, str] = {}
     suggestions_by_record: dict[str, list[CulturalTriple]] = {}
     for c in critiques:
@@ -291,10 +446,14 @@ def build_refined_triples(records_by_id: dict[str, dict],
         return stable_id(t.instance_id, t.subject.lower(),
                          t.predicate.lower(), t.object.lower())
 
-    # Original triples first (grounded take priority).
+    # Original triples first (grounded take priority), but remove topic/category
+    # metadata triples because they corrupt L3 pathway diagnostics.
     for rec_id, triples in triples_by_record.items():
         for t in triples:
             t2 = t.model_copy(deep=True)
+            if _is_topic_metadata_triple(t2):
+                LOGGER.debug("Dropping topic metadata triple from refined KG: %s", t2.triple_id)
+                continue
             if t2.triple_id in flagged_map:
                 reason = flagged_map[t2.triple_id]
                 note = f"[FLAGGED: {reason}]"
@@ -304,6 +463,8 @@ def build_refined_triples(records_by_id: dict[str, dict],
     # Critique suggestions (do not overwrite grounded triples).
     for rec_id, suggestions in suggestions_by_record.items():
         for s in suggestions:
+            if not _is_supported_value_suggestion(s):
+                continue
             k = _key(s)
             if k not in refined:
                 refined[k] = s
