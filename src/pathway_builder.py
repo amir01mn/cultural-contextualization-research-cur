@@ -127,27 +127,29 @@ def _is_weak_pathway_node(graph: nx.MultiDiGraph, node_id: str, culture: str) ->
 
     if not label:
         return True
-
     if label == culture_label:
         return True
-
     if label in _WEAK_NODE_LABELS:
         return True
-
     if label in _WEAK_TOPIC_LABELS:
         return True
-
     return False
 
 
-def _is_weak_metadata_edge(
+def _is_topic_metadata_edge(
     graph: nx.MultiDiGraph,
     source: str,
     target: str,
     data: dict,
     culture: str,
 ) -> bool:
-    """Return True for metadata/topic/generic edges that should not become pathways."""
+    """Return True for topic/category metadata edges.
+
+    This deliberately does not filter edges just because one endpoint is a weak
+    actor such as "American" or "people". Those weak actors should not become
+    pathway nodes, but a non-weak value or practice attached to them can still
+    provide useful record-level evidence for a FULL pathway.
+    """
     predicate = normalize_text(data.get("predicate", "")).lower()
     source_label = _node_label(graph, source).lower()
     target_label = _node_label(graph, target).lower()
@@ -164,13 +166,6 @@ def _is_weak_metadata_edge(
     if source_label == culture_label and (
         "topic" in predicate or "category" in predicate or "cultural group" in predicate
     ):
-        return True
-
-    # Avoid pathways whose explanation node is only a broad culture/group/actor.
-    # These nodes can remain in the graph, but they are not useful retrieval paths.
-    if _is_weak_pathway_node(graph, source, culture):
-        return True
-    if _is_weak_pathway_node(graph, target, culture):
         return True
 
     return False
@@ -234,7 +229,7 @@ def _edge_records_for_culture(
     graph: nx.MultiDiGraph,
     culture: str,
 ) -> dict[str, list[tuple[str, str, str, dict]]]:
-    """Group useful edges by source record for one culture."""
+    """Group non-metadata edges by source record for one culture."""
     by_record: dict[str, list[tuple[str, str, str, dict]]] = defaultdict(list)
 
     for u, v, key, data in graph.edges(keys=True, data=True):
@@ -242,7 +237,9 @@ def _edge_records_for_culture(
             continue
         if culture not in _culture_set(graph.nodes[v]):
             continue
-        if _is_weak_metadata_edge(graph, u, v, data, culture):
+        if _is_topic_metadata_edge(graph, u, v, data, culture):
+            continue
+        if _is_weak_pathway_node(graph, u, culture) and _is_weak_pathway_node(graph, v, culture):
             continue
         record_id = str(data.get("instance_id") or "unknown_record")
         by_record[record_id].append((u, v, str(key), data))
@@ -305,6 +302,21 @@ def _representative_by_layer(
     )[0]
 
 
+def _all_useful_nodes(edges: list[tuple[str, str, str, dict]], culture: str, graph: nx.MultiDiGraph) -> set[str]:
+    """Collect all non-weak endpoint nodes from a record's non-metadata edges."""
+    nodes: set[str] = set()
+    for u, v, _triple_id, _data in edges:
+        if not _is_weak_pathway_node(graph, u, culture):
+            nodes.add(u)
+        if not _is_weak_pathway_node(graph, v, culture):
+            nodes.add(v)
+    return nodes
+
+
+def _all_edge_ids(edges: list[tuple[str, str, str, dict]]) -> set[str]:
+    return {triple_id for _u, _v, triple_id, _data in edges}
+
+
 def build_pathways(
     graph: nx.MultiDiGraph,
     entities: list[CanonicalEntity],
@@ -314,11 +326,14 @@ def build_pathways(
 ) -> list[CulturalPathway]:
     """Enumerate flexible, layer-aware cultural evidence pathways.
 
-    The builder keeps meaningful partial paths instead of requiring every path
-    to start at L3 and move downward. FULL pathways are built when L1, L2, and
-    L3 evidence occurs in the same connected record component. Partial pathways
-    such as L2->L1, L2->L3, and L1->L3 are retained when they are the strongest
-    evidence available.
+    FULL pathways are created when a record contains useful L1, L2, and L3
+    evidence after removing topic/category metadata and generic pathway nodes.
+    The evidence does not need to appear as a single L3->L2->L1 directed chain:
+    if the record states a practice, a social role/norm, and a value in separate
+    triples, that is still a valid record-level FULL pathway.
+
+    Partial pathways such as L2->L1, L2->L3, and L1->L3 are retained exactly as
+    extracted when they are the strongest evidence available.
     """
     max_per_culture = max_per_culture or config.MAX_PATHWAYS_PER_CULTURE
     pivot_ids = {a.abstraction_node_id for a in alignments}
@@ -335,8 +350,33 @@ def build_pathways(
         count = 0
         by_record = _edge_records_for_culture(graph, culture)
 
-        # First, create the strongest available record-level FULL pathways.
-        # This is layer-aware and not dependent on the original edge direction.
+        # First, create record-level FULL pathways. This step is intentionally
+        # broader than connected-component traversal because extracted triples
+        # often attach L3 values through a culture/group node while L2->L1
+        # evidence appears elsewhere in the same record. We do not include the
+        # generic connector node, but we still keep the useful value node.
+        for _record_id, edges in sorted(by_record.items()):
+            if count >= max_per_culture:
+                break
+            record_nodes = _all_useful_nodes(edges, culture, graph)
+            l3 = _representative_by_layer(graph, record_nodes, LayerLabel.LAYER_3_DEEP_VALUE, culture)
+            l2 = _representative_by_layer(graph, record_nodes, LayerLabel.LAYER_2_SOCIAL, culture)
+            l1 = _representative_by_layer(graph, record_nodes, LayerLabel.LAYER_1_SURFACE, culture)
+            if l1 and l2 and l3:
+                if _add_pathway(
+                    graph=graph,
+                    pathways=pathways,
+                    seen_hashes=seen_hashes,
+                    pivot_ids=pivot_ids,
+                    culture=culture,
+                    node_ids=[l3, l2, l1],
+                    triple_ids=_all_edge_ids(edges),
+                ):
+                    count += 1
+
+        # Then create connected-component FULL pathways as a stricter variant.
+        # These can capture multiple FULL pathways within a single record when
+        # the record contains separate connected cultural structures.
         for _record_id, edges in sorted(by_record.items()):
             if count >= max_per_culture:
                 break
@@ -364,7 +404,7 @@ def build_pathways(
                     ):
                         count += 1
 
-        # Then keep meaningful directed partial pathways exactly as extracted.
+        # Finally keep meaningful directed partial pathways exactly as extracted.
         # This preserves L2->L1, L2->L3, L1->L3, etc. instead of forcing them
         # into L3->L2->L1 form.
         for _record_id, edges in sorted(by_record.items()):
