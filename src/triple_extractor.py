@@ -23,11 +23,159 @@ from .utils import get_logger, normalize_text, stable_id, truncate
 
 LOGGER = get_logger("triple_extractor")
 
+_LAYER_LABEL_TEXT = {
+    "LAYER_1_SURFACE",
+    "LAYER_2_SOCIAL",
+    "LAYER_3_DEEP_VALUE",
+    "UNKNOWN",
+}
+
+_TOPIC_METADATA_PREDICATES = {
+    "has cultural topic",
+    "has topic",
+    "topic",
+    "is topic",
+    "belongs to topic",
+    "has category",
+    "category",
+    "has cultural category",
+}
+
+_TOPIC_CATEGORY_LABELS = {
+    "community and identity",
+    "consumer behavior",
+    "cultural and environmental appreciation",
+    "cultural exchange",
+    "cultural traditions and festivals",
+    "drinking and alcohol",
+    "family dynamics",
+    "family traditions and heritage",
+    "finance and economy",
+    "food and dining",
+    "health and hygiene",
+    "household and daily life",
+    "lifestyles",
+    "miscellaneous",
+    "social interactions",
+    "social norms and etiquette",
+    "work-life balance",
+}
+
+_VALUE_REPAIR_KEYWORDS = {
+    "hospitality": "hospitality",
+    "welcome": "welcoming",
+    "gratitude": "gratitude",
+    "grateful": "gratitude",
+    "thank": "gratitude",
+    "appreciation": "appreciation",
+    "appreciate": "appreciation",
+    "reciprocat": "reciprocity",
+    "gift": "reciprocity",
+    "respect": "respect",
+    "honor": "honor",
+    "polite": "politeness",
+    "etiquette": "politeness",
+    "generous": "generosity",
+    "generosity": "generosity",
+    "care": "care",
+    "family": "family connection",
+    "clean": "cleanliness",
+    "hygien": "cleanliness",
+    "comfort": "comfort",
+}
+
 
 def _record_to_dict(record) -> dict:
     if isinstance(record, CulturalRecord):
         return record.model_dump()
     return dict(record)
+
+
+def _label_key(text: str) -> str:
+    return normalize_text(text).strip().upper().replace(" ", "_").replace("-", "_")
+
+
+def _is_layer_placeholder(text: str) -> bool:
+    """Return True when an entity label is actually a layer enum."""
+    return _label_key(text) in _LAYER_LABEL_TEXT
+
+
+def _looks_like_topic_label(text: str) -> bool:
+    return normalize_text(text).lower() in _TOPIC_CATEGORY_LABELS
+
+
+def _value_from_text(*parts: object) -> Optional[str]:
+    blob = normalize_text(" ".join(str(p) for p in parts if p is not None)).lower()
+    for key, value in _VALUE_REPAIR_KEYWORDS.items():
+        if key in blob:
+            return value
+    return None
+
+
+def _value_from_record(rec: dict) -> Optional[str]:
+    return _value_from_text(
+        rec.get("context"),
+        rec.get("goal"),
+        rec.get("actor_behavior"),
+        rec.get("recipient_behavior"),
+        rec.get("source_text"),
+    )
+
+
+def _clean_extraction_fields(rec: dict, fields: dict) -> Optional[dict]:
+    """Drop or repair malformed extraction triples before they enter the KG.
+
+    Local LLMs sometimes copy the layer enum itself into subject/object, for
+    example ``object="LAYER_3_DEEP_VALUE"``. Those strings are schema labels,
+    not cultural entities, so they must not become graph nodes. When the
+    predicate clearly names a real value (for example "express gratitude"), we
+    repair the object to that value; otherwise the triple is dropped.
+    """
+    cleaned = dict(fields)
+    subject = normalize_text(cleaned.get("subject"))
+    predicate = normalize_text(cleaned.get("predicate"))
+    obj = normalize_text(cleaned.get("object"))
+
+    if not subject or not obj:
+        return None
+
+    predicate_l = predicate.lower()
+    if predicate_l in _TOPIC_METADATA_PREDICATES:
+        return None
+    if _looks_like_topic_label(obj) or _looks_like_topic_label(subject):
+        return None
+
+    subject_is_placeholder = _is_layer_placeholder(subject)
+    object_is_placeholder = _is_layer_placeholder(obj)
+
+    if subject_is_placeholder:
+        # A placeholder subject usually cannot be repaired safely because the
+        # real source entity is missing.
+        return None
+
+    if object_is_placeholder:
+        repaired_value = _value_from_text(
+            predicate,
+            cleaned.get("evidence"),
+            cleaned.get("notes"),
+            rec.get("actor_behavior"),
+            rec.get("recipient_behavior"),
+            rec.get("source_text"),
+        )
+        if not repaired_value:
+            return None
+        cleaned["object"] = repaired_value
+        cleaned["object_layer"] = LayerLabel.LAYER_3_DEEP_VALUE.value
+        note = cleaned.get("notes") or ""
+        repair_note = "Repaired layer placeholder object to a concrete value label."
+        cleaned["notes"] = f"{note} {repair_note}".strip()
+
+    if _is_layer_placeholder(normalize_text(cleaned.get("subject"))):
+        return None
+    if _is_layer_placeholder(normalize_text(cleaned.get("object"))):
+        return None
+
+    return cleaned
 
 
 def _build_triple(rec: dict, fields: dict, method: str) -> CulturalTriple:
@@ -120,13 +268,21 @@ def _triples_from_parsed(rec: dict, parsed: dict) -> list[CulturalTriple]:
     if not isinstance(raw_triples, list):
         return []
     triples: list[CulturalTriple] = []
+    dropped = 0
     for ft in raw_triples:
         if not isinstance(ft, dict):
             continue
+        ft = _clean_extraction_fields(rec, ft)
+        if not ft:
+            dropped += 1
+            continue
         if not normalize_text(ft.get("subject")) or not normalize_text(ft.get("object")):
+            dropped += 1
             continue
         ft = validate_triple_layers(ft)
         triples.append(_build_triple(rec, ft, method="llm_based"))
+    if dropped:
+        LOGGER.debug("Dropped/repaired malformed extraction triples for %s: %d", rec.get("instance_id"), dropped)
     return triples
 
 
@@ -301,18 +457,22 @@ def extract_triples_schema(record) -> list[CulturalTriple]:
             "generated": False,
             "evidence": "relation",
         })
-    if cg and rec.get("topic"):
+
+    value = _value_from_record(rec)
+    if value and rec.get("actor_behavior"):
         candidates.append({
-            "subject": cg,
-            "predicate": "has cultural topic",
-            "object": normalize_text(rec["topic"]),
-            "subject_layer": "LAYER_2_SOCIAL",
-            "predicate_layer": "LAYER_2_SOCIAL",
+            "subject": normalize_text(rec["actor_behavior"]),
+            "predicate": "may express",
+            "object": value,
+            "subject_layer": "LAYER_1_SURFACE",
+            "predicate_layer": "LAYER_3_DEEP_VALUE",
             "object_layer": "LAYER_3_DEEP_VALUE",
-            "confidence": 0.5,
-            "generated": False,
-            "evidence": "topic",
+            "confidence": 0.35,
+            "generated": True,
+            "evidence": "record wording",
+            "notes": "Cautious value bridge inferred from record wording; Topic metadata was not used.",
         })
+
     if rec.get("context") and rec.get("actor_behavior"):
         candidates.append({
             "subject": normalize_text(rec["actor_behavior"]),
@@ -328,6 +488,9 @@ def extract_triples_schema(record) -> list[CulturalTriple]:
 
     triples = []
     for c in candidates:
+        c = _clean_extraction_fields(rec, c)
+        if not c:
+            continue
         c = validate_triple_layers(c)
         triples.append(_build_triple(rec, c, method="schema_fallback"))
     return triples
