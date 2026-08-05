@@ -30,10 +30,32 @@ LAYER_2_SOCIAL:
 Social expectations, roles, actor-recipient relations, politeness systems, family roles, guest-host expectations, hierarchy, communication norms, obligation, taboo, service norms, behavioral expectations.
 
 LAYER_3_DEEP_VALUE:
-Abstract values, beliefs, moral principles, cosmologies, identity concepts, respect, harmony, hospitality, modesty, honor, face, family unity, collectivism, individualism, spirituality, purity, dignity.
+Abstract values, beliefs, moral principles, cosmologies, identity concepts, respect, harmony, hospitality, modesty, honor, face, family unity, collectivism, individualism, spirituality, purity, dignity, gratitude, appreciation, reciprocity, generosity, care, belonging, cleanliness, fairness, comfort, or community connection.
 
 UNKNOWN:
 Use only when the layer is genuinely unclear.
+
+Non-negotiable topic/category rule:
+- The Topic field is dataset metadata. It helps you understand the record, but it is not itself a cultural value.
+- Never create triples such as "American -> has cultural topic -> Social Norms and Etiquette".
+- Never treat category labels such as "Social Norms and Etiquette", "Social Interactions", "Food and Dining", "Consumer Behavior", or "Family Dynamics" as LAYER_3_DEEP_VALUE.
+- Do not use predicates like "has cultural topic", "has topic", "belongs to topic", or "has category".
+
+Value-bridge rule:
+- If the record supports a real value, extract it as a specific L3 value such as hospitality, gratitude, reciprocity, politeness, respect, generosity, appreciation, care, cleanliness, or family connection.
+- If the value is inferred rather than directly stated, mark generated=true, use confidence below 0.50, and explain the support in notes.
+- If the record does not support a real value, omit L3 rather than using the Topic field as a substitute.
+
+Good examples:
+- hosts and guests -> follow expectation of -> host-guest reciprocity
+- offering drinks or food to guests -> expresses -> hospitality
+- thanking food providers -> expresses -> gratitude
+- using real plates for guests -> reflects -> respect for guests
+
+Bad examples:
+- American -> has cultural topic -> Social Norms and Etiquette
+- American -> has cultural topic -> Food and Dining
+- people -> has category -> Social Interactions
 
 Important rules:
 1. Extract only culturally relevant triples.
@@ -46,6 +68,7 @@ Important rules:
 8. Avoid stereotyping. Do not generalize beyond the given record.
 9. Keep triples short, clear, and reusable.
 10. Prefer 5 to 12 useful triples per record.
+11. Include surface practices, social roles/norms, and real deep values when supported.
 
 Return JSON in this exact format:
 
@@ -114,8 +137,10 @@ Raw fields:
 Remember:
 - Return only JSON.
 - Extract triples useful for cultural scenario reasoning.
-- Include surface practices, social systems, and deep values when supported.
-- Mark inferred bridge triples as generated=true.
+- Include surface practices, social systems, and real deep values when supported.
+- The Topic field is metadata. Do not turn the Topic field into a LAYER_3_DEEP_VALUE node.
+- Do not emit "has cultural topic", "has topic", "belongs to topic", or "has category" triples.
+- Mark inferred bridge triples as generated=true with confidence below 0.50.
 - Do not stereotype.
 - Do not add unsupported cultural claims."""
 
@@ -144,6 +169,7 @@ Check for:
 8. Behavior without cultural group.
 9. Surface practice without social/value bridge.
 10. Weak predicate choices.
+11. Topic/category labels incorrectly used as LAYER_3_DEEP_VALUE.
 
 Important:
 - Keep valid original triples.
@@ -153,6 +179,10 @@ Important:
 - If a suggested triple is only an interpretation, say so in notes.
 - Avoid stereotypes.
 - Do not generalize to an entire culture beyond the source record.
+- The Topic field is metadata, not a deep value.
+- Flag triples like "American -> has cultural topic -> Social Norms and Etiquette" as topic_as_value or metadata_not_value.
+- Do not suggest "Social Norms and Etiquette", "Social Interactions", "Food and Dining", or similar topic labels as L3 values.
+- If supported, suggest real value bridges such as hospitality, gratitude, reciprocity, politeness, respect, generosity, appreciation, care, cleanliness, or family connection.
 
 Return JSON in this exact format:
 
@@ -202,6 +232,9 @@ Your task:
 - Identify missing social/value mediation.
 - Suggest useful bridge triples if needed.
 - Flag unsupported triples.
+- Specifically flag topic/category triples that are incorrectly treated as LAYER_3_DEEP_VALUE.
+- Do not use the Topic field as a deep value.
+- Suggest only real L3 values when supported by the record.
 - Keep uncertainty.
 - Do not stereotype.
 - Return only JSON."""
@@ -352,13 +385,13 @@ MCQ_EVIDENCE_HEADERS = {
     "S2_flat_kg": "Retrieved cultural facts:",
     "S3_layered_kg": "Retrieved cultural knowledge graph triples (with abstraction layers):",
     "S4_abstraction_refinement_kg": (
-        "Retrieved abstraction→refinement pathways (L3→L2→L1):"
+        "Retrieved flexible cultural evidence pathways (full and partial layer-aware pathways):"
     ),
     "S4_triple_retrieval": (
         "Retrieved refined cultural knowledge graph triples (pathway ablation):"
     ),
     "S4_no_shared_pivot": (
-        "Retrieved abstraction→refinement pathways (without cross-cultural pivots):"
+        "Retrieved flexible cultural evidence pathways (without cross-cultural pivots):"
     ),
 }
 
