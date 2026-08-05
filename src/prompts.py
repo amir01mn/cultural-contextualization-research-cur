@@ -41,6 +41,13 @@ Non-negotiable topic/category rule:
 - Never treat category labels such as "Social Norms and Etiquette", "Social Interactions", "Food and Dining", "Consumer Behavior", or "Family Dynamics" as LAYER_3_DEEP_VALUE.
 - Do not use predicates like "has cultural topic", "has topic", "belongs to topic", or "has category".
 
+Entity-text rule:
+- The subject and object fields must contain actual cultural concepts, actors, practices, roles, norms, or values.
+- Never put schema/layer names in subject or object.
+- Invalid subject/object text: "LAYER_1_SURFACE", "LAYER_2_SOCIAL", "LAYER_3_DEEP_VALUE", or "UNKNOWN".
+- Correct example: individuals, birthday person, and guests -> express -> gratitude.
+- Incorrect example: individuals, birthday person, and guests -> express gratitude -> LAYER_3_DEEP_VALUE.
+
 Value-bridge rule:
 - If the record supports a real value, extract it as a specific L3 value such as hospitality, gratitude, reciprocity, politeness, respect, generosity, appreciation, care, cleanliness, or family connection.
 - If the value is inferred rather than directly stated, mark generated=true, use confidence below 0.50, and explain the support in notes.
@@ -56,6 +63,8 @@ Bad examples:
 - American -> has cultural topic -> Social Norms and Etiquette
 - American -> has cultural topic -> Food and Dining
 - people -> has category -> Social Interactions
+- birthday person -> honor -> LAYER_3_DEEP_VALUE
+- LAYER_1_SURFACE -> reflects -> hospitality
 
 Important rules:
 1. Extract only culturally relevant triples.
@@ -69,6 +78,7 @@ Important rules:
 9. Keep triples short, clear, and reusable.
 10. Prefer 5 to 12 useful triples per record.
 11. Include surface practices, social roles/norms, and real deep values when supported.
+12. Do not use layer enum strings as subject or object labels.
 
 Return JSON in this exact format:
 
@@ -140,6 +150,7 @@ Remember:
 - Include surface practices, social systems, and real deep values when supported.
 - The Topic field is metadata. Do not turn the Topic field into a LAYER_3_DEEP_VALUE node.
 - Do not emit "has cultural topic", "has topic", "belongs to topic", or "has category" triples.
+- Subject and object must be real text labels, never "LAYER_1_SURFACE", "LAYER_2_SOCIAL", "LAYER_3_DEEP_VALUE", or "UNKNOWN".
 - Mark inferred bridge triples as generated=true with confidence below 0.50.
 - Do not stereotype.
 - Do not add unsupported cultural claims."""
@@ -170,6 +181,7 @@ Check for:
 9. Surface practice without social/value bridge.
 10. Weak predicate choices.
 11. Topic/category labels incorrectly used as LAYER_3_DEEP_VALUE.
+12. Schema/layer labels incorrectly used as subject or object text.
 
 Important:
 - Keep valid original triples.
@@ -181,6 +193,7 @@ Important:
 - Do not generalize to an entire culture beyond the source record.
 - The Topic field is metadata, not a deep value.
 - Flag triples like "American -> has cultural topic -> Social Norms and Etiquette" as topic_as_value or metadata_not_value.
+- Flag triples where subject or object is "LAYER_1_SURFACE", "LAYER_2_SOCIAL", "LAYER_3_DEEP_VALUE", or "UNKNOWN".
 - Do not suggest "Social Norms and Etiquette", "Social Interactions", "Food and Dining", or similar topic labels as L3 values.
 - If supported, suggest real value bridges such as hospitality, gratitude, reciprocity, politeness, respect, generosity, appreciation, care, cleanliness, or family connection.
 
@@ -233,6 +246,7 @@ Your task:
 - Suggest useful bridge triples if needed.
 - Flag unsupported triples.
 - Specifically flag topic/category triples that are incorrectly treated as LAYER_3_DEEP_VALUE.
+- Specifically flag triples where subject or object is a layer enum string rather than a real entity.
 - Do not use the Topic field as a deep value.
 - Suggest only real L3 values when supported by the record.
 - Keep uncertainty.
