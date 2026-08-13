@@ -14,6 +14,9 @@
 # Requires the retrieval corpus (sbatch slurm/build_corpus.sh) and staged data.
 #
 #   sbatch slurm/eval_culturalbench.sh
+#
+# Optional controlled question-file run:
+#   QUESTIONS_JSONL=data/controlled/food_hospitality_culturalbench_questions.jsonl sbatch slurm/eval_culturalbench.sh
 
 set -euo pipefail
 
@@ -38,10 +41,19 @@ export VLLM_MODEL="${VLLM_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
 LIMIT="${LIMIT:-250}"
 TOP_K="${TOP_K:-8}"
 SEED="${SEED:-42}"
+QUESTIONS_JSONL="${QUESTIONS_JSONL:-}"
 
 SYSTEMS="${SYSTEMS:-S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg,S4_abstraction_refinement_kg}"
 
+EXTRA_ARGS=()
+if [[ -n "$QUESTIONS_JSONL" ]]; then
+  EXTRA_ARGS+=(--questions_jsonl "$QUESTIONS_JSONL")
+fi
+
 echo "Evaluating on CulturalBench with vLLM model: $VLLM_MODEL"
+if [[ -n "$QUESTIONS_JSONL" ]]; then
+  echo "Using selected question file: $QUESTIONS_JSONL"
+fi
 python scripts/07_eval_culturalbench.py \
   --provider vllm \
   --model "$VLLM_MODEL" \
@@ -49,6 +61,7 @@ python scripts/07_eval_culturalbench.py \
   --limit "$LIMIT" \
   --top_k "$TOP_K" \
   --seed "$SEED" \
-  --systems "$SYSTEMS"
+  --systems "$SYSTEMS" \
+  "${EXTRA_ARGS[@]}"
 
 echo "Eval job complete. See data/outputs/culturalbench_summary.md"
