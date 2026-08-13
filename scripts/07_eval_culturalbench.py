@@ -10,6 +10,9 @@ Examples:
 
     # Cluster (vLLM), full:
     python scripts/07_eval_culturalbench.py --provider vllm --limit 250
+
+    # Controlled selected-question eval:
+    python scripts/07_eval_culturalbench.py --provider vllm --questions_jsonl data/controlled/food_hospitality_culturalbench_questions.jsonl --limit 40
 """
 
 from __future__ import annotations
@@ -33,10 +36,63 @@ from src.mcq_systems import (  # noqa: E402
     run_system,
 )
 from src.pathway_retriever import PathwayRetriever  # noqa: E402
-from src.schemas import CulturalTriple  # noqa: E402
+from src.schemas import CulturalTriple, MCQQuestion  # noqa: E402
 from src.utils import get_logger, read_jsonl  # noqa: E402
 
 LOGGER = get_logger("07_eval_culturalbench")
+
+
+def _variant_name(q: MCQQuestion) -> str:
+    value = q.variant.value if hasattr(q.variant, "value") else q.variant
+    return str(value).lower()
+
+
+def _limit_by_group(questions: list[MCQQuestion], limit: int | None) -> list[MCQQuestion]:
+    """Limit by question group so Hard true/false groups are not split."""
+    if not limit:
+        return questions
+
+    selected: list[MCQQuestion] = []
+    seen_groups: set[str] = set()
+    for q in questions:
+        group_id = q.group_id or q.question_id
+        if group_id not in seen_groups:
+            if len(seen_groups) >= limit:
+                continue
+            seen_groups.add(group_id)
+        selected.append(q)
+    return selected
+
+
+def _load_questions_jsonl(path: Path,
+                          variants: tuple[str, ...],
+                          limit: int | None) -> list[MCQQuestion]:
+    """Load preselected normalized CulturalBench questions from JSONL.
+
+    This is used for controlled subset evaluations, such as the selected
+    food/hospitality CulturalBench questions. The JSONL rows must already match
+    the normalized MCQQuestion schema produced by the CulturalBench loader.
+    """
+    if not path.exists():
+        raise FileNotFoundError(f"Selected question file not found: {path}")
+
+    wanted = {v.lower() for v in variants}
+    questions: list[MCQQuestion] = []
+
+    for row in read_jsonl(path):
+        try:
+            q = MCQQuestion(**row)
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning("Skipping invalid question row in %s: %s", path, exc)
+            continue
+        if wanted and _variant_name(q) not in wanted:
+            continue
+        questions.append(q)
+
+    questions = _limit_by_group(questions, limit)
+    LOGGER.info("Loaded %d selected CulturalBench items from %s.",
+                len(questions), path)
+    return questions
 
 
 def _load_corpus(passages_path: Path,
@@ -86,6 +142,11 @@ def main(argv=None) -> None:
     p.add_argument("--variants", default="easy,hard")
     p.add_argument("--limit", type=int, default=250,
                    help="Cap on Easy questions and Hard groups.")
+    p.add_argument(
+        "--questions_jsonl",
+        default=None,
+        help="Optional JSONL file of preselected normalized CulturalBench questions.",
+    )
     p.add_argument("--allow_fallback", action="store_true", default=False,
                    help="Use tiny built-in sample if HF load fails (dev/tests only).")
     p.add_argument("--top_k", type=int, default=config.RETRIEVAL_TOP_K)
@@ -111,12 +172,23 @@ def main(argv=None) -> None:
         sys.exit(2)
 
     variants = tuple(v.strip() for v in args.variants.split(",") if v.strip())
-    questions = load_culturalbench(variants=variants, limit=args.limit,
-                                   allow_fallback=args.allow_fallback)
-    if any(q.question_id.endswith("_fb1") or "_fb" in q.question_id for q in questions):
-        LOGGER.error("Loaded fallback CulturalBench IDs; refusing to evaluate.")
+    if args.questions_jsonl:
+        questions = _load_questions_jsonl(
+            Path(args.questions_jsonl),
+            variants=variants,
+            limit=args.limit,
+        )
+    else:
+        questions = load_culturalbench(variants=variants, limit=args.limit,
+                                       allow_fallback=args.allow_fallback)
+        if any(q.question_id.endswith("_fb1") or "_fb" in q.question_id for q in questions):
+            LOGGER.error("Loaded fallback CulturalBench IDs; refusing to evaluate.")
+            sys.exit(2)
+        LOGGER.info("Loaded %d CulturalBench items.", len(questions))
+
+    if not questions:
+        LOGGER.error("No CulturalBench questions loaded. Check --variants, --limit, and --questions_jsonl.")
         sys.exit(2)
-    LOGGER.info("Loaded %d CulturalBench items.", len(questions))
 
     need_passages = "S1_raw_text_rag" in systems
     need_triples = any(s in {SYSTEM_S2, SYSTEM_S3} for s in systems) or bool(
@@ -174,6 +246,7 @@ def main(argv=None) -> None:
         "seed": args.seed,
         "variants": list(variants),
         "limit": args.limit,
+        "questions_jsonl": args.questions_jsonl,
         "systems": systems,
         "corpus_passages": len(passages) if passages else 0,
         "corpus_triples": len(triples) if triples else 0,
@@ -192,6 +265,8 @@ def _print_summary(summary: dict, run_meta: dict) -> None:
     combined = summary["accuracy"]["combined"]
     print("\n===== CULTURALBENCH EVALUATION (S0-S4) =====\n")
     print(f"Provider: {run_meta['provider']}   Model: {run_meta['model']}")
+    if run_meta.get("questions_jsonl"):
+        print(f"Questions: {run_meta['questions_jsonl']}")
     print(f"Units: {summary['num_units_total']} "
           f"(easy={summary['num_units_easy']}, hard={summary['num_units_hard']})")
     print(f"Retrieval top-k: {run_meta['top_k']}   "
