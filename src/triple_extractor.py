@@ -161,6 +161,37 @@ def _chunked(items: list, size: int):
         yield items[i:i + size]
 
 
+def _retry_unparsed(backend, stage: str, user_prompts: list[str],
+                    outputs: list[str], system_prompt: str,
+                    cache_dir: str) -> list[str]:
+    """Re-generate any response that did not parse, with a larger budget.
+
+    The dominant failure mode is a JSON object truncated by the token budget, so
+    one retry with more headroom recovers most of them.
+    """
+    from .storage import generate_with_cache
+
+    retry_idx = [
+        i for i, text in enumerate(outputs)
+        if not local_llm.safe_parse_json(text)
+    ]
+    if not retry_idx:
+        return outputs
+
+    bigger = int(config.stage_max_tokens(stage) * config.JSON_RETRY_TOKEN_MULTIPLIER)
+    LOGGER.info("Retrying %d unparsed %s response(s) at max_tokens=%d.",
+                len(retry_idx), stage, bigger)
+    retried = generate_with_cache(
+        backend, stage, [user_prompts[i] for i in retry_idx],
+        system_prompt, cache_dir, max_tokens=bigger,
+    )
+    outputs = list(outputs)
+    for i, text in zip(retry_idx, retried):
+        if local_llm.safe_parse_json(text):
+            outputs[i] = text
+    return outputs
+
+
 def extract_triples_llm_batched_resumable(
     records: list,
     backend,
@@ -177,8 +208,10 @@ def extract_triples_llm_batched_resumable(
         append_jsonl,
         generate_with_cache,
         mark_completed,
+        mark_failed,
         prepare_stage_state,
         read_completed_ids,
+        read_failed_ids,
         save_corpus_state,
     )
 
@@ -215,37 +248,60 @@ def extract_triples_llm_batched_resumable(
             prompts.TRIPLE_EXTRACTION_SYSTEM,
             cache_dir,
         )
+        outputs = _retry_unparsed(
+            backend, "extraction", user_prompts, outputs,
+            prompts.TRIPLE_EXTRACTION_SYSTEM, cache_dir,
+        )
         batch_rows: list[dict] = []
         done_ids: list[str] = []
+        failed_ids: list[str] = []
         for rec, text in zip(batch, outputs):
             iid = rec.get("instance_id", "")
             parsed = local_llm.safe_parse_json(text)
             triples = _triples_from_parsed(rec, parsed) if parsed else []
-            if not triples and config.CORPUS_SCHEMA_FALLBACK_ON_EMPTY:
-                triples = extract_triples_schema(rec)
-            elif not triples and allow_fallback:
-                triples = extract_triples_schema(rec)
+            if triples:
+                done_ids.append(iid)
+            else:
+                # LLM extraction failed for this record. Record that honestly:
+                # substitute schema triples only when fallback is allowed, and
+                # tag them so downstream stages can exclude them.
+                failed_ids.append(iid)
+                if allow_fallback:
+                    triples = extract_triples_schema(rec, llm_failed=True)
             result[iid] = triples
             batch_rows.extend(t.model_dump() for t in triples)
-            done_ids.append(iid)
 
         if batch_rows:
             append_jsonl(out_path, batch_rows)
         mark_completed(state, "extraction", done_ids)
+        if failed_ids:
+            mark_failed(state, "extraction", failed_ids)
         save_corpus_state(state_path, state)
-        LOGGER.info("Extraction batch done: %d records, %d triples appended.",
-                    len(done_ids), len(batch_rows))
+        LOGGER.info(
+            "Extraction batch: %d ok, %d failed, %d triples appended.",
+            len(done_ids), len(failed_ids), len(batch_rows),
+        )
 
+    total_failed = len(read_failed_ids(state, "extraction"))
+    if total_failed:
+        LOGGER.warning(
+            "Extraction: %d record(s) produced no LLM triples. They are NOT "
+            "marked complete and will be retried on the next resumed run.",
+            total_failed,
+        )
     return result
 
 
 # --- Schema fallback (NOT the main method) --------------------------------
 
-def extract_triples_schema(record) -> list[CulturalTriple]:
+def extract_triples_schema(record, *, llm_failed: bool = False) -> list[CulturalTriple]:
     """Deterministic field-based triples. Fallback only.
 
     Builds a handful of grounded triples directly from normalized record fields.
     No external model is used. Layers are guessed by the keyword classifier.
+
+    Pass ``llm_failed=True`` when substituting these for a failed LLM extraction
+    so downstream stages can exclude them from pathway construction.
     """
     rec = _record_to_dict(record)
     cg = normalize_text(rec.get("cultural_group"))
@@ -329,7 +385,9 @@ def extract_triples_schema(record) -> list[CulturalTriple]:
     triples = []
     for c in candidates:
         c = validate_triple_layers(c)
-        triples.append(_build_triple(rec, c, method="schema_fallback"))
+        t = _build_triple(rec, c, method="schema_fallback")
+        t.llm_failed = llm_failed
+        triples.append(t)
     return triples
 
 

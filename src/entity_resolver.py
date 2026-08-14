@@ -8,6 +8,7 @@ from typing import Optional
 import numpy as np
 
 from . import config
+from .culture_normalizer import canonical_culture
 from .embedding_utils import cosine_similarity_matrix, embed_texts
 from .schemas import CanonicalEntity, CulturalTriple, LayerLabel
 from .utils import get_logger, normalize_node_label, normalize_text, stable_id
@@ -26,10 +27,16 @@ def _dominant_endpoint_layer(t: CulturalTriple, endpoint: str) -> LayerLabel:
 
 
 def _record_culture_map(records: list[dict]) -> dict[str, str]:
+    """Map instance_id -> canonical culture key.
+
+    Canonicalizing here is what lets pathway construction find multi-hop chains:
+    it requires every hop to share a culture, and raw CultureBank strings split
+    one culture across many spellings.
+    """
     out: dict[str, str] = {}
     for rec in records:
         iid = normalize_text(rec.get("instance_id"))
-        cg = normalize_text(rec.get("cultural_group"))
+        cg = canonical_culture(rec.get("cultural_group"))
         if iid and cg:
             out[iid] = cg
     return out
@@ -69,29 +76,59 @@ def _collect_candidates(
 
 
 def _cluster_keys(keys: list[tuple[str, str]], labels: list[str],
-                   threshold: float) -> list[list[int]]:
-    if len(keys) <= 1:
+                  threshold: float) -> list[list[int]]:
+    """Cluster label indices into canonical entities by embedding similarity.
+
+    Uses approximate nearest neighbours rather than a dense n x n similarity
+    matrix. The previous implementation materialized that matrix and then ran an
+    O(n^2) Python neighbour scan over it; at 45,087 surface-layer entities the
+    matrix alone is ~8 GB against a 32 GB job, and improving extraction quality
+    only grows n. Nearest-neighbour search keeps recall (unlike token blocking,
+    which would never merge "remove shoes" with "take off shoes") while bounding
+    both memory and time.
+    """
+    n = len(keys)
+    if n <= 1:
         return [[0]] if keys else []
 
     embeddings = embed_texts(labels, fit=True)
-    sim = cosine_similarity_matrix(embeddings)
-    n = len(keys)
+
+    from sklearn.neighbors import NearestNeighbors
+
+    # Cosine distance = 1 - cosine similarity for L2-normalized vectors.
+    radius = max(0.0, 1.0 - threshold)
+    n_neighbors = min(n, config.ER_MAX_NEIGHBORS)
+    nn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine",
+                          algorithm="brute")
+    nn.fit(embeddings)
+
+    adjacency: list[list[int]] = [[] for _ in range(n)]
+    chunk = 2048
+    for start in range(0, n, chunk):
+        block = embeddings[start:start + chunk]
+        distances, indices = nn.kneighbors(block, n_neighbors=n_neighbors)
+        for row, (dists, idxs) in enumerate(zip(distances, indices)):
+            i = start + row
+            for dist, j in zip(dists, idxs):
+                if i != j and dist <= radius:
+                    adjacency[i].append(int(j))
+
+    # Connected components over the neighbour graph.
     visited = [False] * n
     clusters: list[list[int]] = []
-
     for i in range(n):
         if visited[i]:
             continue
-        stack = [i]
-        cluster = []
         visited[i] = True
+        stack = [i]
+        cluster = [i]
         while stack:
             cur = stack.pop()
-            cluster.append(cur)
-            for j in range(n):
-                if not visited[j] and sim[cur, j] >= threshold:
+            for j in adjacency[cur]:
+                if not visited[j]:
                     visited[j] = True
                     stack.append(j)
+                    cluster.append(j)
         clusters.append(cluster)
     return clusters
 

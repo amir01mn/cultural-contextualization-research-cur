@@ -36,7 +36,13 @@ _CULTURALBENCH_SPLITS = ["test"]
 _QUESTION_KEYS = ["prompt_question", "question", "prompt", "query"]
 _COUNTRY_KEYS = ["country", "Country", "cultural_group", "culture", "nation"]
 _REGION_KEYS = ["region", "Region", "continent", "area"]
-_GROUP_KEYS = ["data_idx", "question_idx", "q_idx", "idx", "id", "question_id"]
+# Order matters: this picks the key that GROUPS the True/False items belonging to
+# one CulturalBench-Hard question. "question_idx" is that key; "data_idx" is a
+# per-row identifier and must come after it. With data_idx first, every item
+# became its own group, so Hard was scored as per-item True/False accuracy
+# instead of the official metric (a question counts only when all of its items
+# are correct) - which reported Hard accuracy far higher than it truly was.
+_GROUP_KEYS = ["question_idx", "q_idx", "question_id", "data_idx", "idx", "id"]
 _ANSWER_KEYS = ["answer", "correct_answer", "label", "gold", "gold_answer", "is_correct"]
 _HARD_OPTION_KEYS = ["prompt_option", "option", "answer_option", "candidate", "choice"]
 

@@ -96,6 +96,11 @@ class CulturalTriple(BaseModel):
     generated: bool = False
     evidence: Optional[str] = None
     notes: Optional[str] = None
+    # True when LLM extraction failed for this record and deterministic schema
+    # triples were substituted. Such triples stay in the flat retrieval corpus
+    # (so S1/S2 remain comparable) but are excluded from entity resolution and
+    # pathway construction, which require real LLM-derived layer structure.
+    llm_failed: bool = False
 
     @field_validator("subject_layer", "predicate_layer", "object_layer", mode="before")
     @classmethod
@@ -338,6 +343,12 @@ class CulturalPathway(BaseModel):
     completeness: PathwayCompleteness = PathwayCompleteness.NONE
     has_shared_pivot: bool = False
     shared_pivot_id: Optional[str] = None
+    # Relation label for each hop (len == len(nodes) - 1). Without these a
+    # rendered pathway is just a list of nouns ("Japanese food culture ->
+    # specific brands"), which is unusable as MCQ evidence.
+    predicates: list[str] = Field(default_factory=list)
+    # Whether any contributing triple was inferred rather than dataset-grounded.
+    generated: bool = False
 
     @field_validator("completeness", mode="before")
     @classmethod
@@ -357,3 +368,8 @@ class CorpusBuildState(BaseModel):
     extraction_completed: list[str] = Field(default_factory=list)
     critique_completed: list[str] = Field(default_factory=list)
     updated_at: Optional[str] = None
+    # Records whose LLM output could not be parsed. Tracked separately from
+    # *_completed so a resumed job retries them instead of treating a silent
+    # failure as success.
+    extraction_failed: list[str] = Field(default_factory=list)
+    critique_failed: list[str] = Field(default_factory=list)

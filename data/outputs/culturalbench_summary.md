@@ -3,33 +3,46 @@
 - LLM provider: vllm
 - Model: Qwen/Qwen2.5-7B-Instruct
 - Retrieval top-k: 8
-- Corpus triples: 119711, passages: 22990
-- Units: 500 (easy=250, hard=250)
+- Corpus triples: 153882, passages: 22990
+- Units: 2454 (easy=1227, hard=1227)
 
 ## Accuracy (95% paired-bootstrap CI)
 
 | System | Combined | Easy | Hard |
 |---|---|---|---|
-| S0 No-KG | 76.6% [72.8, 80.2] | 71.6% [66.0, 77.2] | 81.6% [76.8, 86.4] |
-| S1 Raw-text RAG | 71.4% [67.4, 75.4] | 65.6% [59.6, 71.2] | 77.2% [72.0, 82.4] |
-| S2 Flat KG | 72.4% [68.4, 76.4] | 67.2% [61.6, 72.8] | 77.6% [72.4, 82.4] |
-| S3 Layered KG | 70.6% [66.6, 74.6] | 64.0% [58.0, 69.6] | 77.2% [72.0, 82.0] |
-| S4 Pathway KG | 73.2% [69.2, 77.0] | 68.0% [62.0, 73.6] | 78.4% [73.2, 83.2] |
+| S0 No-KG | 52.2% [50.2, 54.2] | 71.6% [69.1, 74.2] | 32.8% [30.1, 35.5] |
+| S1 Raw-text RAG | 41.4% [39.5, 43.4] | 67.3% [64.6, 69.9] | 15.5% [13.5, 17.5] |
+| S2 Flat KG | 42.1% [40.1, 44.1] | 67.0% [64.4, 69.6] | 17.3% [15.2, 19.4] |
+| S3 Layered KG | 42.5% [40.5, 44.4] | 67.3% [64.7, 70.0] | 17.7% [15.7, 19.8] |
+| S4 Pathway KG | 38.4% [36.5, 40.3] | 66.0% [63.4, 68.6] | 10.8% [9.1, 12.6] |
+| S4 Triple ablation | 42.3% [40.4, 44.2] | 67.2% [64.5, 69.8] | 17.5% [15.4, 19.6] |
+| S4 No-shared ablation | 38.2% [36.2, 40.1] | 66.3% [63.7, 69.0] | 10.1% [8.4, 11.8] |
 
 ## McNemar pairwise tests (combined units)
 
 | Comparison | delta acc | discordant (b/c) | p-value | method |
 |---|---|---|---|---|
-| S0_no_kg vs S1_raw_text_rag | +5.2% | 53/27 | 0.004868 | exact_binomial |
-| S0_no_kg vs S2_flat_kg | +4.2% | 48/27 | 0.020298 | exact_binomial |
-| S0_no_kg vs S3_layered_kg | +6.0% | 56/26 | 0.00122 | exact_binomial |
-| S0_no_kg vs S4_abstraction_refinement_kg | +3.4% | 39/22 | 0.039617 | exact_binomial |
-| S1_raw_text_rag vs S2_flat_kg | -1.0% | 23/28 | 0.575849 | exact_binomial |
-| S1_raw_text_rag vs S3_layered_kg | +0.8% | 24/20 | 0.651588 | exact_binomial |
-| S1_raw_text_rag vs S4_abstraction_refinement_kg | -1.8% | 27/36 | 0.313503 | exact_binomial |
-| S2_flat_kg vs S3_layered_kg | +1.8% | 26/17 | 0.222053 | exact_binomial |
-| S2_flat_kg vs S4_abstraction_refinement_kg | -0.8% | 34/38 | 0.723948 | exact_binomial |
-| S3_layered_kg vs S4_abstraction_refinement_kg | -2.6% | 30/43 | 0.159712 | exact_binomial |
+| S0_no_kg vs S1_raw_text_rag | +10.8% | 399/134 | 0.0 | exact_binomial |
+| S0_no_kg vs S2_flat_kg | +10.1% | 385/138 | 0.0 | exact_binomial |
+| S0_no_kg vs S3_layered_kg | +9.7% | 373/135 | 0.0 | exact_binomial |
+| S0_no_kg vs S4_abstraction_refinement_kg | +13.8% | 434/96 | 0.0 | exact_binomial |
+| S0_no_kg vs S4_triple_retrieval | +9.9% | 372/130 | 0.0 | exact_binomial |
+| S0_no_kg vs S4_no_shared_pivot | +14.0% | 443/100 | 0.0 | exact_binomial |
+| S1_raw_text_rag vs S2_flat_kg | -0.7% | 159/177 | 0.353723 | exact_binomial |
+| S1_raw_text_rag vs S3_layered_kg | -1.1% | 157/184 | 0.159037 | exact_binomial |
+| S1_raw_text_rag vs S4_abstraction_refinement_kg | +3.0% | 220/147 | 0.000163 | exact_binomial |
+| S1_raw_text_rag vs S4_triple_retrieval | -0.9% | 154/177 | 0.226521 | exact_binomial |
+| S1_raw_text_rag vs S4_no_shared_pivot | +3.2% | 224/146 | 5.9e-05 | exact_binomial |
+| S2_flat_kg vs S3_layered_kg | -0.4% | 89/98 | 0.558652 | exact_binomial |
+| S2_flat_kg vs S4_abstraction_refinement_kg | +3.7% | 237/146 | 4e-06 | exact_binomial |
+| S2_flat_kg vs S4_triple_retrieval | -0.2% | 94/99 | 0.773491 | exact_binomial |
+| S2_flat_kg vs S4_no_shared_pivot | +3.9% | 238/142 | 1e-06 | exact_binomial |
+| S3_layered_kg vs S4_abstraction_refinement_kg | +4.1% | 241/141 | 0.0 | exact_binomial |
+| S3_layered_kg vs S4_triple_retrieval | +0.2% | 37/33 | 0.720203 | exact_binomial |
+| S3_layered_kg vs S4_no_shared_pivot | +4.3% | 241/136 | 0.0 | exact_binomial |
+| S4_abstraction_refinement_kg vs S4_triple_retrieval | -3.9% | 136/232 | 1e-06 | exact_binomial |
+| S4_abstraction_refinement_kg vs S4_no_shared_pivot | +0.2% | 38/33 | 0.635308 | exact_binomial |
+| S4_triple_retrieval vs S4_no_shared_pivot | +4.1% | 236/135 | 0.0 | exact_binomial |
 
 ## Notes
 - S0–S3 are Phase 1 baselines (raw triple corpus for S2/S3).

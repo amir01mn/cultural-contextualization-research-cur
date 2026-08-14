@@ -40,8 +40,25 @@ CORPUS_LIMIT="${CORPUS_LIMIT:-2000}"
 BATCH_SIZE="${BATCH_SIZE:-32}"
 RESUME="${RESUME:-1}"
 SKIP_ALIGNMENT_VERIFY="${SKIP_ALIGNMENT_VERIFY:-0}"
+STRICT="${STRICT:-1}"
+RUN_TAG="${RUN_TAG:-}"
 
-EXTRA_ARGS=(--provider vllm --model "$VLLM_MODEL" --limit "$CORPUS_LIMIT" --batch_size "$BATCH_SIZE")
+# Per-run cache/state paths. The response cache is keyed on the generation
+# context (model + token budget), but an explicit tag keeps a rebuild fully
+# isolated from the previous checkpoint - which matters because the old
+# checkpoint marks all 22,990 records complete and would otherwise cause
+# extraction and critique to be skipped entirely.
+if [[ -n "$RUN_TAG" ]]; then
+  CACHE_DIR="${CACHE_DIR:-data/processed/llm_cache_${RUN_TAG}}"
+  STATE_PATH="${STATE_PATH:-data/processed/corpus_build_state_${RUN_TAG}.json}"
+else
+  CACHE_DIR="${CACHE_DIR:-data/processed/llm_cache}"
+  STATE_PATH="${STATE_PATH:-data/processed/corpus_build_state.json}"
+fi
+
+EXTRA_ARGS=(--provider vllm --model "$VLLM_MODEL" --limit "$CORPUS_LIMIT" \
+            --batch_size "$BATCH_SIZE" --cache_dir "$CACHE_DIR" \
+            --state_path "$STATE_PATH")
 if [[ "$RESUME" == "1" ]]; then
   EXTRA_ARGS+=(--resume)
 else
@@ -52,9 +69,18 @@ if [[ "$SKIP_ALIGNMENT_VERIFY" == "1" ]]; then
 fi
 
 echo "Building Phase 2 corpus with vLLM model: $VLLM_MODEL (limit=$CORPUS_LIMIT batch=$BATCH_SIZE)"
+echo "  cache_dir=$CACHE_DIR"
+echo "  state_path=$STATE_PATH"
 python scripts/06_build_retrieval_corpus.py "${EXTRA_ARGS[@]}"
 
 echo "Running Phase 2 validation..."
-python scripts/09_validate_phase2.py
+VALIDATE_ARGS=()
+if [[ "$STRICT" == "1" ]]; then
+  VALIDATE_ARGS+=(--strict)
+fi
+if ! python scripts/09_validate_phase2.py "${VALIDATE_ARGS[@]}"; then
+  echo "QUALITY GATES FAILED - see data/outputs/phase2_validation.md" >&2
+  exit 1
+fi
 
 echo "Corpus build job complete."

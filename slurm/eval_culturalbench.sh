@@ -35,11 +35,18 @@ verify_torch_import "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/python"
 
 export LLM_PROVIDER=vllm
 export VLLM_MODEL="${VLLM_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
-LIMIT="${LIMIT:-250}"
+# Full CulturalBench by default: 1,227 Easy questions + 1,227 Hard groups
+# (4,908 True/False items) = 2,454 scored units. The previous 250/variant run
+# gave ~+/-4% bootstrap CIs, too wide to resolve a genuine 3-4 point difference.
+# Batched vLLM answers ~500 items per system in ~20s, so the full set costs
+# roughly 30 minutes of inference.
+LIMIT="${LIMIT:-100000}"
 TOP_K="${TOP_K:-8}"
 SEED="${SEED:-42}"
 
-SYSTEMS="${SYSTEMS:-S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg,S4_abstraction_refinement_kg}"
+# Includes the two S4 ablations, which isolate pathway *structure* from refined
+# *content*; both exist in mcq_systems.ALL_SYSTEMS but were never run.
+SYSTEMS="${SYSTEMS:-S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg,S4_abstraction_refinement_kg,S4_triple_retrieval,S4_no_shared_pivot}"
 
 echo "Evaluating on CulturalBench with vLLM model: $VLLM_MODEL"
 python scripts/07_eval_culturalbench.py \

@@ -91,13 +91,20 @@ class RetrievalContext:
 
 
 def _query_for(q: MCQQuestion) -> str:
+    """Build the retrieval query for a question.
+
+    Answer options are excluded by default. Concatenating all four options meant
+    three of them were distractors, so retrieval was steered by text asserting
+    things that are false - surfacing evidence that supports a wrong option.
+    """
     parts = [q.question]
     if q.cultural_group:
         parts.append(q.cultural_group)
-    if q.variant == MCQVariant.EASY:
-        parts.extend(q.options.values())
-    elif q.option_text:
-        parts.append(q.option_text)
+    if config.RETRIEVAL_QUERY_INCLUDES_OPTIONS:
+        if q.variant == MCQVariant.EASY:
+            parts.extend(q.options.values())
+        elif q.option_text:
+            parts.append(q.option_text)
     return " ".join(p for p in parts if p)
 
 
@@ -127,16 +134,43 @@ def _rank_pathways(hits: list[tuple[CulturalPathway, float]],
 
 
 def _completeness_from_triples(triples: list[CulturalTriple]) -> tuple[str, float, bool]:
-    layers = {
-        layer
-        for triple in triples
-        for layer in (triple.subject_layer, triple.predicate_layer, triple.object_layer)
-        if layer != LayerLabel.UNKNOWN
-    }
-    layer_values = {_LAYER_SCORE[l] for l in layers if l in _LAYER_SCORE}
-    if {3, 2, 1}.issubset(layer_values):
+    """Layer coverage of a retrieved triple bag (NOT pathway completeness).
+
+    Retrieved triples are an unconnected bag, so "all three layers appear
+    somewhere in the bag" says nothing about whether a value -> norm -> practice
+    chain was actually available. Reporting that as FULL is what made the
+    mechanism analysis claim 461 SOCIAL-completeness questions for S4 when the
+    entire corpus held only 19 SOCIAL pathways.
+
+    Connectivity is therefore required: layers only count toward a bucket when a
+    single triple links them, so this measures real linkage rather than
+    co-occurrence. H2 cannot be tested against a co-occurrence metric.
+    """
+    linked_pairs: set[tuple[int, int]] = set()
+    layer_values: set[int] = set()
+    for triple in triples:
+        endpoints = [
+            _LAYER_SCORE.get(triple.subject_layer),
+            _LAYER_SCORE.get(triple.object_layer),
+        ]
+        present = [v for v in endpoints if v is not None]
+        layer_values.update(present)
+        mid = _LAYER_SCORE.get(triple.predicate_layer)
+        if mid is not None:
+            layer_values.add(mid)
+        if len(present) == 2 and present[0] != present[1]:
+            linked_pairs.add((min(present), max(present)))
+        # A triple whose predicate mediates between its endpoints links both.
+        if mid is not None:
+            for v in present:
+                if v != mid:
+                    linked_pairs.add((min(v, mid), max(v, mid)))
+
+    has_32 = (2, 3) in linked_pairs
+    has_21 = (1, 2) in linked_pairs
+    if has_32 and has_21:
         bucket = PathwayCompleteness.FULL.value
-    elif 2 in layer_values and 1 in layer_values:
+    elif has_21 or has_32:
         bucket = PathwayCompleteness.SOCIAL.value
     elif 1 in layer_values:
         bucket = PathwayCompleteness.SURFACE.value
@@ -166,12 +200,31 @@ def _completeness_from_pathways(pathways: list[CulturalPathway]) -> tuple[str, f
     return best.value, score, shared
 
 
+_LAYER_ROLE = {
+    LayerLabel.LAYER_3_DEEP_VALUE: "value",
+    LayerLabel.LAYER_2_SOCIAL: "social norm",
+    LayerLabel.LAYER_1_SURFACE: "practice",
+}
+
+
 def _format_pathway(pw: CulturalPathway, index: int) -> str:
+    """Render a pathway as a readable value -> norm -> practice chain.
+
+    Includes the relation label on each hop. Emitting bare node labels turned a
+    pathway into a list of nouns ("Japanese food culture -> specific brands and
+    flavors"), which carries no assertion the model can reason with.
+    """
     lines = [f"[{index}] Pathway ({pw.completeness.value}, {pw.culture}):"]
-    for node in pw.nodes:
-        lines.append(f"  {node.layer.value}: {node.label}")
+    for i, node in enumerate(pw.nodes):
+        role = _LAYER_ROLE.get(node.layer, "context")
+        lines.append(f"  {node.layer.value} ({role}): {node.label}")
+        if i < len(pw.nodes) - 1:
+            predicate = pw.predicates[i] if i < len(pw.predicates) else ""
+            lines.append(f"    --[{predicate or 'relates to'}]-->")
     if pw.has_shared_pivot:
         lines.append("  [shared abstraction pivot across cultures]")
+    if pw.generated:
+        lines.append("  [inferred - treat as uncertain]")
     return "\n".join(lines)
 
 

@@ -63,8 +63,19 @@ PHASE2_VALIDATION_PATH = OUTPUTS_DIR / "phase2_validation.md"
 # Phase 2 knobs
 CORPUS_BATCH_SIZE = int(os.getenv("CORPUS_BATCH_SIZE", "32"))
 ER_SIMILARITY_THRESHOLD = float(os.getenv("ER_SIMILARITY_THRESHOLD", "0.88"))
+# Neighbours examined per entity during resolution. Bounds cost in place of the
+# former dense n x n similarity matrix (~8 GB at 45k surface entities).
+ER_MAX_NEIGHBORS = int(os.getenv("ER_MAX_NEIGHBORS", "25"))
 ALIGNMENT_SIMILARITY_THRESHOLD = float(os.getenv("ALIGNMENT_SIMILARITY_THRESHOLD", "0.82"))
+# Candidate cross-cultural pairs considered. The old cap of 200 yielded only 107
+# verified pivots for a 23k-record corpus.
+ALIGNMENT_MAX_PAIRS = int(os.getenv("ALIGNMENT_MAX_PAIRS", "2000"))
 MAX_PATHWAYS_PER_CULTURE = int(os.getenv("MAX_PATHWAYS_PER_CULTURE", "500"))
+# Global ceiling on the pathway index. Per-culture caps alone are unbounded when
+# the corpus has a long tail of free-text cultural groups; the index is scanned
+# once per evaluation query, so an unbounded pool would slow retrieval and bloat
+# the on-disk embeddings. Highest-scoring pathways are kept.
+MAX_TOTAL_PATHWAYS = int(os.getenv("MAX_TOTAL_PATHWAYS", "150000"))
 
 
 # --- LLM provider selection ------------------------------------------------
@@ -74,6 +85,39 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
 # Generation defaults shared across backends.
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "512"))
+
+# --- Per-stage generation budgets -----------------------------------------
+# A single global 512-token budget silently truncated extraction and critique
+# JSON mid-object, which made 96% of the corpus fall back to schema triples and
+# 98% of critiques unparseable. Each stage now gets a budget sized to its own
+# expected output: extraction emits 5-12 fully-specified triples, critique emits
+# issues + suggestions, alignment answers a yes/no verdict, MCQ emits a letter.
+EXTRACTION_MAX_TOKENS = int(os.getenv("EXTRACTION_MAX_TOKENS", "2048"))
+CRITIQUE_MAX_TOKENS = int(os.getenv("CRITIQUE_MAX_TOKENS", "1536"))
+ALIGNMENT_MAX_TOKENS = int(os.getenv("ALIGNMENT_MAX_TOKENS", "256"))
+MCQ_MAX_TOKENS = int(os.getenv("MCQ_MAX_TOKENS", "512"))
+
+# Retry a JSON stage once with a larger budget before giving up.
+JSON_RETRY_TOKEN_MULTIPLIER = float(os.getenv("JSON_RETRY_TOKEN_MULTIPLIER", "1.75"))
+
+STAGE_MAX_TOKENS = {
+    "extraction": EXTRACTION_MAX_TOKENS,
+    "critique": CRITIQUE_MAX_TOKENS,
+    "alignment": ALIGNMENT_MAX_TOKENS,
+    "mcq": MCQ_MAX_TOKENS,
+}
+
+
+def stage_max_tokens(stage: str) -> int:
+    """Return the generation budget for a named pipeline stage."""
+    return STAGE_MAX_TOKENS.get(stage, LLM_MAX_TOKENS)
+
+
+# --- Embeddings ------------------------------------------------------------
+# 'auto' prefers sentence-transformers and falls back to TF-IDF. Force 'tfidf'
+# for fast, deterministic, offline test runs (loading MiniLM from a shared
+# filesystem can take minutes).
+EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "auto").strip().lower()
 
 
 # --- Ollama (local dev) ----------------------------------------------------
@@ -119,6 +163,17 @@ RETRIEVAL_CULTURE_MISMATCH_PENALTY = float(os.getenv("RETRIEVAL_CULTURE_MISMATCH
 RETRIEVAL_CULTURE_UNKNOWN_SCORE = float(os.getenv("RETRIEVAL_CULTURE_UNKNOWN_SCORE", "0.6"))
 RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE = float(os.getenv("RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE", "0.75"))
 RETRIEVAL_CANDIDATE_MULTIPLIER = int(os.getenv("RETRIEVAL_CANDIDATE_MULTIPLIER", "5"))
+# Absolute relevance floor. Evidence scoring below this is dropped entirely; if
+# nothing clears it the system emits an empty evidence block and answers
+# closed-book. Without this, irrelevant evidence was injected unconditionally
+# and corrupted answers the base model would otherwise have got right.
+RETRIEVAL_MIN_SCORE = float(os.getenv("RETRIEVAL_MIN_SCORE", "0.15"))
+# Cap how much of one retrieval result set may come from a single culture, to
+# stop one generic pathway dominating (one was returned for 239/500 questions).
+RETRIEVAL_MAX_PER_CULTURE = int(os.getenv("RETRIEVAL_MAX_PER_CULTURE", "3"))
+# Include answer options in the retrieval query. Off by default: distractor text
+# pulls in evidence supporting wrong options.
+RETRIEVAL_QUERY_INCLUDES_OPTIONS = _get_bool("RETRIEVAL_QUERY_INCLUDES_OPTIONS", False)
 # Corpus build: schema fallback when LLM returns empty/unparseable (not when server down)
 CORPUS_SCHEMA_FALLBACK_ON_EMPTY = _get_bool("CORPUS_SCHEMA_FALLBACK_ON_EMPTY", True)
 MAX_CRITIQUE_SUGGESTIONS = int(os.getenv("MAX_CRITIQUE_SUGGESTIONS", "2"))

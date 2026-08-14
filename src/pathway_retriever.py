@@ -9,7 +9,11 @@ from typing import Optional
 import numpy as np
 
 from . import config
-from .embedding_utils import backend_name, cosine_similarity_matrix, embed_texts
+from .embedding_utils import (
+    backend_name,
+    cosine_similarity_matrix,
+    embed_texts,
+)
 from .retrieval_ranking import rerank_hits
 from .schemas import CulturalPathway
 from .utils import ensure_dir, get_logger, normalize_text
@@ -60,6 +64,43 @@ class PathwayRetriever:
         LOGGER.info("Loaded pathway index: %d pathways from %s",
                     len(self.pathways), self.index_dir)
 
+    def _active_backend_matches(self) -> bool:
+        """True when the index was built with the backend now in use.
+
+        A stored index carries fixed-width vectors from whichever backend built
+        it. Querying it with a different backend produces vectors of another
+        width and the similarity matmul fails outright - which happens whenever
+        the corpus is built on a GPU node with sentence-transformers and the
+        eval runs somewhere that falls back to TF-IDF.
+        """
+        return self.backend in (backend_name(), "unknown")
+
+    def _ensure_embeddings_usable(self) -> None:
+        """Make stored embeddings comparable to queries from the active backend.
+
+        Done once per retriever, not per query: re-embedding the whole pathway
+        corpus on every lookup would be O(corpus x queries) and unusable at
+        full-corpus scale.
+
+        With TF-IDF the vectorizer must also be fitted on the corpus before it
+        can project a query into the same space, so the refit is required there
+        even when the backend nominally matches.
+        """
+        if getattr(self, "_embeddings_ready", False):
+            return
+        self._embeddings_ready = True
+        if not self.documents:
+            return
+        if self.backend == "tfidf" or not self._active_backend_matches():
+            if not self._active_backend_matches():
+                LOGGER.warning(
+                    "Pathway index built with '%s' but active backend is '%s'; "
+                    "re-embedding %d pathway documents once.",
+                    self.backend, backend_name(), len(self.documents),
+                )
+            self.embeddings = embed_texts(self.documents, fit=True)
+            self.backend = backend_name()
+
     def retrieve(self,
                  query: str,
                  top_k: int = 5,
@@ -68,17 +109,11 @@ class PathwayRetriever:
         if not self.pathways or self.embeddings is None:
             return []
         candidate_k = min(len(self.pathways), max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k))
-        if self.backend == "tfidf":
-            texts = self.documents + [query]
-            embs = embed_texts(texts, fit=True)
-            if embs.shape[0] < 2:
-                return []
-            scores = embs[-1] @ embs[:-1].T
-        else:
-            q_emb = embed_texts([query], fit=False)
-            if q_emb.shape[0] == 0:
-                return []
-            scores = cosine_similarity_matrix(q_emb, self.embeddings)[0]
+        self._ensure_embeddings_usable()
+        q_emb = embed_texts([query], fit=False)
+        if q_emb.shape[0] == 0:
+            return []
+        scores = cosine_similarity_matrix(q_emb, self.embeddings)[0]
         idx = np.argsort(scores)[::-1][:candidate_k]
         hits = [(self.pathways[i], float(scores[i])) for i in idx if scores[i] > 0]
         return rerank_hits(
@@ -86,6 +121,7 @@ class PathwayRetriever:
             top_k=top_k,
             question_culture=question_culture,
             get_culture=lambda p: p.culture,
+            get_generated=lambda p: p.generated,
             allow_cross_culture_shared=lambda p: p.has_shared_pivot,
         )
 

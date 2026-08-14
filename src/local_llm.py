@@ -114,6 +114,7 @@ def generate_text(prompt: str,
                   model: Optional[str] = None,
                   temperature: Optional[float] = None,
                   base_url: Optional[str] = None,
+                  max_tokens: Optional[int] = None,
                   json_mode: bool = False) -> str:
     """Call Ollama's /api/generate and return the raw response text.
 
@@ -122,6 +123,7 @@ def generate_text(prompt: str,
     base_url = base_url or config.OLLAMA_BASE_URL
     model = model or config.OLLAMA_MODEL
     temperature = config.OLLAMA_TEMPERATURE if temperature is None else temperature
+    num_predict = max_tokens or config.OLLAMA_NUM_PREDICT
 
     payload: dict[str, Any] = {
         "model": model,
@@ -130,7 +132,7 @@ def generate_text(prompt: str,
         "keep_alive": config.OLLAMA_KEEP_ALIVE,
         "options": {
             "temperature": temperature,
-            "num_predict": config.OLLAMA_NUM_PREDICT,
+            "num_predict": num_predict,
         },
     }
     if system_prompt:

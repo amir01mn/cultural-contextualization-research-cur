@@ -161,8 +161,24 @@ def main(argv=None) -> None:
         export_all(build_graph(raw_triples), "corpus_cultural_kg")
 
     # Phase 2: entity resolution → alignment → pathways
-    entities, label_map = resolve_entities(refined_triples, records)
-    write_jsonl(str(config.ENTITY_MAP_PATH), [e.model_dump() for e in entities])
+    #
+    # Schema-fallback triples are kept in the flat corpus above (so S1/S2 stay
+    # comparable) but excluded here: their layers are hardcoded by the field
+    # mapper rather than inferred, which is what previously skewed the graph to
+    # L2->L1 edges and starved pathway construction.
+    structural_triples = [t for t in refined_triples if not t.llm_failed]
+    excluded = len(refined_triples) - len(structural_triples)
+    if excluded:
+        LOGGER.info(
+            "Excluding %d schema-fallback triple(s) from entity resolution and "
+            "pathway construction (%d remain).", excluded, len(structural_triples))
+    if not structural_triples:
+        LOGGER.error(
+            "No LLM-derived triples available for pathway construction. "
+            "Check extraction success rate before continuing.")
+        sys.exit(3)
+
+    entities, label_map = resolve_entities(structural_triples, records)
 
     if not args.skip_alignment:
         alignments, entities = align_cross_cultural(
@@ -174,8 +190,13 @@ def main(argv=None) -> None:
         LOGGER.info("Skipping cross-cultural alignment.")
         alignments = []
     write_jsonl(str(config.ALIGNMENTS_PATH), [a.model_dump() for a in alignments])
+    # Written AFTER alignment so the shared-abstraction pivots it creates are
+    # present; writing it before is why validation reported 0 shared nodes
+    # despite 107 verified alignments.
+    write_jsonl(str(config.ENTITY_MAP_PATH), [e.model_dump() for e in entities])
 
-    resolved_graph = build_graph_resolved(refined_triples, entities, label_map)
+    resolved_graph = build_graph_resolved(
+        structural_triples, entities, label_map, alignments)
     export_all(resolved_graph, "resolved_cultural_kg")
 
     pathways = build_pathways(resolved_graph, entities, alignments)

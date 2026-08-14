@@ -268,6 +268,22 @@ def critique_record(record: dict,
 
 # --- Refined triple builder ------------------------------------------------
 
+# Issue types describing a defect in the triple's *content* (as opposed to a
+# structural gap in the record). Only these justify removing a triple.
+_CONTENT_ISSUE_MARKERS = (
+    "unsupported",
+    "hallucinat",
+    "stereotyp",
+    "overgeneral",
+    "unverified",
+    "contradict",
+)
+
+
+def _is_content_issue(issue_type: str) -> bool:
+    it = normalize_text(issue_type).lower()
+    return any(marker in it for marker in _CONTENT_ISSUE_MARKERS)
+
 def build_refined_triples(records_by_id: dict[str, dict],
                           triples_by_record: dict[str, list[CulturalTriple]],
                           critiques: list[CritiqueResult]) -> list[CulturalTriple]:
@@ -279,13 +295,34 @@ def build_refined_triples(records_by_id: dict[str, dict],
       grounded (non-generated) version when there is a conflict.
     """
     flagged_map: dict[str, str] = {}
+    # Triples judged unsupported or stereotyping-prone are dropped, not merely
+    # annotated - otherwise critique can never actually clean harmful evidence
+    # out of the retrieval corpus.
+    #
+    # Deliberately conservative, per CRITIQUE_SYSTEM ("Do not delete triples
+    # unless clearly unsupported"): a triple is dropped only when it was
+    # BOTH explicitly flagged AND implicated in a high-severity *content* issue.
+    # Structural issue types such as "surface_without_bridge" or
+    # "missing_layer_2_social" describe a gap in the record, not a bad triple,
+    # and the rule-based critique raises them at high severity listing every
+    # triple id - dropping on severity alone would erase whole records.
+    high_severity_content_ids: set[str] = set()
     suggestions_by_record: dict[str, list[CulturalTriple]] = {}
     for c in critiques:
         for fl in c.triples_to_flag:
             flagged_map[fl.triple_id] = fl.reason
+        for issue in c.issues:
+            if normalize_text(issue.severity).lower() != "high":
+                continue
+            if not _is_content_issue(issue.issue_type):
+                continue
+            high_severity_content_ids.update(issue.affected_triple_ids or [])
         suggestions_by_record.setdefault(c.record_id, []).extend(c.suggested_triples)
 
+    drop_ids = high_severity_content_ids & set(flagged_map)
+
     refined: dict[str, CulturalTriple] = {}
+    dropped = 0
 
     def _key(t: CulturalTriple) -> str:
         return stable_id(t.instance_id, t.subject.lower(),
@@ -294,12 +331,18 @@ def build_refined_triples(records_by_id: dict[str, dict],
     # Original triples first (grounded take priority).
     for rec_id, triples in triples_by_record.items():
         for t in triples:
+            if t.triple_id in drop_ids:
+                dropped += 1
+                continue
             t2 = t.model_copy(deep=True)
             if t2.triple_id in flagged_map:
                 reason = flagged_map[t2.triple_id]
                 note = f"[FLAGGED: {reason}]"
                 t2.notes = (t2.notes + " " + note) if t2.notes else note
             refined[_key(t2)] = t2
+
+    if dropped:
+        LOGGER.info("Refinement dropped %d high-severity flagged triple(s).", dropped)
 
     # Critique suggestions (do not overwrite grounded triples).
     for rec_id, suggestions in suggestions_by_record.items():
@@ -333,10 +376,13 @@ def critique_records_batched_resumable(
         append_jsonl,
         generate_with_cache,
         mark_completed,
+        mark_failed,
         prepare_stage_state,
         read_completed_ids,
+        read_failed_ids,
         save_corpus_state,
     )
+    from .triple_extractor import _retry_unparsed
 
     state = prepare_stage_state(state_path, "critique", resume=resume)
     records_by_id = {r.get("instance_id", ""): r for r in records}
@@ -377,29 +423,50 @@ def critique_records_batched_resumable(
 
         outputs = generate_with_cache(
             backend, "critique", user_prompts, prompts.CRITIQUE_SYSTEM, cache_dir)
+        outputs = _retry_unparsed(
+            backend, "critique", user_prompts, outputs,
+            prompts.CRITIQUE_SYSTEM, cache_dir,
+        )
 
         batch_critiques: list[CritiqueResult] = []
         done_ids: list[str] = []
+        failed_ids: list[str] = []
         for rec, triples, text in zip(batch_recs, batch_triples, outputs):
+            iid = rec.get("instance_id", "")
             parsed = local_llm.safe_parse_json(text)
             if parsed and isinstance(parsed, dict):
                 cr = _parse_critique_response(rec, triples, parsed)
+                done_ids.append(iid)
             elif allow_fallback:
                 cr = critique_record_rule_based(rec, triples)
+                # A rule-based critique is not a successful LLM critique; record
+                # it as failed so a later run can retry the real thing.
+                failed_ids.append(iid)
             else:
                 cr = CritiqueResult(
-                    record_id=rec.get("instance_id", ""),
+                    record_id=iid,
                     original_triple_ids=[t.triple_id for t in triples],
                     summary="Critique parse failed.",
                     method="llm_based",
                 )
+                failed_ids.append(iid)
             batch_critiques.append(cr)
-            done_ids.append(rec.get("instance_id", ""))
 
         append_jsonl(critiques_path, [c.model_dump() for c in batch_critiques])
         all_critiques.extend(batch_critiques)
         mark_completed(state, "critique", done_ids)
+        if failed_ids:
+            mark_failed(state, "critique", failed_ids)
         save_corpus_state(state_path, state)
+        LOGGER.info("Critique batch: %d ok, %d failed.", len(done_ids), len(failed_ids))
+
+    total_failed = len(read_failed_ids(state, "critique"))
+    if total_failed:
+        LOGGER.warning(
+            "Critique: %d record(s) produced no parseable critique. They are "
+            "NOT marked complete and will be retried on the next resumed run.",
+            total_failed,
+        )
 
     refined = build_refined_triples(records_by_id, triples_by_record, all_critiques)
     return all_critiques, refined

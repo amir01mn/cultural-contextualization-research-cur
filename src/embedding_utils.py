@@ -6,6 +6,7 @@ from typing import Optional
 
 import numpy as np
 
+from . import config
 from .utils import get_logger
 
 LOGGER = get_logger("embedding_utils")
@@ -19,6 +20,10 @@ def _get_st_model():
     if _ST_TRIED:
         return _ST_MODEL
     _ST_TRIED = True
+    if config.EMBEDDING_BACKEND == "tfidf":
+        LOGGER.info("EMBEDDING_BACKEND=tfidf; skipping sentence-transformers.")
+        _ST_MODEL = None
+        return _ST_MODEL
     try:
         from sentence_transformers import SentenceTransformer
 
@@ -30,8 +35,29 @@ def _get_st_model():
     return _ST_MODEL
 
 
+_TFIDF_VECTORIZER = None
+
+
+def get_sentence_transformer():
+    """Return the shared SentenceTransformer, or None when unavailable/disabled.
+
+    Public entry point so every retriever in the pipeline resolves its embedding
+    backend the same way and loads the model at most once per process.
+    """
+    return _get_st_model()
+
+
 def embed_texts(texts: list[str], *, fit: bool = False) -> np.ndarray:
-    """Return L2-normalized embedding matrix of shape (n, d)."""
+    """Return L2-normalized embedding matrix of shape (n, d).
+
+    With the TF-IDF backend the fitted vectorizer is retained at module level so
+    ``fit=False`` can project a query into the same vector space as the corpus.
+    Previously each call built a fresh vectorizer, so ``fit=False`` raised
+    NotFittedError - reachable whenever an index built with sentence-transformers
+    is later loaded in an environment that falls back to TF-IDF.
+    """
+    global _TFIDF_VECTORIZER
+
     if not texts:
         return np.zeros((0, 1), dtype=np.float32)
 
@@ -46,13 +72,26 @@ def embed_texts(texts: list[str], *, fit: bool = False) -> np.ndarray:
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.preprocessing import normalize
 
-    vectorizer = TfidfVectorizer(stop_words="english", max_features=4096)
-    if fit:
-        matrix = vectorizer.fit_transform(texts)
+    if fit or _TFIDF_VECTORIZER is None:
+        if not fit:
+            LOGGER.warning(
+                "TF-IDF vectorizer not fitted yet; fitting on the given texts. "
+                "Query vectors may not share the corpus vector space."
+            )
+        _TFIDF_VECTORIZER = TfidfVectorizer(stop_words="english", max_features=4096)
+        matrix = _TFIDF_VECTORIZER.fit_transform(texts)
     else:
-        matrix = vectorizer.transform(texts)
+        matrix = _TFIDF_VECTORIZER.transform(texts)
     dense = normalize(matrix, norm="l2", axis=1).toarray()
     return np.asarray(dense, dtype=np.float32)
+
+
+def reset_embedding_state() -> None:
+    """Clear cached model/vectorizer state (used by tests)."""
+    global _ST_MODEL, _ST_TRIED, _TFIDF_VECTORIZER
+    _ST_MODEL = None
+    _ST_TRIED = False
+    _TFIDF_VECTORIZER = None
 
 
 def cosine_similarity_matrix(a: np.ndarray, b: Optional[np.ndarray] = None) -> np.ndarray:

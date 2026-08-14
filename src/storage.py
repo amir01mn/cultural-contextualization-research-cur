@@ -56,8 +56,10 @@ def prepare_stage_state(path: str | Path, stage: str, *, resume: bool) -> Corpus
     if not resume:
         if stage == "extraction":
             state.extraction_completed = []
+            state.extraction_failed = []
         elif stage == "critique":
             state.critique_completed = []
+            state.critique_failed = []
         else:
             raise ValueError(f"Unknown stage: {stage}")
     return state
@@ -77,17 +79,41 @@ def read_completed_ids(state: CorpusBuildState, stage: str) -> set[str]:
 
 
 def mark_completed(state: CorpusBuildState, stage: str, instance_ids: Iterable[str]) -> None:
-    ids = list(instance_ids)
+    """Mark records as successfully completed (and clear any prior failure)."""
+    ids = set(instance_ids)
     if stage == "extraction":
-        done = set(state.extraction_completed)
-        done.update(ids)
-        state.extraction_completed = sorted(done)
+        state.extraction_completed = sorted(set(state.extraction_completed) | ids)
+        state.extraction_failed = sorted(set(state.extraction_failed) - ids)
     elif stage == "critique":
-        done = set(state.critique_completed)
-        done.update(ids)
-        state.critique_completed = sorted(done)
+        state.critique_completed = sorted(set(state.critique_completed) | ids)
+        state.critique_failed = sorted(set(state.critique_failed) - ids)
     else:
         raise ValueError(f"Unknown stage: {stage}")
+
+
+def mark_failed(state: CorpusBuildState, stage: str, instance_ids: Iterable[str]) -> None:
+    """Record records whose LLM output could not be parsed.
+
+    Deliberately does NOT mark them complete, so a resumed run retries them.
+    Previously every record was marked complete regardless of outcome, which is
+    why the checkpoint claimed 22,990 critiques while only 20,990 rows existed
+    and 20,644 of those were parse failures.
+    """
+    ids = set(instance_ids)
+    if stage == "extraction":
+        state.extraction_failed = sorted(set(state.extraction_failed) | ids)
+    elif stage == "critique":
+        state.critique_failed = sorted(set(state.critique_failed) | ids)
+    else:
+        raise ValueError(f"Unknown stage: {stage}")
+
+
+def read_failed_ids(state: CorpusBuildState, stage: str) -> set[str]:
+    if stage == "extraction":
+        return set(state.extraction_failed)
+    if stage == "critique":
+        return set(state.critique_failed)
+    raise ValueError(f"Unknown stage: {stage}")
 
 
 def write_parquet(path: str | Path, records: list[dict]) -> None:
@@ -107,28 +133,49 @@ def read_parquet(path: str | Path) -> list[dict]:
     return pd.read_parquet(path).to_dict(orient="records")
 
 
-def _cache_key(stage: str, system_prompt: Optional[str], user_prompt: str) -> str:
-    payload = f"{stage}\n{system_prompt or ''}\n{user_prompt}"
+def _cache_key(stage: str, system_prompt: Optional[str], user_prompt: str,
+               *, model: Optional[str] = None,
+               max_tokens: Optional[int] = None) -> str:
+    """Hash the full generation context, not just the prompt text.
+
+    The model id and token budget MUST be part of the key. They are what
+    determine whether a response was truncated, so a cache keyed only on prompt
+    text would replay previously truncated completions verbatim after the budget
+    is raised - silently reproducing the broken corpus.
+    """
+    payload = (
+        f"{stage}\n{model or ''}\n{max_tokens or ''}\n"
+        f"{system_prompt or ''}\n{user_prompt}"
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def get_llm_cache_path(cache_dir: str | Path, stage: str,
-                       system_prompt: Optional[str], user_prompt: str) -> Path:
-    key = _cache_key(stage, system_prompt, user_prompt)
+                       system_prompt: Optional[str], user_prompt: str,
+                       *, model: Optional[str] = None,
+                       max_tokens: Optional[int] = None) -> Path:
+    key = _cache_key(stage, system_prompt, user_prompt,
+                     model=model, max_tokens=max_tokens)
     return Path(cache_dir) / stage / f"{key}.txt"
 
 
 def read_llm_cache(cache_dir: str | Path, stage: str,
-                   system_prompt: Optional[str], user_prompt: str) -> Optional[str]:
-    path = get_llm_cache_path(cache_dir, stage, system_prompt, user_prompt)
+                   system_prompt: Optional[str], user_prompt: str,
+                   *, model: Optional[str] = None,
+                   max_tokens: Optional[int] = None) -> Optional[str]:
+    path = get_llm_cache_path(cache_dir, stage, system_prompt, user_prompt,
+                              model=model, max_tokens=max_tokens)
     if not path.exists():
         return None
     return path.read_text(encoding="utf-8")
 
 
 def write_llm_cache(cache_dir: str | Path, stage: str,
-                    system_prompt: Optional[str], user_prompt: str, response: str) -> None:
-    path = get_llm_cache_path(cache_dir, stage, system_prompt, user_prompt)
+                    system_prompt: Optional[str], user_prompt: str, response: str,
+                    *, model: Optional[str] = None,
+                    max_tokens: Optional[int] = None) -> None:
+    path = get_llm_cache_path(cache_dir, stage, system_prompt, user_prompt,
+                              model=model, max_tokens=max_tokens)
     ensure_dir(path.parent)
     path.write_text(response, encoding="utf-8")
 
@@ -139,15 +186,28 @@ def generate_with_cache(
     user_prompts: list[str],
     system_prompt: Optional[str],
     cache_dir: str | Path,
+    *,
+    max_tokens: Optional[int] = None,
 ) -> list[str]:
-    """Generate completions, reading/writing per-prompt cache entries."""
+    """Generate completions, reading/writing per-prompt cache entries.
+
+    ``max_tokens`` defaults to the configured budget for ``stage`` and is part of
+    the cache key, so changing a stage budget invalidates its cached responses.
+    """
+    from . import config
+
     cache_dir = Path(cache_dir)
+    if max_tokens is None:
+        max_tokens = config.stage_max_tokens(stage)
+    model = getattr(backend, "model", None)
+
     outputs: list[Optional[str]] = [None] * len(user_prompts)
     pending_idx: list[int] = []
     pending_prompts: list[str] = []
 
     for i, prompt in enumerate(user_prompts):
-        cached = read_llm_cache(cache_dir, stage, system_prompt, prompt)
+        cached = read_llm_cache(cache_dir, stage, system_prompt, prompt,
+                                model=model, max_tokens=max_tokens)
         if cached is not None:
             outputs[i] = cached
         else:
@@ -155,9 +215,11 @@ def generate_with_cache(
             pending_prompts.append(prompt)
 
     if pending_prompts:
-        fresh = backend.generate(pending_prompts, system_prompt=system_prompt)
+        fresh = backend.generate(pending_prompts, system_prompt=system_prompt,
+                                 max_tokens=max_tokens)
         for idx, prompt, text in zip(pending_idx, pending_prompts, fresh):
-            write_llm_cache(cache_dir, stage, system_prompt, prompt, text)
+            write_llm_cache(cache_dir, stage, system_prompt, prompt, text,
+                            model=model, max_tokens=max_tokens)
             outputs[idx] = text
 
     return [o or "" for o in outputs]

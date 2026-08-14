@@ -70,10 +70,11 @@ def align_cross_cultural(
     *,
     similarity_threshold: Optional[float] = None,
     verify: bool = True,
-    max_pairs: int = 200,
+    max_pairs: Optional[int] = None,
 ) -> tuple[list[CrossCulturalAlignment], list[CanonicalEntity]]:
     """Find cross-cultural abstraction pivots; optionally LLM-verify."""
     threshold = similarity_threshold or config.ALIGNMENT_SIMILARITY_THRESHOLD
+    max_pairs = max_pairs or config.ALIGNMENT_MAX_PAIRS
     pairs = _candidate_pairs(entities, threshold)[:max_pairs]
     if not pairs:
         LOGGER.info("Cross-cultural alignment: no candidate pairs above threshold.")

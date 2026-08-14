@@ -319,7 +319,15 @@ Instructions:
 
 MCQ_SYSTEM = """You are answering multiple-choice questions about cultural norms and practices.
 
-Read the question carefully. If cultural evidence is provided, use it to inform your answer.
+Read the question carefully.
+
+Retrieved cultural evidence may be provided. It is retrieved automatically and is
+NOT guaranteed to be relevant:
+- Use it only when it directly addresses the question and the culture being asked about.
+- If it concerns a different culture, a different topic, or does not help decide
+  between the options, IGNORE it and answer from your own knowledge.
+- Never pick an option merely because its wording resembles the evidence.
+
 Avoid stereotyping and do not assume all members of a culture behave identically.
 Base your choice on the most likely culturally appropriate answer.
 
@@ -329,7 +337,15 @@ where <letter> is one of the provided option letters. Output nothing after that 
 
 MCQ_HARD_SYSTEM = """You are judging whether a candidate answer to a cultural question is correct.
 
-Consider the cultural context carefully. If cultural evidence is provided, use it.
+Consider the cultural context carefully.
+
+Retrieved cultural evidence may be provided. It is retrieved automatically and is
+NOT guaranteed to be relevant:
+- Use it only when it directly addresses the question and the culture being asked about.
+- If it concerns a different culture, a different topic, or does not help decide,
+  IGNORE it and judge from your own knowledge.
+- Never judge TRUE merely because the statement's wording resembles the evidence.
+
 Avoid stereotyping and do not assume all members of a culture behave identically.
 
 You must end your response with your judgment on its own line in EXACTLY this format:

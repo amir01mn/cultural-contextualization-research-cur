@@ -39,6 +39,50 @@ from src.utils import get_logger, read_jsonl  # noqa: E402
 LOGGER = get_logger("07_eval_culturalbench")
 
 
+def _read_rows(path: Path) -> list[dict]:
+    """Read triple rows, preferring a sibling Parquet file when present.
+
+    The JSONL stores are ~430 MB and ~525 MB; their Parquet equivalents are
+    ~10x smaller and read columnar in one pass. On a shared Lustre filesystem
+    the difference is large - parsing the JSONL line by line took ~35 minutes of
+    an evaluation job's wall clock.
+    """
+    parquet_path = path.with_suffix(".parquet")
+    if parquet_path.exists():
+        from src.storage import read_parquet
+
+        rows = read_parquet(parquet_path)
+        LOGGER.info("Read %d rows from %s (parquet).", len(rows), parquet_path.name)
+        return rows
+    return list(read_jsonl(path))
+
+
+def _clean_row(row: dict) -> dict:
+    """Normalize a Parquet-decoded row back to JSON-like Python values.
+
+    Parquet has no None for a float column, so optional strings that were null
+    come back as NaN and fail validation. Numpy scalars and arrays likewise need
+    unwrapping before pydantic sees them.
+    """
+    cleaned: dict = {}
+    for key, value in row.items():
+        if value is None:
+            cleaned[key] = None
+        elif isinstance(value, float) and value != value:  # NaN
+            cleaned[key] = None
+        elif hasattr(value, "item") and getattr(value, "ndim", None) == 0:
+            cleaned[key] = value.item()
+        elif hasattr(value, "tolist"):
+            cleaned[key] = value.tolist()
+        else:
+            cleaned[key] = value
+    return cleaned
+
+
+def _to_triples(rows: list[dict]) -> list[CulturalTriple]:
+    return [CulturalTriple(**_clean_row(r)) for r in rows if isinstance(r, dict)]
+
+
 def _load_corpus(passages_path: Path,
                  triples_path: Path,
                  refined_path: Path,
@@ -59,13 +103,13 @@ def _load_corpus(passages_path: Path,
         LOGGER.warning("Passages file not found at %s; S1 will have no evidence.", passages_path)
 
     if need_triples and triples_path.exists():
-        triples = [CulturalTriple(**t) for t in read_jsonl(triples_path)]
+        triples = _to_triples(_read_rows(triples_path))
         LOGGER.info("Loaded %d raw corpus triples.", len(triples))
     elif need_triples:
         LOGGER.warning("Triples file not found at %s; S2/S3 will have no evidence.", triples_path)
 
     if need_refined and refined_path.exists():
-        refined = [CulturalTriple(**t) for t in read_jsonl(refined_path)]
+        refined = _to_triples(_read_rows(refined_path))
         LOGGER.info("Loaded %d refined corpus triples.", len(refined))
     elif need_refined:
         LOGGER.warning("Refined triples not found at %s; S4 triple ablation empty.", refined_path)
@@ -96,6 +140,16 @@ def main(argv=None) -> None:
     )
     p.add_argument("--seed", type=int, default=config.RANDOM_SEED)
     p.add_argument("--n_boot", type=int, default=10000)
+    p.add_argument("--min_score", type=float, default=None,
+                   help="Retrieval relevance floor; below it no evidence is "
+                        "injected and the system answers closed-book.")
+    p.add_argument("--sweep_min_score", default=None,
+                   help="Comma-separated floors to sweep after the main run "
+                        "(e.g. 0.0,0.1,0.2,0.3). Reuses the loaded model and "
+                        "corpus, so each extra point costs only inference.")
+    p.add_argument("--sweep_systems", default=None,
+                   help="Systems to include in the sweep (default: the KG "
+                        "systems being evaluated, plus S0 as the reference).")
     p.add_argument("--passages",
                    default=str(config.PROCESSED_DIR / "corpus_passages.jsonl"))
     p.add_argument("--triples",
@@ -109,6 +163,10 @@ def main(argv=None) -> None:
     if invalid:
         LOGGER.error("Unknown systems: %s. Valid: %s", invalid, ALL_SYSTEMS)
         sys.exit(2)
+
+    if args.min_score is not None:
+        config.RETRIEVAL_MIN_SCORE = args.min_score
+        LOGGER.info("Retrieval relevance floor: %.3f", config.RETRIEVAL_MIN_SCORE)
 
     variants = tuple(v.strip() for v in args.variants.split(",") if v.strip())
     questions = load_culturalbench(variants=variants, limit=args.limit,
@@ -186,6 +244,67 @@ def main(argv=None) -> None:
     _print_summary(summary, run_meta)
     for name, path in paths.items():
         LOGGER.info("  %s -> %s", name, path)
+
+    if args.sweep_min_score:
+        _sweep_min_score(args, questions, backend, ctx, systems)
+
+
+def _sweep_min_score(args, questions, backend, ctx, systems) -> None:
+    """Re-evaluate at several relevance floors, reusing the loaded model.
+
+    The floor governs when retrieved evidence is injected at all, which is the
+    main precision control: on the previous corpus the KG recovered ~20% of the
+    baseline's errors but corrupted ~10-15% of its correct answers, so where the
+    floor sits decides whether augmentation is a net gain or a net loss.
+    """
+    from src.mcq_evaluator import summarize as _summarize
+
+    values = []
+    for raw in args.sweep_min_score.split(","):
+        raw = raw.strip()
+        if raw:
+            try:
+                values.append(float(raw))
+            except ValueError:
+                LOGGER.warning("Skipping non-numeric sweep value %r", raw)
+    if not values:
+        return
+
+    if args.sweep_systems:
+        sweep_systems = [s.strip() for s in args.sweep_systems.split(",") if s.strip()]
+    else:
+        sweep_systems = [s for s in systems if s != "S0_no_kg"]
+    reference = "S0_no_kg" if "S0_no_kg" in systems else None
+
+    original = config.RETRIEVAL_MIN_SCORE
+    rows: list[tuple[float, dict]] = []
+    try:
+        for value in values:
+            config.RETRIEVAL_MIN_SCORE = value
+            LOGGER.info("Sweep: relevance floor = %.3f", value)
+            answers = {
+                s: run_system(s, questions, backend, ctx, top_k=args.top_k)
+                for s in sweep_systems
+            }
+            summary, _meta, _corr = _summarize(
+                questions, answers, n_boot=200, seed=args.seed)
+            rows.append((value, summary["accuracy"]["combined"]))
+    finally:
+        config.RETRIEVAL_MIN_SCORE = original
+
+    print("\n===== RELEVANCE-FLOOR SWEEP =====\n")
+    header = "  floor  | " + " | ".join(f"{s[:22]:>22s}" for s in sweep_systems)
+    print(header)
+    print("  " + "-" * (len(header) - 2))
+    for value, combined in rows:
+        cells = " | ".join(
+            f"{combined.get(s, {}).get('accuracy', 0) * 100:21.1f}%"
+            for s in sweep_systems
+        )
+        print(f"  {value:5.2f}  | {cells}")
+    if reference:
+        print(f"\n  (reference) {reference}: see main summary above")
+    print()
 
 
 def _print_summary(summary: dict, run_meta: dict) -> None:

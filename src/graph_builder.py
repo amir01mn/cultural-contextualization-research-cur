@@ -102,8 +102,16 @@ def build_graph_resolved(
     triples: Iterable[CulturalTriple],
     entities: list,
     label_layer_to_entity: dict[tuple[str, str], str],
+    alignments: Iterable = (),
 ) -> nx.MultiDiGraph:
-    """Build graph with canonical entity IDs and culture metadata on nodes."""
+    """Build graph with canonical entity IDs and culture metadata on nodes.
+
+    ``alignments`` connects cross-cultural abstraction pivots. Without it the
+    pivot entities created during alignment are added as nodes but never receive
+    edges (they are absent from ``label_layer_to_entity``, which is built before
+    alignment runs), so no pathway can traverse one and ``has_shared_pivot`` is
+    structurally always False.
+    """
     from .entity_resolver import apply_entity_map
     from .schemas import CanonicalEntity
     from .utils import normalize_node_label
@@ -163,6 +171,44 @@ def build_graph_resolved(
             notes=t.notes or "",
             extraction_method=t.extraction_method,
         )
+
+    # Connect cross-cultural pivots to the entities they abstract over, so a
+    # pathway can actually pass through a shared abstraction node.
+    pivot_edges = 0
+    for alignment in alignments or ():
+        pivot_id = getattr(alignment, "abstraction_node_id", None)
+        member_ids = getattr(alignment, "entity_ids", None) or []
+        if not pivot_id or pivot_id not in graph:
+            continue
+        for member_id in member_ids:
+            if member_id not in graph or member_id == pivot_id:
+                continue
+            edge_key = f"align_{pivot_id}_{member_id}"
+            if graph.has_edge(pivot_id, member_id, key=edge_key):
+                continue
+            graph.add_edge(
+                pivot_id,
+                member_id,
+                key=edge_key,
+                triple_id=edge_key,
+                predicate="shared abstraction of",
+                predicate_layer=graph.nodes[pivot_id].get("layer", "UNKNOWN"),
+                dataset_id="alignment",
+                instance_id="",
+                source_text="",
+                confidence=float(getattr(alignment, "similarity", 0.0) or 0.0),
+                generated=True,
+                evidence="cross_cultural_alignment",
+                notes=getattr(alignment, "verification_rationale", "") or "",
+                extraction_method="cross_cultural_alignment",
+            )
+            pivot_edges += 1
+            # A pivot spans several cultures; give it the union so it is
+            # reachable when building pathways for any member culture.
+            graph.nodes[pivot_id]["cultures"] |= _culture_set(graph.nodes[member_id])
+
+    if pivot_edges:
+        LOGGER.info("Connected %d cross-cultural pivot edge(s).", pivot_edges)
 
     LOGGER.info("Built resolved graph: %d nodes, %d edges",
                 graph.number_of_nodes(), graph.number_of_edges())

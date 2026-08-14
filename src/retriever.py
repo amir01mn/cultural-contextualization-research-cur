@@ -10,14 +10,12 @@ from __future__ import annotations
 from typing import Optional
 
 from . import config
+from .embedding_utils import get_sentence_transformer
 from .retrieval_ranking import passage_culture, rerank_hits, triple_culture
 from .schemas import CulturalTriple
 from .utils import get_logger, normalize_text
 
 LOGGER = get_logger("retriever")
-
-_ST_MODEL = None
-_ST_TRIED = False
 
 
 def _triple_document(t: CulturalTriple) -> str:
@@ -37,19 +35,15 @@ def _triple_document(t: CulturalTriple) -> str:
 
 
 def _get_st_model():
-    global _ST_MODEL, _ST_TRIED
-    if _ST_TRIED:
-        return _ST_MODEL
-    _ST_TRIED = True
-    try:
-        from sentence_transformers import SentenceTransformer
+    """Shared sentence-transformers handle.
 
-        LOGGER.info("Loading sentence-transformers model (all-MiniLM-L6-v2)...")
-        _ST_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
-    except Exception as exc:  # noqa: BLE001
-        LOGGER.info("sentence-transformers unavailable (%s); using TF-IDF.", exc)
-        _ST_MODEL = None
-    return _ST_MODEL
+    Delegates to ``embedding_utils`` so triple/passage retrieval honours the same
+    ``EMBEDDING_BACKEND`` setting as entity resolution and pathway retrieval, and
+    so the model is loaded at most once per process. This module previously kept
+    a private loader that ignored the setting, meaning S1/S2/S3 could silently
+    use a different embedding backend than S4.
+    """
+    return get_sentence_transformer()
 
 
 class TripleRetriever:

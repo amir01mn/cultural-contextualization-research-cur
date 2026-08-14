@@ -85,11 +85,13 @@ Shared abstraction (e.g., respect for elders)
 | Triple-level retrieval (TF-IDF / sentence-transformers) | ✅ Implemented |
 | CulturalBench MCQ evaluation (S0–S3) | ✅ Implemented |
 | Pluggable LLM backend (Ollama + vLLM) | ✅ Implemented |
-| Entity resolution / node canonicalization | 🔲 Planned |
-| Cross-cultural abstraction alignment | 🔲 Planned |
-| Abstraction→refinement **pathway** construction | 🔲 Planned |
-| Pathway retrieval (S4 system) | 🔲 Planned |
-| Mechanism analysis (completeness buckets, shared-node pivots) | 🔲 Planned |
+| Entity resolution / node canonicalization | ✅ Implemented |
+| Cross-cultural abstraction alignment | ✅ Implemented |
+| Abstraction→refinement **pathway** construction | ✅ Implemented |
+| Pathway retrieval (S4 system) | ✅ Implemented |
+| Mechanism analysis (completeness buckets, shared-node pivots) | ✅ Implemented |
+| Canonical culture normalization | ✅ Implemented |
+| Fail-loud corpus quality gates (`09_validate_phase2.py --strict`) | ✅ Implemented |
 
 ---
 
@@ -578,11 +580,26 @@ Same `TripleRetriever`; separate indexes for raw vs. refined triple sets. Retrie
 
 This is the **target retrieval unit** for the publishable paper. Not yet implemented.
 
+> **Implementation note (important).** Pathways are assembled by pivoting on the
+> **L2 (social norm) hub**, not by walking downward from an L3 node.
+>
+> The corpus stores cultural structure as `L2 → L1` (norm to practice) and
+> `L2 → L3` (norm to value), because the social norm is the natural *subject* of
+> both statements. Measured on the 22,990-record corpus: 57,966 `L2→L1` edges and
+> 22,521 `L2→L3` edges, but only **19** `L3→L2` edges. A traversal that starts at
+> L3 and follows outgoing edges therefore finds almost nothing — it produced 150
+> pathways with **zero** complete ones.
+>
+> An L2 hub with at least one L3 neighbour and one L1 neighbour *is* a complete
+> value→norm→practice chain, just stored with the norm as subject. Edges are
+> treated as undirected for discovery and nodes are ordered L3→L2→L1 for output.
+
 ### Pathway definition
 
-A directed path `p = (v3 → v2 → v1)` where:
+A path `p = (v3 → v2 → v1)` where:
 - `layer(v3) = L3`, `layer(v2) = L2`, `layer(v1) = L1`
-- Nodes share at least one culture (pathway is coherent)
+- Nodes share at least one **canonical** culture (see `src/culture_normalizer.py`)
+- Every hop carries provenance (at least one contributing `triple_id`)
 - Optionally passes through a **shared abstraction node** linking ≥2 cultures
 
 Example:
