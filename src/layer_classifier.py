@@ -32,15 +32,16 @@ _L1_CUES = {
     "celebrations", "birthday", "candy", "to-go", "box", "boxes",
 }
 _L2_CUES = {
-    "host", "hosts", "guest", "guests", "elder", "role", "roles",
-    "actor", "recipient", "expectation", "expectations", "expected", "norm",
-    "norms", "polite", "politeness", "hierarchy", "relation", "relationship",
-    "respectful", "obligation", "taboo", "should", "must", "communication",
-    "family", "families", "friend", "friends", "parent", "parents", "child",
-    "children", "senior", "junior", "service", "server", "servers", "customer",
-    "customers", "staff", "restaurant staff", "etiquette", "rule", "rules",
-    "duty", "status", "birthday person", "people", "individual", "individuals",
-    "couple", "couples",
+    "host", "hosts", "guest", "guests", "visitor", "visitors", "elder",
+    "role", "roles", "actor", "recipient", "author", "authors",
+    "commenter", "commenters", "expectation", "expectations", "expected",
+    "norm", "norms", "polite", "politeness", "hierarchy", "relation",
+    "relationship", "respectful", "obligation", "taboo", "should", "must",
+    "communication", "family", "families", "friend", "friends", "parent",
+    "parents", "child", "children", "senior", "junior", "service", "server",
+    "servers", "customer", "customers", "staff", "restaurant staff",
+    "etiquette", "rule", "rules", "duty", "status", "birthday person",
+    "people", "individual", "individuals", "couple", "couples",
 }
 _L3_CUES = {
     "respect", "harmony", "hospitality", "modesty", "honor", "honour",
@@ -58,6 +59,9 @@ _L2_PHRASES = {
     "restaurant staff",
     "hosts and guests",
     "guests and hosts",
+    "visitors and the author",
+    "visitors and the author of the comment",
+    "author of the comment",
     "customers and servers",
     "servers and customers",
     "friends and family",
@@ -151,6 +155,7 @@ def repair_layer(label: object, text: str) -> LayerLabel:
 
     This is intentionally conservative. It fixes cases like:
       - "hosts and guests" marked as L1 -> L2
+      - "visitors and the author of the comment" marked as L1 -> L2
       - "gifts" marked as L2 -> L1
       - "hospitality and appreciation" marked as L1/L2 -> L3
     """
