@@ -1,17 +1,17 @@
 culture,original_candidates,keep,maybe,keep_plus_maybe,recommended_use
-south korea,15,8,7,15,usable keep-only coverage
+south korea,15,0,0,0,no usable coverage from current run
 iran,3,0,0,0,no usable coverage from current run
 bangladesh,1,0,0,0,no usable coverage from current run
-spain,23,4,0,4,low keep-only coverage; usable with caution
-indonesia,23,5,11,16,usable keep-only coverage
+spain,23,0,0,0,no usable coverage from current run
+indonesia,23,0,0,0,no usable coverage from current run
 zimbabwe,0,0,0,0,no usable coverage from current run
-netherlands,30,15,9,24,usable keep-only coverage
-new zealand,5,2,1,3,low keep-only coverage; usable with caution
-turkey,16,5,3,8,usable keep-only coverage
-china,15,7,4,11,usable keep-only coverage
-pakistan,5,2,1,3,low keep-only coverage; usable with caution
-south africa,1,0,1,1,maybe-only coverage; manually inspect before use
-japan,33,13,4,17,usable keep-only coverage
-philippines,14,7,3,10,usable keep-only coverage
-russia,15,8,3,11,usable keep-only coverage
-brazil,7,1,4,5,low keep-only coverage; usable with caution
+netherlands,30,0,0,0,no usable coverage from current run
+new zealand,5,0,0,0,no usable coverage from current run
+turkey,16,0,0,0,no usable coverage from current run
+china,15,0,0,0,no usable coverage from current run
+pakistan,5,0,0,0,no usable coverage from current run
+south africa,1,0,0,0,no usable coverage from current run
+japan,33,0,0,0,no usable coverage from current run
+philippines,14,0,0,0,no usable coverage from current run
+russia,15,0,0,0,no usable coverage from current run
+brazil,7,0,0,0,no usable coverage from current run
