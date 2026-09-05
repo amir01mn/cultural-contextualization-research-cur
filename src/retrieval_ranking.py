@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Callable, Optional, TypeVar
 
 from . import config
@@ -10,29 +11,83 @@ from .utils import normalize_text
 T = TypeVar("T")
 
 
+_CULTURE_ALIASES = {
+    "american": {
+        "american", "americans", "usa", "us", "u s", "united states",
+        "united states of america", "u.s.", "u.s.a.",
+    },
+    "british": {"british", "uk", "u k", "united kingdom", "english"},
+    "south korea": {
+        "south korea", "south korean", "south koreans", "korea", "korean", "koreans",
+    },
+    "north korea": {"north korea", "north korean", "north koreans"},
+    "china": {"china", "chinese", "chinese people"},
+    "japan": {"japan", "japanese", "japanese people", "japanese sushi chefs"},
+    "iran": {"iran", "iranian", "iranians", "persian", "persians"},
+    "bangladesh": {"bangladesh", "bangladeshi", "bangladeshis", "bengali", "bengalis"},
+    "spain": {"spain", "spanish", "spaniard", "spaniards"},
+    "netherlands": {"netherlands", "dutch", "dutch people", "holland"},
+    "new zealand": {"new zealand", "new zealander", "new zealanders", "maori", "māori", "kiwi"},
+    "turkey": {
+        "turkey", "turkish", "turkish people", "turks", "germans of turkish heritage",
+    },
+    "russia": {"russia", "russian", "russians"},
+    "indonesia": {"indonesia", "indonesian", "indonesians"},
+    "philippines": {"philippines", "philippine", "filipino", "filipinos"},
+    "pakistan": {"pakistan", "pakistani", "pakistanis"},
+    "south africa": {"south africa", "south african", "south africans"},
+    "zimbabwe": {"zimbabwe", "zimbabwean", "zimbabweans", "shona", "mashona"},
+    "brazil": {"brazil", "brazilian", "brazilians"},
+}
+
+_ALIAS_TO_CANONICAL = {
+    alias: canonical
+    for canonical, aliases in _CULTURE_ALIASES.items()
+    for alias in aliases
+}
+
+
+def _clean_culture(text: str) -> str:
+    text = normalize_text(text or "").lower()
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _canonical_culture(text: str) -> str:
+    """Map country/demonym variants to one comparison label when possible."""
+    cleaned = _clean_culture(text)
+    if not cleaned:
+        return ""
+    if cleaned in _ALIAS_TO_CANONICAL:
+        return _ALIAS_TO_CANONICAL[cleaned]
+
+    # Some extracted culture strings contain modifiers, e.g. "Japanese sushi chefs"
+    # or "Germans of Turkish heritage". Match known aliases as whole-word spans.
+    for alias, canonical in sorted(_ALIAS_TO_CANONICAL.items(), key=lambda x: len(x[0]), reverse=True):
+        if re.search(rf"\b{re.escape(alias)}\b", cleaned):
+            return canonical
+    return cleaned
+
+
 def culture_match_score(item_culture: str, question_culture: Optional[str]) -> float:
     """Return 1.0 for strong culture match, else mismatch penalty."""
-    pc = normalize_text(item_culture).lower()
-    qc = normalize_text(question_culture or "").lower()
+    pc = _clean_culture(item_culture)
+    qc = _clean_culture(question_culture or "")
     if not qc:
         return 1.0
     if not pc:
         return config.RETRIEVAL_CULTURE_UNKNOWN_SCORE
+
     if pc == qc or pc in qc or qc in pc:
         return 1.0
-    # Common aliases
-    aliases = {
-        "usa": "american",
-        "us": "american",
-        "united states": "american",
-        "uk": "british",
-        "south korea": "korean",
-        "north korea": "korean",
-    }
-    pc_norm = aliases.get(pc, pc)
-    qc_norm = aliases.get(qc, qc)
-    if pc_norm == qc_norm or pc_norm in qc_norm or qc_norm in pc_norm:
+
+    pc_norm = _canonical_culture(pc)
+    qc_norm = _canonical_culture(qc)
+    if pc_norm and qc_norm and (
+        pc_norm == qc_norm or pc_norm in qc_norm or qc_norm in pc_norm
+    ):
         return 1.0
+
     return config.RETRIEVAL_CULTURE_MISMATCH_PENALTY
 
 
