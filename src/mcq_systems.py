@@ -114,7 +114,7 @@ def _rank_pathways(hits: list[tuple[CulturalPathway, float]],
         if pw.has_shared_pivot and cm < 0.9:
             cm = max(cm, config.RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE)
         bonus = 1.1 if pw.has_shared_pivot else 1.0
-        ranked.append((pw, score * w * cm * bonus, cm))
+        ranked.append((pw, score * w * bonus, cm))
     ranked.sort(key=lambda x: x[1], reverse=True)
 
     if question_culture:
