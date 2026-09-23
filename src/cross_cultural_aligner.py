@@ -7,18 +7,60 @@ from typing import Optional
 from . import config, local_llm, prompts
 from .embedding_utils import cosine_similarity_matrix, embed_texts
 from .schemas import CanonicalEntity, CrossCulturalAlignment
-from .utils import get_logger, normalize_text, stable_id, truncate
+from .utils import get_logger, normalize_node_label, normalize_text, stable_id, truncate
 
 LOGGER = get_logger("cross_cultural_aligner")
 
 _ABSTRACT_LAYERS = {"LAYER_2_SOCIAL", "LAYER_3_DEEP_VALUE"}
+
+# Actor/group labels can legitimately occur at L2, but they are not themselves
+# the shared norm/value abstractions that A4 is intended to test.
+_ACTOR_GROUP_MARKERS = (
+    "people", "person", "persons", "customer", "customers", "tourist",
+    "tourists", "foreigner", "foreigners", "family member", "family members",
+    "guest", "guests", "host", "hosts", "author", "visitor", "visitors",
+    "employee", "employees", "boss", "bosses", "service provider",
+    "service providers", "individual", "individuals", "themselves", "others",
+)
+_NORM_VALUE_CUES = (
+    "norm", "etiquette", "expectation", "obligation", "hierarchy", "respect",
+    "politeness", "hospitality", "reciprocity", "gratitude", "appreciation",
+    "custom", "rule", "relationship", "relation", "deference", "duty",
+    "courtesy", "generosity", "care",
+)
+
+
+def _culture_key(culture: str) -> str:
+    """Normalize obvious dataset aliases before deciding cultures differ."""
+    key = " ".join(normalize_text(culture).lower().split())
+    for suffix in (" people", " peoples"):
+        if key.endswith(suffix):
+            key = key[:-len(suffix)].strip()
+    return key
+
+
+def _is_actor_only_l2(entity: CanonicalEntity) -> bool:
+    if entity.layer.value != "LAYER_2_SOCIAL":
+        return False
+    label = normalize_text(entity.canonical_label).lower()
+    if any(cue in label for cue in _NORM_VALUE_CUES):
+        return False
+    return any(marker in label for marker in _ACTOR_GROUP_MARKERS)
+
+
+def _alignment_eligible(entity: CanonicalEntity) -> bool:
+    if entity.layer.value not in _ABSTRACT_LAYERS or len(entity.cultures) != 1:
+        return False
+    if _is_actor_only_l2(entity):
+        return False
+    return True
 
 
 def _candidate_pairs(entities: list[CanonicalEntity],
                      threshold: float) -> list[tuple[int, int, float]]:
     eligible = [
         (i, e) for i, e in enumerate(entities)
-        if e.layer.value in _ABSTRACT_LAYERS and len(e.cultures) == 1
+        if _alignment_eligible(e)
     ]
     if len(eligible) < 2:
         return []
@@ -32,7 +74,7 @@ def _candidate_pairs(entities: list[CanonicalEntity],
         for j in range(i + 1, len(eligible)):
             ei, ent_i = eligible[i]
             ej, ent_j = eligible[j]
-            if ent_i.cultures[0].lower() == ent_j.cultures[0].lower():
+            if _culture_key(ent_i.cultures[0]) == _culture_key(ent_j.cultures[0]):
                 continue
             if ent_i.layer != ent_j.layer:
                 continue
@@ -110,8 +152,16 @@ def align_cross_cultural(
         pivot_label = ent_a.canonical_label
         if len(ent_b.canonical_label) > len(pivot_label):
             pivot_label = ent_b.canonical_label
+        # Reuse one shared pivot for repeated pairwise matches of the same
+        # abstraction. Culture-pair-specific pivot IDs created duplicate
+        # "hospitality" pivots and made one entity belong to several equivalent
+        # shared nodes.
         pivot_id = stable_id(
-            "pivot", pivot_label, ent_a.cultures, ent_b.cultures, prefix="p_")
+            "pivot",
+            ent_a.layer.value,
+            normalize_node_label(pivot_label),
+            prefix="p_",
+        )
 
         cultures = sorted(set(ent_a.cultures) | set(ent_b.cultures))
         aliases = sorted(set(ent_a.aliases) | set(ent_b.aliases) | {ent_a.canonical_label, ent_b.canonical_label})

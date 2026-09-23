@@ -437,6 +437,13 @@ cultures refer to the same underlying abstract cultural concept (value, norm, or
 expectation). Be conservative: only confirm when the concepts are genuinely equivalent,
 not merely related.
 
+A valid shared abstraction must itself be an abstract value, norm, expectation,
+obligation, etiquette system, hierarchy, or comparable cultural concept.
+Reject labels that merely name participants or populations, such as people, customers,
+tourists, foreigners, family members, guests, hosts, authors, service providers, or a
+cultural/national group. Those actors may participate in a norm, but they are not the
+shared abstraction itself.
+
 Respond with JSON only:
 {"verified": true|false, "rationale": "brief explanation"}"""
 

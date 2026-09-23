@@ -96,3 +96,81 @@ def test_multiculture_entity_is_not_implicitly_marked_shared():
     )
     assert alignments == []
     assert updated[0].is_shared_abstraction is False
+
+
+
+def test_same_culture_aliases_are_not_cross_cultural():
+    entities = [
+        CanonicalEntity(
+            entity_id="e1", canonical_label="politeness",
+            layer=LayerLabel.LAYER_3_DEEP_VALUE, cultures=["Japanese"],
+        ),
+        CanonicalEntity(
+            entity_id="e2", canonical_label="politeness",
+            layer=LayerLabel.LAYER_3_DEEP_VALUE, cultures=["Japanese people"],
+        ),
+    ]
+    alignments, _ = align_cross_cultural(
+        entities, backend=None, verify=False, similarity_threshold=0.5
+    )
+    assert alignments == []
+
+
+def test_actor_only_l2_labels_are_not_shared_abstraction_candidates():
+    entities = [
+        CanonicalEntity(
+            entity_id="e1", canonical_label="customers",
+            layer=LayerLabel.LAYER_2_SOCIAL, cultures=["Korean"],
+        ),
+        CanonicalEntity(
+            entity_id="e2", canonical_label="customers",
+            layer=LayerLabel.LAYER_2_SOCIAL, cultures=["Spaniards"],
+        ),
+    ]
+    alignments, _ = align_cross_cultural(
+        entities, backend=None, verify=False, similarity_threshold=0.5
+    )
+    assert alignments == []
+
+
+def test_norm_like_l2_labels_remain_alignment_candidates():
+    entities = [
+        CanonicalEntity(
+            entity_id="e1", canonical_label="guest etiquette",
+            layer=LayerLabel.LAYER_2_SOCIAL, cultures=["Japan"],
+        ),
+        CanonicalEntity(
+            entity_id="e2", canonical_label="guest etiquette",
+            layer=LayerLabel.LAYER_2_SOCIAL, cultures=["India"],
+        ),
+    ]
+    alignments, _ = align_cross_cultural(
+        entities, backend=None, verify=False, similarity_threshold=0.5
+    )
+    assert alignments
+
+
+def test_same_concept_across_three_cultures_reuses_one_pivot():
+    entities = [
+        CanonicalEntity(
+            entity_id="e1", canonical_label="hospitality",
+            layer=LayerLabel.LAYER_3_DEEP_VALUE, cultures=["Brazil"],
+        ),
+        CanonicalEntity(
+            entity_id="e2", canonical_label="hospitality",
+            layer=LayerLabel.LAYER_3_DEEP_VALUE, cultures=["Pakistan"],
+        ),
+        CanonicalEntity(
+            entity_id="e3", canonical_label="hospitality",
+            layer=LayerLabel.LAYER_3_DEEP_VALUE, cultures=["Russia"],
+        ),
+    ]
+    alignments, updated = align_cross_cultural(
+        entities, backend=None, verify=False, similarity_threshold=0.5
+    )
+    assert len(alignments) == 3
+    pivot_ids = {alignment.abstraction_node_id for alignment in alignments}
+    assert len(pivot_ids) == 1
+    pivot_id = next(iter(pivot_ids))
+    pivot = next(entity for entity in updated if entity.entity_id == pivot_id)
+    assert set(pivot.cultures) == {"Brazil", "Pakistan", "Russia"}

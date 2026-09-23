@@ -36,6 +36,17 @@ def build_validation_report(
 
     completeness = Counter(p.get("completeness", "NONE") for p in pathways)
     cultures = Counter(p.get("culture", "") for p in pathways)
+    alignment_pivots = {
+        a.get("abstraction_node_id")
+        for a in alignments
+        if a.get("abstraction_node_id")
+    }
+    shared_pathways = [p for p in pathways if p.get("has_shared_pivot")]
+    used_shared_pivots = {
+        p.get("shared_pivot_id")
+        for p in shared_pathways
+        if p.get("shared_pivot_id")
+    }
 
     retriever = PathwayRetriever(config.PATHWAY_INDEX_DIR)
     hits = retriever.retrieve(query, top_k=top_k)
@@ -54,14 +65,16 @@ def build_validation_report(
         "",
         "## Entity resolution",
         f"- Canonical entities: {len(entities)}",
-        f"- Shared abstraction nodes: {sum(1 for e in entities if e.get('is_shared_abstraction'))}",
+        f"- Entities marked shared (alignment members + pivots): {sum(1 for e in entities if e.get('is_shared_abstraction'))}",
         "",
         "## Cross-cultural alignment",
-        f"- Alignments: {len(alignments)}",
-        f"- Verified: {sum(1 for a in alignments if a.get('verified'))}",
+        f"- Verified pairwise alignments: {sum(1 for a in alignments if a.get('verified'))}",
+        f"- Unique shared pivot IDs: {len(alignment_pivots)}",
         "",
         "## Pathways",
         f"- Total pathways: {len(pathways)}",
+        f"- Shared-pivot pathways: {len(shared_pathways)}",
+        f"- Unique shared pivot IDs used by pathways: {len(used_shared_pivots)}",
         f"- By completeness: {dict(completeness)}",
         f"- Top cultures: {dict(cultures.most_common(10))}",
         "",
