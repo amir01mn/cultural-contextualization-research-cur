@@ -223,3 +223,38 @@ def test_s4_postranking_does_not_apply_culture_penalty_twice():
     # FULL has weight 1.0, so a second culture penalty must not change the
     # score at this post-ranking stage.
     assert ranked[0][1] == already_reranked_score
+
+
+
+def test_s4_postranking_preserves_retriever_scores_without_pathway_bonuses():
+    full_pathway = CulturalPathway(
+        pathway_id="pw_full",
+        culture="Japan",
+        completeness=PathwayCompleteness.FULL,
+        has_shared_pivot=True,
+    )
+    social_pathway = CulturalPathway(
+        pathway_id="pw_social",
+        culture="Japan",
+        completeness=PathwayCompleteness.SOCIAL,
+        has_shared_pivot=False,
+    )
+
+    # These scores represent the output of PathwayRetriever after semantic and
+    # culture reranking. The post-ranking stage should not inject additional
+    # completeness or shared-pivot bonuses into the retrieval-unit ablation.
+    hits = [
+        (social_pathway, 0.90),
+        (full_pathway, 0.80),
+    ]
+
+    ranked = mcq_systems._rank_pathways(
+        hits,
+        question_culture="Japan",
+    )
+
+    assert [pw.pathway_id for pw, _score in ranked] == [
+        "pw_social",
+        "pw_full",
+    ]
+    assert [score for _pw, score in ranked] == [0.90, 0.80]
