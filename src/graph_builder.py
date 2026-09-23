@@ -86,7 +86,6 @@ def build_graph(triples: Iterable[CulturalTriple]) -> nx.MultiDiGraph:
             predicate_layer=t.predicate_layer.value,
             dataset_id=t.dataset_id,
             instance_id=t.instance_id,
-            cultural_group=culture_by_instance.get(t.instance_id, ""),
             source_text=t.source_text,
             confidence=float(t.confidence),
             generated=bool(t.generated),
