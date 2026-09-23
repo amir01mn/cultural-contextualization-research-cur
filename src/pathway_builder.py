@@ -341,11 +341,12 @@ def build_pathways(
 ) -> list[CulturalPathway]:
     """Enumerate flexible, layer-aware cultural evidence pathways.
 
-    FULL pathways are created when a record contains useful L1, L2, and L3
-    evidence after removing topic/category metadata and generic pathway nodes.
-    The evidence does not need to appear as a single L3->L2->L1 directed chain:
-    if the record states a practice, a social role/norm, and a value in separate
-    triples, that is still a valid record-level FULL pathway.
+    FULL pathways are created when a connected component within one source
+    record contains useful L1, L2, and L3 evidence after removing
+    topic/category metadata and generic pathway nodes. The evidence does not
+    need to appear as a strict directed L3->L2->L1 chain; direction is
+    flexible, but the supporting evidence must belong to the same connected
+    component.
 
     Partial pathways such as L2->L1, L2->L3, and L1->L3 are retained exactly as
     extracted when they are the strongest evidence available.
@@ -365,33 +366,10 @@ def build_pathways(
         count = 0
         by_record = _edge_records_for_culture(graph, culture)
 
-        # First, create record-level FULL pathways. This step is intentionally
-        # broader than connected-component traversal because extracted triples
-        # often attach L3 values through a culture/group node while L2->L1
-        # evidence appears elsewhere in the same record. We do not include the
-        # generic connector node, but we still keep the useful value node.
-        for _record_id, edges in sorted(by_record.items()):
-            if count >= max_per_culture:
-                break
-            record_nodes = _all_useful_nodes(edges, culture, graph)
-            l3 = _representative_by_layer(graph, record_nodes, LayerLabel.LAYER_3_DEEP_VALUE, culture)
-            l2 = _representative_by_layer(graph, record_nodes, LayerLabel.LAYER_2_SOCIAL, culture)
-            l1 = _representative_by_layer(graph, record_nodes, LayerLabel.LAYER_1_SURFACE, culture)
-            if l1 and l2 and l3:
-                if _add_pathway(
-                    graph=graph,
-                    pathways=pathways,
-                    seen_hashes=seen_hashes,
-                    pivot_ids=pivot_ids,
-                    culture=culture,
-                    node_ids=[l3, l2, l1],
-                    triple_ids=_all_edge_ids(edges),
-                ):
-                    count += 1
-
-        # Then create connected-component FULL pathways as a stricter variant.
-        # These can capture multiple FULL pathways within a single record when
-        # the record contains separate connected cultural structures.
+        # Create FULL pathways only when L1, L2, and L3 evidence occur within
+        # the same connected component of a source record. Direction remains
+        # flexible, but disconnected evidence from the same record must not be
+        # combined into one pathway.
         for _record_id, edges in sorted(by_record.items()):
             if count >= max_per_culture:
                 break
