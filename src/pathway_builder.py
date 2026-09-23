@@ -21,6 +21,7 @@ from .schemas import (
     CulturalPathway,
     LayerLabel,
     PathwayCompleteness,
+    PathwayEdgeRef,
     PathwayNodeRef,
 )
 from .utils import get_logger, normalize_text, stable_id
@@ -182,6 +183,47 @@ def _pathway_refs(graph: nx.MultiDiGraph, node_ids: list[str]) -> list[PathwayNo
     ]
 
 
+def _pathway_edge_refs(
+    graph: nx.MultiDiGraph,
+    triple_ids: set[str],
+) -> list[PathwayEdgeRef]:
+    """Materialize the exact graph relations that support a pathway."""
+    wanted = {str(tid) for tid in triple_ids}
+    refs: list[PathwayEdgeRef] = []
+
+    for source, target, key, data in graph.edges(keys=True, data=True):
+        triple_id = str(data.get("triple_id") or key)
+        if triple_id not in wanted:
+            continue
+
+        refs.append(
+            PathwayEdgeRef(
+                triple_id=triple_id,
+                source_entity_id=source,
+                target_entity_id=target,
+                source_label=_node_label(graph, source),
+                target_label=_node_label(graph, target),
+                predicate=normalize_text(data.get("predicate", "")),
+                source_layer=_node_layer(graph.nodes[source]),
+                predicate_layer=LayerLabel.coerce(data.get("predicate_layer")),
+                target_layer=_node_layer(graph.nodes[target]),
+                instance_id=str(data.get("instance_id") or ""),
+                cultural_group=normalize_text(data.get("cultural_group", "")),
+                generated=bool(data.get("generated", False)),
+                evidence=normalize_text(data.get("evidence", "")),
+            )
+        )
+
+    return sorted(
+        refs,
+        key=lambda edge: (
+            edge.triple_id,
+            edge.source_label.lower(),
+            edge.target_label.lower(),
+        ),
+    )
+
+
 def _add_pathway(
     *,
     graph: nx.MultiDiGraph,
@@ -216,6 +258,7 @@ def _add_pathway(
             pathway_id=stable_id(culture, node_key, prefix="pw_"),
             culture=culture,
             nodes=_pathway_refs(graph, node_ids),
+            edges=_pathway_edge_refs(graph, triple_ids),
             triple_ids=sorted(str(tid) for tid in triple_ids),
             completeness=completeness,
             has_shared_pivot=shared,

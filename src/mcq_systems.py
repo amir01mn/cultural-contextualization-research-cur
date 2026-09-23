@@ -170,6 +170,17 @@ def _format_pathway(pw: CulturalPathway, index: int) -> str:
     lines = [f"[{index}] Pathway ({pw.completeness.value}, {pw.culture}):"]
     for node in pw.nodes:
         lines.append(f"  {node.layer.value}: {node.label}")
+
+    if pw.edges:
+        lines.append("  Supporting relations:")
+        for edge in pw.edges:
+            generated = " [generated]" if edge.generated else ""
+            lines.append(
+                f"    ({edge.source_layer.value}) {edge.source_label} "
+                f"-[{edge.predicate} | {edge.predicate_layer.value}]-> "
+                f"({edge.target_layer.value}) {edge.target_label}{generated}"
+            )
+
     if pw.has_shared_pivot:
         lines.append("  [shared abstraction pivot across cultures]")
     return "\n".join(lines)

@@ -21,6 +21,12 @@ def pathway_document(pathway: CulturalPathway) -> str:
     parts = [f"culture: {pathway.culture}", f"completeness: {pathway.completeness.value}"]
     for node in pathway.nodes:
         parts.append(f"{node.layer.value}: {node.label}")
+    for edge in pathway.edges:
+        parts.append(
+            f"relation: ({edge.source_layer.value}) {edge.source_label} "
+            f"-[{edge.predicate} | {edge.predicate_layer.value}]-> "
+            f"({edge.target_layer.value}) {edge.target_label}"
+        )
     if pathway.has_shared_pivot:
         parts.append("shared_pivot: true")
     return " | ".join(parts)

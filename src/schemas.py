@@ -332,12 +332,36 @@ class PathwayNodeRef(BaseModel):
         return LayerLabel.coerce(v)
 
 
+class PathwayEdgeRef(BaseModel):
+    """One provenance-preserving relation supporting a cultural pathway."""
+
+    triple_id: str
+    source_entity_id: str
+    target_entity_id: str
+    source_label: str
+    target_label: str
+    predicate: str
+    source_layer: LayerLabel = LayerLabel.UNKNOWN
+    predicate_layer: LayerLabel = LayerLabel.UNKNOWN
+    target_layer: LayerLabel = LayerLabel.UNKNOWN
+    instance_id: str = ""
+    cultural_group: str = ""
+    generated: bool = False
+    evidence: str = ""
+
+    @field_validator("source_layer", "predicate_layer", "target_layer", mode="before")
+    @classmethod
+    def _coerce_layers(cls, v: Any) -> LayerLabel:
+        return LayerLabel.coerce(v)
+
+
 class CulturalPathway(BaseModel):
-    """An abstraction→refinement pathway (L3→L2→L1 when complete)."""
+    """A connected, provenance-preserving cultural evidence pathway."""
 
     pathway_id: str
     culture: str
     nodes: list[PathwayNodeRef] = Field(default_factory=list)
+    edges: list[PathwayEdgeRef] = Field(default_factory=list)
     triple_ids: list[str] = Field(default_factory=list)
     completeness: PathwayCompleteness = PathwayCompleteness.NONE
     has_shared_pivot: bool = False
