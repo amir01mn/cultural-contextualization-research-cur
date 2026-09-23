@@ -7,6 +7,7 @@ from src.mcq_systems import (
     SYSTEM_S2,
     SYSTEM_S3,
     SYSTEM_S4,
+    SYSTEM_S4_TRIPLE,
     RetrievalContext,
     build_prompt,
     parse_easy_answer,
@@ -141,3 +142,52 @@ def test_s4_prompt_preserves_pathway_predicates(mcq_easy_question):
     # pathway must therefore survive into the evidence shown to the LLM.
     assert "mediates" in user_prompt
     assert "expressed as" in user_prompt
+
+
+
+def test_s4_pathway_and_triple_ablation_use_same_requested_retrieval_budget(
+    mcq_easy_question,
+):
+    class RecordingPathwayRetriever:
+        def __init__(self):
+            self.pathways = []
+            self.requested_top_k = []
+
+        def retrieve(self, query, top_k=5, *, question_culture=None):
+            self.requested_top_k.append(top_k)
+            return []
+
+    class RecordingTripleRetriever:
+        def __init__(self):
+            self.requested_top_k = []
+
+        def retrieve(self, query, top_k=5, *, question_culture=None):
+            self.requested_top_k.append(top_k)
+            return []
+
+    pathway_retriever = RecordingPathwayRetriever()
+    triple_retriever = RecordingTripleRetriever()
+
+    ctx = RetrievalContext(pathway_retriever=pathway_retriever)
+    ctx.refined_triple_retriever = triple_retriever
+
+    requested_top_k = 4
+
+    build_prompt(
+        SYSTEM_S4,
+        mcq_easy_question,
+        ctx,
+        top_k=requested_top_k,
+    )
+    build_prompt(
+        SYSTEM_S4_TRIPLE,
+        mcq_easy_question,
+        ctx,
+        top_k=requested_top_k,
+    )
+
+    # The pathway condition and its triple ablation must enter their
+    # retrievers with the same requested top-k. Each retriever may then apply
+    # the same internal candidate multiplier before reranking.
+    assert pathway_retriever.requested_top_k == [requested_top_k]
+    assert triple_retriever.requested_top_k == [requested_top_k]
