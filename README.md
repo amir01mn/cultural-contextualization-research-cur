@@ -1,5 +1,13 @@
 # cultural-kg-mvp
 
+> **Current research pipeline:** this README documents the original MVP and is
+> retained for historical setup context. The active S0-S4 CulturalBench method,
+> validated pathway definition, and ablations are documented in
+> `docs/RESEARCH_DESIGN.md`, `docs/PROJECT_OVERVIEW.md`, and
+> `docs/S4_EVALUATION_GUIDE.md`. For the current validation work, use the
+> `validate-flexible-pathways` branch behavior rather than the legacy
+> three-system description below.
+
 A Python MVP pipeline that tests whether a **layered cultural knowledge graph (KG)**
 improves cultural scenario reasoning compared to baseline prompting, and whether a
 **critique-refined KG** improves over a **raw KG**.

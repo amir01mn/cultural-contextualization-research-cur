@@ -1,9 +1,9 @@
 # Research Design: Abstraction→Refinement Cultural Knowledge Graphs for Culturally Grounded Reasoning
 
-> Status: design lock (pre-implementation). This document defines the claim,
-> hypotheses, formal definitions, the exact ablation/evaluation matrix, and the
-> metrics. It is the contract we build against. Everything implemented must serve
-> a hypothesis or a metric defined here.
+> Status: implementation-aligned research design. The pathway definition and
+> ablation controls below were updated after validation of the 77-record
+> development experiment. This document defines the claim, hypotheses, formal
+> definitions, evaluation matrix, and metrics used by the current pipeline.
 
 ---
 
@@ -68,9 +68,11 @@ We use three cultural abstraction layers (most abstract → most refined):
 `UNKNOWN` is allowed only when a layer is genuinely unclear and is excluded from
 pathway analysis.
 
-An **abstraction→refinement** direction means traversal from L3 (abstract) →
-L2 → L1 (refined). (Note: this is the inverse reading direction of "a practice
-expresses a value"; both directions describe the same edges.)
+**Abstraction→refinement** describes the conceptual ordering from L3 (abstract)
+through L2 to L1 (refined). Extracted relations do not have to point in that
+direction. A record may state the same relationship in the opposite direction,
+for example "a practice expresses a value," and the pathway builder preserves
+the extracted predicate and direction rather than rewriting it.
 
 ---
 
@@ -83,20 +85,24 @@ source_text, confidence, generated flag, evidence) per the existing schema.
 
 ### 3.1 Abstraction→refinement pathway
 
-An **abstraction→refinement pathway** is a directed path
-`p = (v3 → v2 → v1)` such that:
+An **abstraction→refinement pathway** is a provenance-preserving, layer-aware
+evidence structure built from relations belonging to one CultureBank source
+record and one cultural group.
 
-- `layer(v3) = L3`, `layer(v2) = L2`, `layer(v1) = L1`, and
-- consecutive nodes are connected by directed edges in `E`, and
-- the nodes share at least one culture: `cultures(v3) ∩ cultures(v2) ∩ cultures(v1) ≠ ∅`
-  (the pathway is *coherent* for some culture `c`).
+A pathway is **complete (FULL)** when one weakly connected source-record
+component contains useful evidence from all three layers L3, L2, and L1. The
+supporting relations do **not** have to form a strict directed L3→L2→L1 chain.
+Direction is flexible because the source may express the same relationship in
+either direction. The original predicates, edge directions, source-record
+provenance, and generated/grounded status are retained.
 
-A pathway is **complete** if it spans all three layers (L3→L2→L1). We also define
-partial pathways: **2-layer** (L3→L2 or L2→L1) and **1-layer** (a single node).
+Partial pathways preserve meaningful directly extracted two-node relations, such
+as L2→L1, L2→L3, or L1→L3, when a complete three-layer connected component is
+not the relevant evidence unit.
 
-> We allow multi-hop within a layer band (e.g., L2→L2→L1) as long as the layer
-> index is non-increasing along the path; "complete" still requires at least one
-> node from each of L3, L2, L1.
+This definition prevents disconnected L1, L2, and L3 facts from the same record
+from being bundled into a FULL pathway solely because all three layer labels are
+present.
 
 ### 3.2 Shared abstraction node (cross-cultural pivot)
 
@@ -117,8 +123,9 @@ Define the **completeness level** of `q`:
 
 ```
 completeness(q) =
-    FULL      if G_q contains a complete L3→L2→L1 pathway coherent for c(q)
-    SOCIAL    elif G_q contains an L2-bearing 2-layer pathway for c(q)   (L1↔L2)
+    FULL      if G_q contains a connected, c(q)-coherent evidence component
+              containing L1, L2, and L3 support
+    SOCIAL    elif G_q contains an L2-bearing 2-layer pathway for c(q)
     SURFACE   elif G_q contains only L1 (surface) content for c(q)
     NONE      else (no relevant retrieved content)
 ```
@@ -184,8 +191,10 @@ CulturalBench (no second benchmark needed).
 3. **Cross-cultural abstraction alignment** (NEW, critical): align refinements
    from different cultures under the same abstraction node → creates shared
    abstraction nodes (enables H2). This is the highest-risk, highest-value piece.
-4. **Abstraction→refinement pathway construction** (NEW): assemble L3→L2→L1
-   pathways; mark completeness; index pathways for retrieval.
+4. **Abstraction→refinement pathway construction** (NEW): build connected,
+   layer-aware source-record pathways; retain their supporting predicates,
+   provenance, and generated/grounded status; mark completeness; index pathways
+   for retrieval.
 5. **Critique-refinement** (exists, repurposed): detect *incomplete* pathways and
    complete them (add missing L2/L3 bridges) under hallucination/stereotype
    control; measured by H3.
@@ -280,7 +289,8 @@ Reviewers grade construction quality independently of downstream accuracy:
   inter-annotator agreement (Cohen's/Fleiss' κ).
 - **Layer-label validity**: human vs. LLM layer agreement (validates the
   ontology).
-- **Pathway-edge precision**: are L3→L2→L1 links actually correct?
+- **Pathway-edge precision**: are the source relations supporting each
+  connected pathway actually correct and culturally coherent?
 - **Cross-cultural alignment precision**: are nodes merged under a shared
   abstraction node genuinely the same concept?
 - **Entity-resolution quality**: precision/recall of node merging on a labeled

@@ -21,7 +21,7 @@ The current repository defines these CulturalBench systems:
 | `S0_no_kg` | No retrieved evidence; question/options only |
 | `S1_raw_text_rag` | Retrieved raw CultureBank passages |
 | `S2_flat_kg` | Retrieved raw KG triples without layer/pathway structure |
-| `S3_layered_kg` | Retrieved refined/layered triples with abstraction layers |
+| `S3_layered_kg` | Retrieved raw triples with abstraction-layer labels |
 | `S4_abstraction_refinement_kg` | Retrieved abstraction-refinement pathways |
 | `S4_triple_retrieval` | S4 ablation using refined triple retrieval instead of pathways |
 | `S4_no_shared_pivot` | S4 ablation using pathways but excluding shared cross-cultural pivots |
@@ -55,15 +55,21 @@ S4 tests the main project claim:
 Do abstraction-refinement pathways help the model answer culturally grounded questions better than raw text, flat triples, or layered triples alone?
 ```
 
-S4 uses pathways with this general shape:
+S4 organizes evidence conceptually across:
 
 ```text
 L3 deep value / abstract cultural concept
--> L2 social norm or role expectation
--> L1 surface practice
+L2 social norm or role expectation
+L1 surface practice
 ```
 
-The current code also tracks whether retrieved evidence has pathway completeness and whether a shared cross-cultural pivot is available.
+A FULL pathway requires L1, L2, and L3 evidence within the same connected
+source-record component, but the extracted edge directions remain flexible.
+S4 preserves and displays the supporting predicates rather than inventing a
+strict L3→L2→L1 direction.
+
+The current code also tracks pathway completeness, shared cross-cultural pivots,
+relation provenance, and the generated-support ratio of retrieved evidence.
 
 ## How the current pipeline builds S4 evidence
 
@@ -73,8 +79,8 @@ That script produces:
 
 ```text
 raw-text passages for S1
-raw triples for S2
-refined triples for S3 and S4_triple_retrieval
+raw triples for S2 and S3
+refined triples for S4_triple_retrieval and S4 pathway construction
 entity map
 cross-cultural alignments
 resolved graph exports
@@ -167,6 +173,7 @@ retrieval top-k
 model/provider
 number of Easy and Hard units
 S0-S4 accuracy
+mean generated-support ratio by system
 McNemar comparisons
 ```
 
@@ -185,7 +192,7 @@ Then manually inspect disagreement cases, especially:
 
 Use cautious wording:
 
-> Step 7 connects the current S4 abstraction-refinement pathway implementation to the CulturalBench evaluation workflow. It allows us to compare no-KG, raw text RAG, flat KG, layered KG, pathway KG, and two S4 ablations under the same model, top-k, and scoring protocol.
+> Step 7 connects the current S4 abstraction-refinement pathway implementation to the CulturalBench evaluation workflow. It compares no-KG, raw text RAG, flat raw triples, layered raw triples, refined-triple retrieval, pathway retrieval, and the no-shared-pivot ablation under the same model and requested top-k. The evaluation also reports generated-support ratios so inferred evidence is visible rather than hidden.
 
 Avoid saying:
 
