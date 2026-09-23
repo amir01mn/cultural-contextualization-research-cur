@@ -1,5 +1,11 @@
 from src.pathway_retriever import PathwayRetriever, build_pathway_index, pathway_document
-from src.schemas import CulturalPathway, LayerLabel, PathwayCompleteness, PathwayNodeRef
+from src.schemas import (
+    CulturalPathway,
+    LayerLabel,
+    PathwayCompleteness,
+    PathwayEdgeRef,
+    PathwayNodeRef,
+)
 
 
 def test_pathway_index_roundtrip(tmp_path):
@@ -25,3 +31,69 @@ def test_pathway_document_includes_culture():
     pw = CulturalPathway(pathway_id="x", culture="India", completeness=PathwayCompleteness.FULL)
     doc = pathway_document(pw)
     assert "India" in doc
+
+
+
+def test_pathway_retrieval_penalizes_fully_generated_support(tmp_path):
+    grounded = CulturalPathway(
+        pathway_id="grounded",
+        culture="Japan",
+        nodes=[
+            PathwayNodeRef(
+                entity_id="l2",
+                label="guest etiquette",
+                layer=LayerLabel.LAYER_2_SOCIAL,
+            ),
+            PathwayNodeRef(
+                entity_id="l1",
+                label="remove shoes",
+                layer=LayerLabel.LAYER_1_SURFACE,
+            ),
+        ],
+        edges=[
+            PathwayEdgeRef(
+                triple_id="t_grounded",
+                source_entity_id="l2",
+                target_entity_id="l1",
+                source_label="guest etiquette",
+                target_label="remove shoes",
+                predicate="expressed as",
+                source_layer=LayerLabel.LAYER_2_SOCIAL,
+                target_layer=LayerLabel.LAYER_1_SURFACE,
+                cultural_group="Japan",
+                generated=False,
+            ),
+        ],
+        triple_ids=["t_grounded"],
+        completeness=PathwayCompleteness.SOCIAL,
+    )
+
+    generated = grounded.model_copy(
+        update={
+            "pathway_id": "generated",
+            "edges": [
+                grounded.edges[0].model_copy(
+                    update={
+                        "triple_id": "t_generated",
+                        "generated": True,
+                    }
+                )
+            ],
+            "triple_ids": ["t_generated"],
+        }
+    )
+
+    retriever = build_pathway_index([grounded, generated], tmp_path)
+    hits = retriever.retrieve(
+        "Japan guest etiquette remove shoes",
+        top_k=2,
+        question_culture="Japan",
+    )
+
+    scores = {pathway.pathway_id: score for pathway, score in hits}
+    assert set(scores) == {"grounded", "generated"}
+
+    # Generated bridge evidence is explicitly uncertain elsewhere in the
+    # pipeline. Pathway retrieval should therefore prefer otherwise identical
+    # grounded support rather than treating both pathways as equally reliable.
+    assert scores["grounded"] > scores["generated"]
