@@ -151,6 +151,19 @@ def _completeness_from_pathways(pathways: list[CulturalPathway]) -> tuple[str, f
     return best.value, score, shared
 
 
+def _generated_ratio_triples(triples: list[CulturalTriple]) -> float:
+    if not triples:
+        return 0.0
+    return sum(1 for triple in triples if triple.generated) / len(triples)
+
+
+def _generated_ratio_pathways(pathways: list[CulturalPathway]) -> float:
+    edges = [edge for pathway in pathways for edge in pathway.edges]
+    if not edges:
+        return 0.0
+    return sum(1 for edge in edges if edge.generated) / len(edges)
+
+
 def _format_pathway(pw: CulturalPathway, index: int) -> str:
     lines = [f"[{index}] Pathway ({pw.completeness.value}, {pw.culture}):"]
     for node in pw.nodes:
@@ -191,6 +204,7 @@ def _passage_evidence(ctx: RetrievalContext, query: str, top_k: int,
         "completeness": PathwayCompleteness.NONE.value,
         "completeness_score": 0.0,
         "shared_node_available": False,
+        "generated_support_ratio": 0.0,
     }
     return "\n".join(lines), ids, meta
 
@@ -209,7 +223,12 @@ def _flat_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
         lines.append(f"[{i}] {t.subject} - {t.predicate} - {t.object}")
         ids.append(t.triple_id)
     bucket, score, shared = _completeness_from_triples(triples)
-    meta = {"completeness": bucket, "completeness_score": score, "shared_node_available": shared}
+    meta = {
+        "completeness": bucket,
+        "completeness_score": score,
+        "shared_node_available": shared,
+        "generated_support_ratio": _generated_ratio_triples(triples),
+    }
     return "\n".join(lines), ids, meta
 
 
@@ -231,7 +250,12 @@ def _layered_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
         )
         ids.append(t.triple_id)
     bucket, score, shared = _completeness_from_triples(triples)
-    meta = {"completeness": bucket, "completeness_score": score, "shared_node_available": shared}
+    meta = {
+        "completeness": bucket,
+        "completeness_score": score,
+        "shared_node_available": shared,
+        "generated_support_ratio": _generated_ratio_triples(triples),
+    }
     return "\n".join(lines), ids, meta
 
 
@@ -243,9 +267,18 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
             "completeness": PathwayCompleteness.NONE.value,
             "completeness_score": 0.0,
             "shared_node_available": False,
+            "generated_support_ratio": 0.0,
         }
-    hits = ctx.pathway_retriever.retrieve(
-        query, top_k=top_k, question_culture=q.cultural_group)
+    if exclude_shared:
+        hits = ctx.pathway_retriever.retrieve(
+            query,
+            top_k=top_k,
+            question_culture=q.cultural_group,
+            exclude_shared=True,
+        )
+    else:
+        hits = ctx.pathway_retriever.retrieve(
+            query, top_k=top_k, question_culture=q.cultural_group)
     ranked = _rank_pathways(hits, q.cultural_group, exclude_shared=exclude_shared)[:top_k]
     lines, ids, pathways = [], [], []
     for i, (pw, _score) in enumerate(ranked, 1):
@@ -253,7 +286,12 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
         ids.append(pw.pathway_id)
         pathways.append(pw)
     bucket, score, shared = _completeness_from_pathways(pathways)
-    meta = {"completeness": bucket, "completeness_score": score, "shared_node_available": shared}
+    meta = {
+        "completeness": bucket,
+        "completeness_score": score,
+        "shared_node_available": shared,
+        "generated_support_ratio": _generated_ratio_pathways(pathways),
+    }
     return "\n".join(lines), ids, meta
 
 
@@ -263,6 +301,7 @@ def _evidence_for(system: str, ctx: Optional[RetrievalContext],
         "completeness": PathwayCompleteness.NONE.value,
         "completeness_score": 0.0,
         "shared_node_available": False,
+        "generated_support_ratio": 0.0,
     }
     if system == SYSTEM_S0 or ctx is None:
         return "", [], empty_meta
@@ -272,7 +311,11 @@ def _evidence_for(system: str, ctx: Optional[RetrievalContext],
     elif system == SYSTEM_S2:
         body, ids, meta = _flat_triple_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S3:
-        body, ids, meta = _layered_triple_evidence(ctx, query, top_k, q)
+        # S2 and S3 share the raw triple corpus so their comparison isolates
+        # the layer labels rather than critique/refinement.
+        body, ids, meta = _layered_triple_evidence(
+            ctx, query, top_k, q, retriever=ctx.triple_retriever
+        )
     elif system == SYSTEM_S4:
         body, ids, meta = _pathway_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S4_NO_SHARED:
@@ -393,5 +436,6 @@ def run_system(system: str,
                 completeness=meta.get("completeness"),
                 completeness_score=meta.get("completeness_score"),
                 shared_node_available=meta.get("shared_node_available"),
+                generated_support_ratio=meta.get("generated_support_ratio"),
             )
     return [a for a in answers]  # type: ignore[return-value]

@@ -251,6 +251,7 @@ class MCQSystemAnswer(BaseModel):
     completeness: Optional[str] = None  # PathwayCompleteness bucket for mechanism analysis
     completeness_score: Optional[float] = None
     shared_node_available: Optional[bool] = None
+    generated_support_ratio: Optional[float] = None
 
 
 class MCQItemResult(BaseModel):

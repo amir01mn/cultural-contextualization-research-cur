@@ -196,6 +196,18 @@ def summarize(questions: list[MCQQuestion],
             pairwise[key] = mcnemar(combined[a], combined[bsys])
     summary["mcnemar_combined"] = pairwise
 
+    generated_support_ratio = {}
+    for system, answers in answers_by_system.items():
+        values = [
+            float(answer.generated_support_ratio)
+            for answer in answers
+            if answer is not None and answer.generated_support_ratio is not None
+        ]
+        generated_support_ratio[system] = (
+            round(sum(values) / len(values), 4) if values else 0.0
+        )
+    summary["generated_support_ratio"] = generated_support_ratio
+
     summary["mechanism_analysis"] = summarize_mechanisms(questions, answers_by_system)
 
     # Per-culture accuracy (combined units).
@@ -310,6 +322,17 @@ def _write_summary_md(path, summary: dict, run_meta: dict) -> None:
             f"| {labels.get(s, s)} | {_fmt_acc(c) if c else 'n/a'} | "
             f"{_fmt_acc(e) if e else 'n/a'} | {_fmt_acc(h) if h else 'n/a'} |"
         )
+
+    lines += [
+        "",
+        "## Mean generated-support ratio",
+        "",
+        "| System | Generated support |",
+        "|---|---:|",
+    ]
+    for system in systems:
+        ratio = summary.get("generated_support_ratio", {}).get(system, 0.0)
+        lines.append(f"| {labels.get(system, system)} | {ratio*100:.1f}% |")
 
     lines += ["", "## McNemar pairwise tests (combined units)", "",
               "| Comparison | delta acc | discordant (b/c) | p-value | method |",

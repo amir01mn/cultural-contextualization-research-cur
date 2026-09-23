@@ -32,6 +32,7 @@ from src.mcq_systems import (  # noqa: E402
     SYSTEM_S2,
     SYSTEM_S3,
     SYSTEM_S4,
+    SYSTEM_S4_TRIPLE,
     RetrievalContext,
     run_system,
 )
@@ -191,15 +192,11 @@ def main(argv=None) -> None:
         sys.exit(2)
 
     need_passages = "S1_raw_text_rag" in systems
-    need_triples = any(s in {SYSTEM_S2, SYSTEM_S3} for s in systems) or bool(
-        set(systems) & S4_SYSTEMS
-    )
-    need_refined = (
-        SYSTEM_S3 in systems
-        or "S4_triple_retrieval" in systems
-        or SYSTEM_S4 in systems
-        or "S4_no_shared_pivot" in systems
-    )
+    # S2 and S3 intentionally share the raw triple corpus. Refined triples
+    # are loaded only for the S4 triple-retrieval ablation; pathway systems
+    # use their already-built pathway index.
+    need_triples = any(s in {SYSTEM_S2, SYSTEM_S3} for s in systems)
+    need_refined = SYSTEM_S4_TRIPLE in systems
     need_pathways = bool(set(systems) & {s for s in S4_SYSTEMS if s != "S4_triple_retrieval"})
 
     passages, triples, refined, pathway_retriever = _load_corpus(
