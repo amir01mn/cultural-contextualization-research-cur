@@ -258,3 +258,25 @@ def test_s4_postranking_preserves_retriever_scores_without_pathway_bonuses():
         "pw_full",
     ]
     assert [score for _pw, score in ranked] == [0.90, 0.80]
+
+
+def test_s2_and_s3_use_same_raw_triple_retriever(mcq_easy_question):
+    class RecordingRetriever:
+        def __init__(self):
+            self.calls = 0
+
+        def retrieve(self, query, top_k=5, *, question_culture=None):
+            self.calls += 1
+            return []
+
+    raw = RecordingRetriever()
+    refined = RecordingRetriever()
+    ctx = RetrievalContext()
+    ctx.triple_retriever = raw
+    ctx.refined_triple_retriever = refined
+
+    build_prompt(SYSTEM_S2, mcq_easy_question, ctx, top_k=4)
+    build_prompt(SYSTEM_S3, mcq_easy_question, ctx, top_k=4)
+
+    assert raw.calls == 2
+    assert refined.calls == 0

@@ -85,3 +85,25 @@ def test_summarize_structure():
     # S3 should outscore S0 here.
     acc = summary["accuracy"]["combined"]
     assert acc["S3_layered_kg"]["accuracy"] >= acc["S0_no_kg"]["accuracy"]
+
+
+def test_summarize_reports_generated_support_ratio():
+    questions = [_easy("e1"), _easy("e2")]
+    answers = {
+        "S4_abstraction_refinement_kg": [
+            MCQSystemAnswer(
+                system="S4_abstraction_refinement_kg",
+                correct=True,
+                generated_support_ratio=0.25,
+            ),
+            MCQSystemAnswer(
+                system="S4_abstraction_refinement_kg",
+                correct=True,
+                generated_support_ratio=0.75,
+            ),
+        ]
+    }
+    summary, _units, _correctness = summarize(
+        questions, answers, n_boot=20, seed=1
+    )
+    assert summary["generated_support_ratio"]["S4_abstraction_refinement_kg"] == 0.5
