@@ -1285,3 +1285,146 @@ The final question is now empirical rather than architectural:
 > After rebuilding and rerunning the exact 77-record experiment with these controls, does the S4 pathway condition still show useful behavior?
 
 That is the result that should determine whether this implementation is frozen and scaled.
+
+
+---
+
+# 19. Alignment audit after the culture-scoped rebuild
+
+## What the Narval rebuild showed
+
+After culture-scoped entity resolution was introduced, the 77-record corpus was rebuilt with LLM alignment verification enabled.
+
+The structural output was:
+
+```text
+Raw triples:                         431
+Refined triples:                     431
+Canonical entities:                  555
+Verified pairwise alignments:         66
+FULL pathways:                        39
+SOCIAL pathways:                     162
+SURFACE pathways:                    114
+Total pathways:                      315
+Shared-pivot pathways:                87
+Unique pivot IDs used by pathways:    28
+```
+
+The increase from 443 to 555 canonical entities was expected because concepts are no longer merged across cultures during ordinary entity resolution.
+
+The stable reduction from 52 historical FULL pathways to 39 also remained consistent with the connected-FULL definition.
+
+However, manual inspection of the 66 verified alignments exposed three additional alignment-quality problems.
+
+## Problem A: same-culture aliases were treated as cross-cultural
+
+Examples included:
+
+```text
+Japanese        vs Japanese people
+Dutch           vs Dutch people
+Turkish         vs Turkish people
+```
+
+These are lexical variants of the cultural-group label, not distinct cultures.
+
+The candidate generator previously compared culture strings literally, so `Japanese` and `Japanese people` counted as different cultures.
+
+### Fix
+
+Culture labels are now normalized before candidate-pair generation. Obvious `... people` / `... peoples` aliases collapse to the same culture key and therefore cannot form a cross-cultural candidate pair.
+
+Regression:
+
+```text
+test_same_culture_aliases_are_not_cross_cultural
+```
+
+## Problem B: generic actors were being promoted to shared abstractions
+
+The L2 layer contains both:
+
+- genuine social norms/expectations; and
+- social participants/roles.
+
+The previous aligner treated all L2 nodes as potentially alignable abstractions. The verifier therefore accepted examples such as:
+
+```text
+people
+customers
+foreigners and family members
+family members and guests
+service providers/customers
+```
+
+Those labels may participate in cultural relations, but they are not themselves the mid-level shared abstractions that A4 is meant to test.
+
+### Fix
+
+Alignment eligibility is now conservative for L2:
+
+- obvious actor/group-only labels are excluded before embedding candidate generation;
+- norm/value-like L2 labels such as `guest etiquette`, obligations, expectations, hierarchies, politeness systems, and relations remain eligible;
+- the LLM verifier prompt now explicitly rejects labels that merely name participants, populations, national groups, customers, guests, tourists, family members, authors, service providers, etc.
+
+Regressions:
+
+```text
+test_actor_only_l2_labels_are_not_shared_abstraction_candidates
+test_norm_like_l2_labels_remain_alignment_candidates
+```
+
+## Problem C: one concept produced many pair-specific pivot IDs
+
+Repeated concepts such as `hospitality`, `appreciation`, `reciprocity`, and `politeness` appeared across several cultures.
+
+The previous pivot ID included the culture pair. Therefore:
+
+```text
+Brazilian hospitality <-> Pakistani hospitality
+Brazilian hospitality <-> Russian hospitality
+Chinese hospitality   <-> Russian hospitality
+...
+```
+
+could each create a different pivot even though they represented the same normalized abstraction.
+
+That caused a single entity to participate in many equivalent pivot IDs and made shared-node counts difficult to interpret.
+
+### Fix
+
+The pivot ID is now based on:
+
+```text
+(layer, normalized abstraction label)
+```
+
+rather than the culture pair.
+
+Pairwise alignment records are still preserved as verification evidence, but repeated verified matches of the same abstraction reuse one shared pivot entity whose cultures, aliases, source IDs, and provenance are accumulated.
+
+Regression:
+
+```text
+test_same_concept_across_three_cultures_reuses_one_pivot
+```
+
+## Validation-report improvement
+
+The Phase 2 report now distinguishes:
+
+- entities marked shared, including alignment members and pivots;
+- verified pairwise alignments;
+- unique shared pivot IDs;
+- pathways using shared pivots;
+- unique shared pivots actually used by pathways.
+
+This avoids treating pairwise alignment count, pivot count, and marked-member count as if they were the same quantity.
+
+## Commit
+
+```text
+60b70d5 Tighten shared abstraction alignment
+```
+
+Because this changes alignment candidate selection and pivot identity, the 77-record corpus must be rebuilt once more before the final CulturalBench rerun.
