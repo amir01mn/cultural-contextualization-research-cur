@@ -14,7 +14,12 @@ from src.mcq_systems import (
     parse_hard_answer,
     run_system,
 )
-from src.schemas import CulturalTriple, LayerLabel, PathwayCompleteness
+from src.schemas import (
+    CulturalPathway,
+    CulturalTriple,
+    LayerLabel,
+    PathwayCompleteness,
+)
 
 
 def test_parse_easy_answer_from_answer_line():
@@ -191,3 +196,30 @@ def test_s4_pathway_and_triple_ablation_use_same_requested_retrieval_budget(
     # the same internal candidate multiplier before reranking.
     assert pathway_retriever.requested_top_k == [requested_top_k]
     assert triple_retriever.requested_top_k == [requested_top_k]
+
+
+
+def test_s4_postranking_does_not_apply_culture_penalty_twice():
+    pathway = CulturalPathway(
+        pathway_id="pw_mismatch",
+        culture="American",
+        completeness=PathwayCompleteness.FULL,
+    )
+
+    # PathwayRetriever.retrieve() has already applied the culture mismatch
+    # penalty before _rank_pathways() receives this score.
+    already_reranked_score = mcq_systems.culture_match_score(
+        pathway.culture,
+        "Japan",
+    )
+
+    ranked = mcq_systems._rank_pathways(
+        [(pathway, already_reranked_score)],
+        question_culture="Japan",
+    )
+
+    assert len(ranked) == 1
+
+    # FULL has weight 1.0, so a second culture penalty must not change the
+    # score at this post-ranking stage.
+    assert ranked[0][1] == already_reranked_score
