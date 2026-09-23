@@ -260,8 +260,7 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
             "shared_node_available": False,
         }
     hits = ctx.pathway_retriever.retrieve(
-        query, top_k=max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k),
-        question_culture=q.cultural_group)
+        query, top_k=top_k, question_culture=q.cultural_group)
     ranked = _rank_pathways(hits, q.cultural_group, exclude_shared=exclude_shared)[:top_k]
     lines, ids, pathways = [], [], []
     for i, (pw, _score) in enumerate(ranked, 1):
