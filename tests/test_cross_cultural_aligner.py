@@ -83,7 +83,7 @@ def test_cross_cultural_alignment_does_not_merge_different_layers():
     assert alignments == []
 
 
-def test_prealigned_multiculture_entity_is_marked_shared():
+def test_multiculture_entity_is_not_implicitly_marked_shared():
     entities = [
         CanonicalEntity(
             entity_id="e1", canonical_label="hospitality",
@@ -95,4 +95,4 @@ def test_prealigned_multiculture_entity_is_marked_shared():
         entities, backend=None, verify=False, similarity_threshold=0.5
     )
     assert alignments == []
-    assert updated[0].is_shared_abstraction is True
+    assert updated[0].is_shared_abstraction is False

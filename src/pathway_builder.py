@@ -416,26 +416,15 @@ def build_pathways(
 
     shared_pivots_by_node: dict[str, set[str]] = defaultdict(set)
 
-    # Explicit alignments take precedence over the entity's own ID. A member
-    # entity such as "l3" should point to the alignment pivot ("pivot1"), not
-    # become its own competing pivot candidate.
-    explicitly_aligned_entities: set[str] = set()
+    # Shared-pivot metadata comes only from the explicit cross-cultural
+    # alignment stage. Entity resolution is culture-scoped, so this keeps the
+    # S4 vs S4_no_shared_pivot ablation isolated to one mechanism.
+    _ = entities
     for alignment in alignments:
         pivot_id = alignment.abstraction_node_id
         shared_pivots_by_node[pivot_id].add(pivot_id)
         for entity_id in alignment.entity_ids:
             shared_pivots_by_node[entity_id].add(pivot_id)
-            explicitly_aligned_entities.add(entity_id)
-
-    # Entity resolution may already have merged an abstract concept across
-    # cultures without creating an explicit alignment object. In that case,
-    # using the entity itself as the shared pivot is the correct fallback.
-    for entity in entities:
-        if (
-            entity.is_shared_abstraction
-            and entity.entity_id not in explicitly_aligned_entities
-        ):
-            shared_pivots_by_node[entity.entity_id].add(entity.entity_id)
 
     cultures: set[str] = set()
     for _nid, data in graph.nodes(data=True):

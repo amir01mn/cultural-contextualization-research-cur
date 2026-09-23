@@ -79,9 +79,6 @@ def align_cross_cultural(
 
     entities_out = [e.model_copy(deep=True) for e in entities]
     by_id = {e.entity_id: e for e in entities_out}
-    for entity in entities_out:
-        if entity.layer.value in _ABSTRACT_LAYERS and len(set(entity.cultures)) >= 2:
-            entity.is_shared_abstraction = True
 
     pairs = _candidate_pairs(entities, threshold)[:max_pairs]
     if not pairs:

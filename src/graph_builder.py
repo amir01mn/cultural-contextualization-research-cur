@@ -101,10 +101,9 @@ def build_graph(triples: Iterable[CulturalTriple]) -> nx.MultiDiGraph:
 def build_graph_resolved(
     triples: Iterable[CulturalTriple],
     entities: list,
-    label_layer_to_entity: dict[tuple[str, str], str],
+    label_layer_to_entity: dict[tuple[str, ...], str],
 ) -> nx.MultiDiGraph:
     """Build graph with canonical entity IDs and culture metadata on nodes."""
-    from .entity_resolver import apply_entity_map
     from .schemas import CanonicalEntity
     from .utils import normalize_node_label
 
@@ -117,7 +116,7 @@ def build_graph_resolved(
             if instance_id and culture:
                 culture_by_instance[instance_id] = culture
 
-    resolved_triples = apply_entity_map(list(triples), label_layer_to_entity, entities_by_id)
+    triples = list(triples)
 
     graph = nx.MultiDiGraph()
     entity_node_ids: dict[str, str] = {}
@@ -140,13 +139,18 @@ def build_graph_resolved(
             is_shared_abstraction=bool(e.is_shared_abstraction),
         )
 
-    for t in resolved_triples:
+    for t in triples:
         if not t.subject or not t.object:
             continue
-        s_key = (normalize_node_label(t.subject), t.subject_layer.value)
-        o_key = (normalize_node_label(t.object), t.object_layer.value)
-        s_id = label_layer_to_entity.get(s_key)
-        o_id = label_layer_to_entity.get(o_key)
+        culture = culture_by_instance.get(t.instance_id, "")
+        s_norm = normalize_node_label(t.subject)
+        o_norm = normalize_node_label(t.object)
+        s_id = label_layer_to_entity.get(
+            (s_norm, t.subject_layer.value, culture)
+        ) or label_layer_to_entity.get((s_norm, t.subject_layer.value))
+        o_id = label_layer_to_entity.get(
+            (o_norm, t.object_layer.value, culture)
+        ) or label_layer_to_entity.get((o_norm, t.object_layer.value))
         if not s_id or not o_id or s_id not in graph or o_id not in graph:
             continue
         graph.nodes[s_id]["frequency"] = graph.nodes[s_id].get("frequency", 1) + 1

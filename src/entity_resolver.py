@@ -38,9 +38,14 @@ def _record_culture_map(records: list[dict]) -> dict[str, str]:
 def _collect_candidates(
     triples: list[CulturalTriple],
     culture_by_instance: dict[str, str],
-) -> dict[tuple[str, str], dict]:
-    """Key: (normalized_label, layer_value) -> aggregate metadata."""
-    candidates: dict[tuple[str, str], dict] = {}
+) -> dict[tuple[str, str, str], dict]:
+    """Key: (normalized_label, layer_value, culture) -> aggregate metadata.
+
+    Entity resolution is intentionally culture-scoped. Cross-cultural merging is
+    handled later by the explicit alignment stage so the alignment ablation has a
+    clean causal interpretation.
+    """
+    candidates: dict[tuple[str, str, str], dict] = {}
     for t in triples:
         for endpoint, label in (("subject", t.subject), ("object", t.object)):
             if not normalize_text(label):
@@ -49,7 +54,9 @@ def _collect_candidates(
             if layer not in _LAYER_GROUPS:
                 continue
             norm = normalize_node_label(label)
-            key = (norm, layer.value)
+            iid = normalize_text(t.instance_id)
+            culture = culture_by_instance.get(iid, "")
+            key = (norm, layer.value, culture)
             bucket = candidates.setdefault(key, {
                 "label": normalize_text(label),
                 "norm": norm,
@@ -59,16 +66,14 @@ def _collect_candidates(
                 "instance_ids": set(),
             })
             bucket["aliases"].add(normalize_text(label))
-            iid = normalize_text(t.instance_id)
             if iid:
                 bucket["instance_ids"].add(iid)
-                cg = culture_by_instance.get(iid)
-                if cg:
-                    bucket["cultures"].add(cg)
+            if culture:
+                bucket["cultures"].add(culture)
     return candidates
 
 
-def _cluster_keys(keys: list[tuple[str, str]], labels: list[str],
+def _cluster_keys(keys: list[tuple[str, str, str]], labels: list[str],
                    threshold: float) -> list[list[int]]:
     if len(keys) <= 1:
         return [[0]] if keys else []
@@ -104,20 +109,21 @@ def resolve_entities(
 ) -> tuple[list[CanonicalEntity], dict[tuple[str, str], str]]:
     """Cluster endpoint labels into canonical entities.
 
-    Returns entities and a mapping (normalized_label, layer_value) -> entity_id.
+    Returns entities and a mapping
+    (normalized_label, layer_value, culture) -> entity_id.
     """
     threshold = similarity_threshold or config.ER_SIMILARITY_THRESHOLD
     culture_by_instance = _record_culture_map(records)
     candidates = _collect_candidates(triples, culture_by_instance)
 
     entities: list[CanonicalEntity] = []
-    label_layer_to_entity: dict[tuple[str, str], str] = {}
+    label_layer_to_entity: dict[tuple[str, str, str], str] = {}
 
-    by_layer: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    by_layer_culture: dict[tuple[str, str], list[tuple[str, str, str]]] = defaultdict(list)
     for key in candidates:
-        by_layer[key[1]].append(key)
+        by_layer_culture[(key[1], key[2])].append(key)
 
-    for layer_value, keys in by_layer.items():
+    for (layer_value, culture), keys in by_layer_culture.items():
         labels = [candidates[k]["label"] for k in keys]
         clusters = _cluster_keys(keys, labels, threshold)
         for cluster in clusters:
@@ -141,7 +147,13 @@ def resolve_entities(
                 for instance_id in sorted(instance_ids)
                 if instance_id in culture_by_instance
             }
-            entity_id = stable_id(layer_value, canonical_label, sorted(aliases), prefix="e_")
+            entity_id = stable_id(
+                layer_value,
+                culture,
+                canonical_label,
+                sorted(aliases),
+                prefix="e_",
+            )
             entity = CanonicalEntity(
                 entity_id=entity_id,
                 canonical_label=canonical_label,
@@ -162,18 +174,28 @@ def resolve_entities(
 
 def apply_entity_map(
     triples: list[CulturalTriple],
-    label_layer_to_entity: dict[tuple[str, str], str],
+    label_layer_to_entity: dict[tuple[str, ...], str],
     entities_by_id: dict[str, CanonicalEntity],
 ) -> list[CulturalTriple]:
     """Return triples with subject/object rewritten to canonical labels."""
+    culture_by_instance: dict[str, str] = {}
+    for entity in entities_by_id.values():
+        for instance_id, culture in entity.source_instance_cultures.items():
+            if instance_id and culture:
+                culture_by_instance[instance_id] = culture
+
     resolved: list[CulturalTriple] = []
     for t in triples:
         t2 = t.model_copy(deep=True)
+        culture = culture_by_instance.get(t.instance_id, "")
         for endpoint, attr in (("subject", "subject_layer"), ("object", "object_layer")):
             label = getattr(t2, endpoint)
             layer = getattr(t2, attr)
-            key = (normalize_node_label(label), layer.value)
-            eid = label_layer_to_entity.get(key)
+            norm = normalize_node_label(label)
+            eid = label_layer_to_entity.get((norm, layer.value, culture))
+            if eid is None:
+                # Backward-compatible support for manually constructed/legacy maps.
+                eid = label_layer_to_entity.get((norm, layer.value))
             if eid and eid in entities_by_id:
                 setattr(t2, endpoint, entities_by_id[eid].canonical_label)
         resolved.append(t2)

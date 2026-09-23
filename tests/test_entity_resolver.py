@@ -34,3 +34,50 @@ def test_entity_cultures_from_record(sample_record, sample_triples):
     entities, _ = resolve_entities(sample_triples, [sample_record], similarity_threshold=0.99)
     assert entities
     assert any("Japanese" in e.cultures for e in entities)
+
+
+
+def test_entity_resolution_keeps_cultures_separate_before_alignment():
+    records = [
+        {"instance_id": "jp1", "cultural_group": "Japan"},
+        {"instance_id": "in1", "cultural_group": "India"},
+    ]
+    triples = [
+        CulturalTriple(
+            triple_id="jp_t",
+            subject="hospitality",
+            predicate="expressed as",
+            object="serving tea",
+            subject_layer=LayerLabel.LAYER_3_DEEP_VALUE,
+            object_layer=LayerLabel.LAYER_1_SURFACE,
+            instance_id="jp1",
+        ),
+        CulturalTriple(
+            triple_id="in_t",
+            subject="hospitality",
+            predicate="expressed as",
+            object="serving food",
+            subject_layer=LayerLabel.LAYER_3_DEEP_VALUE,
+            object_layer=LayerLabel.LAYER_1_SURFACE,
+            instance_id="in1",
+        ),
+    ]
+
+    entities, label_map = resolve_entities(
+        triples, records, similarity_threshold=0.5
+    )
+
+    hospitality = [
+        entity for entity in entities
+        if entity.canonical_label.lower() == "hospitality"
+    ]
+    assert len(hospitality) == 2
+    assert {tuple(entity.cultures) for entity in hospitality} == {
+        ("Japan",),
+        ("India",),
+    }
+
+    layer = LayerLabel.LAYER_3_DEEP_VALUE.value
+    assert label_map[("hospitality", layer, "Japan")] != label_map[
+        ("hospitality", layer, "India")
+    ]
