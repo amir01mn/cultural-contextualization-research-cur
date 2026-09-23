@@ -17,6 +17,11 @@ from .utils import ensure_dir, get_logger, normalize_text
 LOGGER = get_logger("pathway_retriever")
 
 
+def _pathway_fully_generated(pathway: CulturalPathway) -> bool:
+    """Return True only when all known supporting edges are inferred."""
+    return bool(pathway.edges) and all(edge.generated for edge in pathway.edges)
+
+
 def pathway_document(pathway: CulturalPathway) -> str:
     parts = [f"culture: {pathway.culture}", f"completeness: {pathway.completeness.value}"]
     for node in pathway.nodes:
@@ -92,6 +97,7 @@ class PathwayRetriever:
             top_k=top_k,
             question_culture=question_culture,
             get_culture=lambda p: p.culture,
+            get_generated=_pathway_fully_generated,
             allow_cross_culture_shared=lambda p: p.has_shared_pivot,
         )
 
