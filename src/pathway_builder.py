@@ -233,14 +233,29 @@ def _edge_records_for_culture(
     by_record: dict[str, list[tuple[str, str, str, dict]]] = defaultdict(list)
 
     for u, v, key, data in graph.edges(keys=True, data=True):
-        if culture not in _culture_set(graph.nodes[u]):
-            continue
-        if culture not in _culture_set(graph.nodes[v]):
-            continue
+        edge_culture = normalize_text(data.get("cultural_group"))
+
+        # Prefer relation-level provenance whenever available.
+        if edge_culture:
+            if edge_culture != culture:
+                continue
+
+        # Backward-compatible fallback for older/manually constructed graphs.
+        else:
+            if culture not in _culture_set(graph.nodes[u]):
+                continue
+            if culture not in _culture_set(graph.nodes[v]):
+                continue
+
         if _is_topic_metadata_edge(graph, u, v, data, culture):
             continue
-        if _is_weak_pathway_node(graph, u, culture) and _is_weak_pathway_node(graph, v, culture):
+
+        if (
+            _is_weak_pathway_node(graph, u, culture)
+            and _is_weak_pathway_node(graph, v, culture)
+        ):
             continue
+
         record_id = str(data.get("instance_id") or "unknown_record")
         by_record[record_id].append((u, v, str(key), data))
 

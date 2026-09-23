@@ -285,6 +285,10 @@ class CanonicalEntity(BaseModel):
     cultures: list[str] = Field(default_factory=list)
     aliases: list[str] = Field(default_factory=list)
     source_instance_ids: list[str] = Field(default_factory=list)
+
+    # Preserve which culture each source record belongs to.
+    source_instance_cultures: dict[str, str] = Field(default_factory=dict)
+    
     is_shared_abstraction: bool = False
 
     @field_validator("layer", mode="before")

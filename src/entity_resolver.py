@@ -129,11 +129,18 @@ def resolve_entities(
             aliases: set[str] = set()
             cultures: set[str] = set()
             instance_ids: set[str] = set()
+
             for k in cluster_keys:
                 meta = candidates[k]
                 aliases.update(meta["aliases"])
                 cultures.update(meta["cultures"])
                 instance_ids.update(meta["instance_ids"])
+
+            source_instance_cultures = {
+                instance_id: culture_by_instance[instance_id]
+                for instance_id in sorted(instance_ids)
+                if instance_id in culture_by_instance
+            }
             entity_id = stable_id(layer_value, canonical_label, sorted(aliases), prefix="e_")
             entity = CanonicalEntity(
                 entity_id=entity_id,
@@ -142,6 +149,7 @@ def resolve_entities(
                 cultures=sorted(cultures),
                 aliases=sorted(aliases),
                 source_instance_ids=sorted(instance_ids),
+                source_instance_cultures=source_instance_cultures,
             )
             entities.append(entity)
             for k in cluster_keys:

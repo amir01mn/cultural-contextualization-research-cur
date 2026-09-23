@@ -86,6 +86,7 @@ def build_graph(triples: Iterable[CulturalTriple]) -> nx.MultiDiGraph:
             predicate_layer=t.predicate_layer.value,
             dataset_id=t.dataset_id,
             instance_id=t.instance_id,
+            cultural_group=culture_by_instance.get(t.instance_id, ""),
             source_text=t.source_text,
             confidence=float(t.confidence),
             generated=bool(t.generated),
@@ -110,6 +111,13 @@ def build_graph_resolved(
 
     entity_objs = [e if isinstance(e, CanonicalEntity) else CanonicalEntity(**e) for e in entities]
     entities_by_id = {e.entity_id: e for e in entity_objs}
+    culture_by_instance: dict[str, str] = {}
+
+    for entity in entity_objs:
+        for instance_id, culture in entity.source_instance_cultures.items():
+            if instance_id and culture:
+                culture_by_instance[instance_id] = culture
+
     resolved_triples = apply_entity_map(list(triples), label_layer_to_entity, entities_by_id)
 
     graph = nx.MultiDiGraph()
@@ -156,6 +164,7 @@ def build_graph_resolved(
             predicate_layer=t.predicate_layer.value,
             dataset_id=t.dataset_id,
             instance_id=t.instance_id,
+            cultural_group=culture_by_instance.get(t.instance_id, ""),
             source_text=t.source_text,
             confidence=float(t.confidence),
             generated=bool(t.generated),
@@ -238,6 +247,7 @@ def export_csvs(graph: nx.MultiDiGraph, nodes_path: str | Path,
             "predicate_layer": data.get("predicate_layer"),
             "dataset_id": data.get("dataset_id"),
             "instance_id": data.get("instance_id"),
+            "cultural_group": data.get("cultural_group"),
             "confidence": data.get("confidence"),
             "generated": data.get("generated"),
             "evidence": data.get("evidence"),

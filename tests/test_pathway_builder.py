@@ -1,6 +1,12 @@
+from src.entity_resolver import resolve_entities
 from src.graph_builder import build_graph_resolved
 from src.pathway_builder import build_pathways
-from src.schemas import CanonicalEntity, LayerLabel, PathwayCompleteness
+from src.schemas import (
+    CanonicalEntity,
+    CulturalTriple,
+    LayerLabel,
+    PathwayCompleteness,
+)
 
 
 def test_build_pathways_finds_full_path():
@@ -17,7 +23,6 @@ def test_build_pathways_finds_full_path():
         ("deference norm", LayerLabel.LAYER_2_SOCIAL.value): "l2",
         ("remove shoes", LayerLabel.LAYER_1_SURFACE.value): "l1",
     }
-    from src.schemas import CulturalTriple
 
     triples = [
         CulturalTriple(
@@ -39,3 +44,94 @@ def test_build_pathways_finds_full_path():
     pathways = build_pathways(graph, entities, [], max_per_culture=50)
     assert pathways
     assert any(p.completeness == PathwayCompleteness.FULL for p in pathways)
+
+def test_pathways_do_not_leak_edges_between_cultures():
+    records = [
+        {
+            "instance_id": "a_japan",
+            "cultural_group": "Japan",
+        },
+        {
+            "instance_id": "b_netherlands",
+            "cultural_group": "Netherlands",
+        },
+    ]
+
+    # The two cultures deliberately use the same endpoint concepts.
+    # Entity resolution is allowed to merge those concepts into shared
+    # canonical nodes, but relation provenance must remain culture-specific.
+    triples = [
+        CulturalTriple(
+            triple_id="t_japan",
+            subject="guest",
+            predicate="is served",
+            object="tea",
+            subject_layer=LayerLabel.LAYER_2_SOCIAL,
+            object_layer=LayerLabel.LAYER_1_SURFACE,
+            instance_id="a_japan",
+        ),
+        CulturalTriple(
+            triple_id="t_netherlands",
+            subject="guest",
+            predicate="is offered",
+            object="tea",
+            subject_layer=LayerLabel.LAYER_2_SOCIAL,
+            object_layer=LayerLabel.LAYER_1_SURFACE,
+            instance_id="b_netherlands",
+        ),
+    ]
+
+    entities, label_map = resolve_entities(
+        triples,
+        records,
+        similarity_threshold=0.99,
+    )
+
+    graph = build_graph_resolved(
+        triples,
+        entities,
+        label_map,
+    )
+
+    pathways = build_pathways(
+        graph,
+        entities,
+        [],
+        max_per_culture=50,
+    )
+
+    japanese_pathways = [
+        p for p in pathways
+        if p.culture == "Japan"
+    ]
+
+    dutch_pathways = [
+        p for p in pathways
+        if p.culture == "Netherlands"
+    ]
+
+    assert japanese_pathways
+    assert dutch_pathways
+
+    # Japanese pathways must use Japanese relation provenance only.
+    assert all(
+        "t_netherlands" not in p.triple_ids
+        for p in japanese_pathways
+    )
+
+    # Dutch pathways must use Dutch relation provenance only.
+    assert all(
+        "t_japan" not in p.triple_ids
+        for p in dutch_pathways
+    )
+
+    # Make sure each culture actually retained its own evidence.
+    assert any(
+        "t_japan" in p.triple_ids
+        for p in japanese_pathways
+    )
+
+    assert any(
+        "t_netherlands" in p.triple_ids
+        for p in dutch_pathways
+    )
