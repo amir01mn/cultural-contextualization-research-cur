@@ -52,3 +52,17 @@ def test_pathway_shared_pivot_cross_culture():
         allow_cross_culture_shared=lambda p: p.has_shared_pivot,
     )
     assert ranked
+
+
+def test_rerank_scales_penalty_with_generated_ratio():
+    hits = [("grounded", 1.0), ("mixed", 1.0), ("generated", 1.0)]
+    ratios = {"grounded": 0.0, "mixed": 0.5, "generated": 1.0}
+    ranked = rerank_hits(
+        hits,
+        top_k=3,
+        question_culture="Japan",
+        get_culture=lambda _x: "Japan",
+        get_generated_ratio=lambda x: ratios[x],
+    )
+    scores = {item: score for item, score in ranked}
+    assert scores["grounded"] > scores["mixed"] > scores["generated"]
