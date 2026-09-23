@@ -171,7 +171,6 @@ def main(argv=None) -> None:
 
     # Phase 2: entity resolution → alignment → pathways
     entities, label_map = resolve_entities(refined_triples, records)
-    write_jsonl(str(config.ENTITY_MAP_PATH), [e.model_dump() for e in entities])
 
     if not args.skip_alignment:
         alignments, entities = align_cross_cultural(
@@ -182,6 +181,10 @@ def main(argv=None) -> None:
     else:
         LOGGER.info("Skipping cross-cultural alignment.")
         alignments = []
+
+    # Persist the post-alignment entity state so JSONL and Parquet artifacts
+    # agree on shared-abstraction flags and alignment provenance.
+    write_jsonl(str(config.ENTITY_MAP_PATH), [e.model_dump() for e in entities])
     write_jsonl(str(config.ALIGNMENTS_PATH), [a.model_dump() for a in alignments])
 
     resolved_graph = build_graph_resolved(refined_triples, entities, label_map)
