@@ -25,7 +25,7 @@ _ACTOR_GROUP_MARKERS = (
 _NORM_VALUE_CUES = (
     "norm", "etiquette", "expectation", "obligation", "hierarchy", "respect",
     "politeness", "hospitality", "reciprocity", "gratitude", "appreciation",
-    "custom", "rule", "relationship", "relation", "deference", "duty",
+    "custom", "customs", "rule", "relationship", "relation", "deference", "duty",
     "courtesy", "generosity", "care",
 )
 
@@ -39,13 +39,20 @@ def _culture_key(culture: str) -> str:
     return key
 
 
+def _contains_phrase(label: str, phrase: str) -> bool:
+    """Match whole tokens/phrases rather than arbitrary substrings."""
+    normalized_label = " ".join(normalize_text(label).lower().split())
+    normalized_phrase = " ".join(normalize_text(phrase).lower().split())
+    return f" {normalized_phrase} " in f" {normalized_label} "
+
+
 def _is_actor_only_l2(entity: CanonicalEntity) -> bool:
     if entity.layer.value != "LAYER_2_SOCIAL":
         return False
     label = normalize_text(entity.canonical_label).lower()
-    if any(cue in label for cue in _NORM_VALUE_CUES):
+    if any(_contains_phrase(label, cue) for cue in _NORM_VALUE_CUES):
         return False
-    return any(marker in label for marker in _ACTOR_GROUP_MARKERS)
+    return any(_contains_phrase(label, marker) for marker in _ACTOR_GROUP_MARKERS)
 
 
 def _alignment_eligible(entity: CanonicalEntity) -> bool:
