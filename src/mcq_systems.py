@@ -53,13 +53,6 @@ ALL_SYSTEMS = [
 KG_SYSTEMS = {SYSTEM_S2, SYSTEM_S3, SYSTEM_S4, SYSTEM_S4_TRIPLE, SYSTEM_S4_NO_SHARED}
 S4_SYSTEMS = {SYSTEM_S4, SYSTEM_S4_TRIPLE, SYSTEM_S4_NO_SHARED}
 
-_COMPLETENESS_WEIGHT = {
-    PathwayCompleteness.FULL: 1.0,
-    PathwayCompleteness.SOCIAL: 0.85,
-    PathwayCompleteness.SURFACE: 0.7,
-    PathwayCompleteness.NONE: 0.5,
-}
-
 _LAYER_SCORE = {
     LayerLabel.LAYER_1_SURFACE: 1,
     LayerLabel.LAYER_2_SOCIAL: 2,
@@ -105,25 +98,17 @@ def _rank_pathways(hits: list[tuple[CulturalPathway, float]],
                    question_culture: Optional[str],
                    *,
                    exclude_shared: bool = False) -> list[tuple[CulturalPathway, float]]:
-    ranked: list[tuple[CulturalPathway, float, float]] = []
-    for pw, score in hits:
-        if exclude_shared and pw.has_shared_pivot:
-            continue
-        w = _COMPLETENESS_WEIGHT.get(pw.completeness, 0.5)
-        cm = culture_match_score(pw.culture, question_culture)
-        if pw.has_shared_pivot and cm < 0.9:
-            cm = max(cm, config.RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE)
-        bonus = 1.1 if pw.has_shared_pivot else 1.0
-        ranked.append((pw, score * w * bonus, cm))
-    ranked.sort(key=lambda x: x[1], reverse=True)
+    """Preserve retriever ranking; optionally remove shared-pivot pathways.
 
-    if question_culture:
-        matched = [x for x in ranked if x[2] >= 0.9]
-        cross = [x for x in ranked if x[2] < 0.9 and x[0].has_shared_pivot]
-        rest = [x for x in ranked if x[2] < 0.9 and not x[0].has_shared_pivot]
-        ranked = matched + cross + rest
-
-    return [(pw, s) for pw, s, _ in ranked]
+    PathwayRetriever already applies semantic similarity and culture-aware
+    reranking. This post-retrieval stage must not add pathway-only completeness
+    or shared-pivot bonuses, because those would confound the S4 pathway-vs-
+    triple retrieval-unit ablation.
+    """
+    _ = question_culture  # Kept for a stable internal call signature.
+    if exclude_shared:
+        return [(pw, score) for pw, score in hits if not pw.has_shared_pivot]
+    return list(hits)
 
 
 def _completeness_from_triples(triples: list[CulturalTriple]) -> tuple[str, float, bool]:
