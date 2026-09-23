@@ -135,3 +135,70 @@ def test_pathways_do_not_leak_edges_between_cultures():
         "t_netherlands" in p.triple_ids
         for p in dutch_pathways
     )
+
+
+def test_disconnected_same_record_evidence_does_not_make_full_pathway():
+    records = [
+        {
+            "instance_id": "r1",
+            "cultural_group": "Japan",
+        },
+    ]
+
+    # Both triples come from the same source record, but they form two
+    # completely disconnected graph components:
+    #
+    #   hospitality -> generosity
+    #
+    #   guest -> tea
+    #
+    # Collectively the record contains L3, L2, and L1 evidence, but there is
+    # no connected component containing all three layers.
+    triples = [
+        CulturalTriple(
+            triple_id="t_value",
+            subject="hospitality",
+            predicate="is associated with",
+            object="generosity",
+            subject_layer=LayerLabel.LAYER_3_DEEP_VALUE,
+            object_layer=LayerLabel.LAYER_3_DEEP_VALUE,
+            instance_id="r1",
+        ),
+        CulturalTriple(
+            triple_id="t_practice",
+            subject="guest",
+            predicate="is offered",
+            object="tea",
+            subject_layer=LayerLabel.LAYER_2_SOCIAL,
+            object_layer=LayerLabel.LAYER_1_SURFACE,
+            instance_id="r1",
+        ),
+    ]
+
+    entities, label_map = resolve_entities(
+        triples,
+        records,
+        similarity_threshold=0.99,
+    )
+
+    graph = build_graph_resolved(
+        triples,
+        entities,
+        label_map,
+    )
+
+    pathways = build_pathways(
+        graph,
+        entities,
+        [],
+        max_per_culture=50,
+    )
+
+    full_pathways = [
+        p for p in pathways
+        if p.culture == "Japan"
+        and p.completeness == PathwayCompleteness.FULL
+    ]
+
+    # A FULL pathway should require connected L1/L2/L3 evidence.
+    assert not full_pathways
