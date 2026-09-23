@@ -98,6 +98,7 @@ def rerank_hits(
     question_culture: Optional[str] = None,
     get_culture: Callable[[T], str],
     get_generated: Callable[[T], bool] | None = None,
+    get_generated_ratio: Callable[[T], float] | None = None,
     allow_cross_culture_shared: Callable[[T], bool] | None = None,
     culture_first: bool = True,
 ) -> list[tuple[T, float]]:
@@ -111,7 +112,15 @@ def rerank_hits(
     scored: list[tuple[T, float, float]] = []
     for item, base in hits:
         cm = culture_match_score(get_culture(item), question_culture)
-        gen = 1.0 if not get_generated(item) else config.RETRIEVAL_GENERATED_PENALTY
+        if get_generated_ratio is not None:
+            try:
+                generated_ratio = float(get_generated_ratio(item))
+            except (TypeError, ValueError):
+                generated_ratio = 0.0
+            generated_ratio = max(0.0, min(1.0, generated_ratio))
+            gen = 1.0 - generated_ratio * (1.0 - config.RETRIEVAL_GENERATED_PENALTY)
+        else:
+            gen = 1.0 if not get_generated(item) else config.RETRIEVAL_GENERATED_PENALTY
         if cm < 0.9 and allow_cross_culture_shared(item):
             cm = max(cm, config.RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE)
         final = float(base) * cm * gen

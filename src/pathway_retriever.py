@@ -17,9 +17,11 @@ from .utils import ensure_dir, get_logger, normalize_text
 LOGGER = get_logger("pathway_retriever")
 
 
-def _pathway_fully_generated(pathway: CulturalPathway) -> bool:
-    """Return True only when all known supporting edges are inferred."""
-    return bool(pathway.edges) and all(edge.generated for edge in pathway.edges)
+def _pathway_generated_ratio(pathway: CulturalPathway) -> float:
+    """Fraction of known supporting relations that are inferred/generated."""
+    if not pathway.edges:
+        return 0.0
+    return sum(1 for edge in pathway.edges if edge.generated) / len(pathway.edges)
 
 
 def pathway_document(pathway: CulturalPathway) -> str:
@@ -75,10 +77,22 @@ class PathwayRetriever:
                  query: str,
                  top_k: int = 5,
                  *,
-                 question_culture: Optional[str] = None) -> list[tuple[CulturalPathway, float]]:
+                 question_culture: Optional[str] = None,
+                 exclude_shared: bool = False) -> list[tuple[CulturalPathway, float]]:
         if not self.pathways or self.embeddings is None:
             return []
-        candidate_k = min(len(self.pathways), max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k))
+
+        eligible_indices = [
+            i for i, pathway in enumerate(self.pathways)
+            if not (exclude_shared and pathway.has_shared_pivot)
+        ]
+        if not eligible_indices:
+            return []
+
+        candidate_k = min(
+            len(eligible_indices),
+            max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k),
+        )
         if self.backend == "tfidf":
             texts = self.documents + [query]
             embs = embed_texts(texts, fit=True)
@@ -90,14 +104,19 @@ class PathwayRetriever:
             if q_emb.shape[0] == 0:
                 return []
             scores = cosine_similarity_matrix(q_emb, self.embeddings)[0]
-        idx = np.argsort(scores)[::-1][:candidate_k]
-        hits = [(self.pathways[i], float(scores[i])) for i in idx if scores[i] > 0]
+
+        eligible = set(eligible_indices)
+        idx = [
+            i for i in np.argsort(scores)[::-1]
+            if i in eligible and scores[i] > 0
+        ][:candidate_k]
+        hits = [(self.pathways[i], float(scores[i])) for i in idx]
         return rerank_hits(
             hits,
             top_k=top_k,
             question_culture=question_culture,
             get_culture=lambda p: p.culture,
-            get_generated=_pathway_fully_generated,
+            get_generated_ratio=_pathway_generated_ratio,
             allow_cross_culture_shared=lambda p: p.has_shared_pivot,
         )
 

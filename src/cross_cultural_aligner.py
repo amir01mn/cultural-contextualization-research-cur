@@ -34,6 +34,8 @@ def _candidate_pairs(entities: list[CanonicalEntity],
             ej, ent_j = eligible[j]
             if ent_i.cultures[0].lower() == ent_j.cultures[0].lower():
                 continue
+            if ent_i.layer != ent_j.layer:
+                continue
             score = float(sim[i, j])
             if score >= threshold:
                 pairs.append((ei, ej, score))
@@ -74,13 +76,18 @@ def align_cross_cultural(
 ) -> tuple[list[CrossCulturalAlignment], list[CanonicalEntity]]:
     """Find cross-cultural abstraction pivots; optionally LLM-verify."""
     threshold = similarity_threshold or config.ALIGNMENT_SIMILARITY_THRESHOLD
-    pairs = _candidate_pairs(entities, threshold)[:max_pairs]
-    if not pairs:
-        LOGGER.info("Cross-cultural alignment: no candidate pairs above threshold.")
-        return [], list(entities)
 
     entities_out = [e.model_copy(deep=True) for e in entities]
     by_id = {e.entity_id: e for e in entities_out}
+    for entity in entities_out:
+        if entity.layer.value in _ABSTRACT_LAYERS and len(set(entity.cultures)) >= 2:
+            entity.is_shared_abstraction = True
+
+    pairs = _candidate_pairs(entities, threshold)[:max_pairs]
+    if not pairs:
+        LOGGER.info("Cross-cultural alignment: no candidate pairs above threshold.")
+        return [], entities_out
+
     alignments: list[CrossCulturalAlignment] = []
 
     verify_prompts = []
@@ -112,6 +119,16 @@ def align_cross_cultural(
         cultures = sorted(set(ent_a.cultures) | set(ent_b.cultures))
         aliases = sorted(set(ent_a.aliases) | set(ent_b.aliases) | {ent_a.canonical_label, ent_b.canonical_label})
         instance_ids = sorted(set(ent_a.source_instance_ids) | set(ent_b.source_instance_ids))
+        source_instance_cultures = dict(ent_a.source_instance_cultures)
+        for instance_id, culture in ent_b.source_instance_cultures.items():
+            existing = source_instance_cultures.get(instance_id)
+            if existing and existing != culture:
+                LOGGER.warning(
+                    "Conflicting cultures for source record %s: %s vs %s",
+                    instance_id, existing, culture,
+                )
+                continue
+            source_instance_cultures[instance_id] = culture
 
         if pivot_id not in by_id:
             by_id[pivot_id] = CanonicalEntity(
@@ -121,6 +138,7 @@ def align_cross_cultural(
                 cultures=cultures,
                 aliases=aliases,
                 source_instance_ids=instance_ids,
+                source_instance_cultures=source_instance_cultures,
                 is_shared_abstraction=True,
             )
             entities_out.append(by_id[pivot_id])
@@ -129,9 +147,14 @@ def align_cross_cultural(
             pivot.is_shared_abstraction = True
             pivot.cultures = sorted(set(pivot.cultures) | set(cultures))
             pivot.aliases = sorted(set(pivot.aliases) | set(aliases))
+            pivot.source_instance_ids = sorted(
+                set(pivot.source_instance_ids) | set(instance_ids)
+            )
+            for instance_id, culture in source_instance_cultures.items():
+                pivot.source_instance_cultures.setdefault(instance_id, culture)
 
-        ent_a.is_shared_abstraction = True
-        ent_b.is_shared_abstraction = True
+        by_id[ent_a.entity_id].is_shared_abstraction = True
+        by_id[ent_b.entity_id].is_shared_abstraction = True
 
         alignments.append(CrossCulturalAlignment(
             alignment_id=stable_id(ent_a.entity_id, ent_b.entity_id, prefix="a_"),

@@ -229,10 +229,11 @@ def _add_pathway(
     graph: nx.MultiDiGraph,
     pathways: list[CulturalPathway],
     seen_hashes: set[str],
-    pivot_ids: set[str],
+    shared_pivots_by_node: dict[str, set[str]],
     culture: str,
     node_ids: list[str],
     triple_ids: set[str],
+    support_node_ids: Optional[set[str]] = None,
 ) -> bool:
     """Add a pathway if it is non-empty, meaningful, and not duplicated."""
     if len(node_ids) < 2:
@@ -246,13 +247,19 @@ def _add_pathway(
     if completeness == PathwayCompleteness.NONE:
         return False
 
-    node_key = stable_id(culture, *node_ids)
+    node_key = stable_id(culture, *node_ids, *sorted(str(tid) for tid in triple_ids))
     if node_key in seen_hashes:
         return False
     seen_hashes.add(node_key)
 
-    shared = any(n in pivot_ids for n in node_ids)
-    pivot_id = next((n for n in node_ids if n in pivot_ids), None)
+    support_nodes = set(node_ids) | set(support_node_ids or set())
+    pivot_candidates = sorted({
+        pivot_id
+        for node_id in support_nodes
+        for pivot_id in shared_pivots_by_node.get(node_id, set())
+    })
+    shared = bool(pivot_candidates)
+    pivot_id = pivot_candidates[0] if pivot_candidates else None
     pathways.append(
         CulturalPathway(
             pathway_id=stable_id(culture, node_key, prefix="pw_"),
@@ -375,6 +382,22 @@ def _all_edge_ids(edges: list[tuple[str, str, str, dict]]) -> set[str]:
     return {triple_id for _u, _v, triple_id, _data in edges}
 
 
+def _pathway_generated_ratio(pathway: CulturalPathway) -> float:
+    if not pathway.edges:
+        return 0.0
+    return sum(1 for edge in pathway.edges if edge.generated) / len(pathway.edges)
+
+
+def _pathway_priority(pathway: CulturalPathway) -> tuple[int, float, str]:
+    priority = {
+        PathwayCompleteness.FULL: 3,
+        PathwayCompleteness.SOCIAL: 2,
+        PathwayCompleteness.SURFACE: 1,
+        PathwayCompleteness.NONE: 0,
+    }
+    return (-priority.get(pathway.completeness, 0), _pathway_generated_ratio(pathway), pathway.pathway_id)
+
+
 def build_pathways(
     graph: nx.MultiDiGraph,
     entities: list[CanonicalEntity],
@@ -382,20 +405,24 @@ def build_pathways(
     *,
     max_per_culture: Optional[int] = None,
 ) -> list[CulturalPathway]:
-    """Enumerate flexible, layer-aware cultural evidence pathways.
+    """Enumerate flexible, connected cultural evidence pathways.
 
-    FULL pathways are created when a connected component within one source
-    record contains useful L1, L2, and L3 evidence after removing
-    topic/category metadata and generic pathway nodes. The evidence does not
-    need to appear as a strict directed L3->L2->L1 chain; direction is
-    flexible, but the supporting evidence must belong to the same connected
-    component.
-
-    Partial pathways such as L2->L1, L2->L3, and L1->L3 are retained exactly as
-    extracted when they are the strongest evidence available.
+    FULL pathways require connected L1, L2, and L3 evidence within one source
+    record. Direction remains flexible. Per-culture truncation is applied only
+    after deterministic quality ranking so record order cannot decide which
+    pathways survive the cap.
     """
-    max_per_culture = max_per_culture or config.MAX_PATHWAYS_PER_CULTURE
-    pivot_ids = {a.abstraction_node_id for a in alignments}
+    max_per_culture = config.MAX_PATHWAYS_PER_CULTURE if max_per_culture is None else max_per_culture
+
+    shared_pivots_by_node: dict[str, set[str]] = defaultdict(set)
+    for entity in entities:
+        if entity.is_shared_abstraction:
+            shared_pivots_by_node[entity.entity_id].add(entity.entity_id)
+    for alignment in alignments:
+        pivot_id = alignment.abstraction_node_id
+        shared_pivots_by_node[pivot_id].add(pivot_id)
+        for entity_id in alignment.entity_ids:
+            shared_pivots_by_node[entity_id].add(pivot_id)
 
     cultures: set[str] = set()
     for _nid, data in graph.nodes(data=True):
@@ -406,68 +433,47 @@ def build_pathways(
     seen_hashes: set[str] = set()
 
     for culture in sorted(cultures):
-        count = 0
         by_record = _edge_records_for_culture(graph, culture)
+        culture_pathways: list[CulturalPathway] = []
 
-        # Create FULL pathways only when L1, L2, and L3 evidence occur within
-        # the same connected component of a source record. Direction remains
-        # flexible, but disconnected evidence from the same record must not be
-        # combined into one pathway.
         for _record_id, edges in sorted(by_record.items()):
-            if count >= max_per_culture:
-                break
             for comp_nodes, comp_edge_ids in _connected_components_for_record(edges):
-                if count >= max_per_culture:
-                    break
-                l3 = _representative_by_layer(
-                    graph, comp_nodes, LayerLabel.LAYER_3_DEEP_VALUE, culture
-                )
-                l2 = _representative_by_layer(
-                    graph, comp_nodes, LayerLabel.LAYER_2_SOCIAL, culture
-                )
-                l1 = _representative_by_layer(
-                    graph, comp_nodes, LayerLabel.LAYER_1_SURFACE, culture
-                )
+                l3 = _representative_by_layer(graph, comp_nodes, LayerLabel.LAYER_3_DEEP_VALUE, culture)
+                l2 = _representative_by_layer(graph, comp_nodes, LayerLabel.LAYER_2_SOCIAL, culture)
+                l1 = _representative_by_layer(graph, comp_nodes, LayerLabel.LAYER_1_SURFACE, culture)
                 if l1 and l2 and l3:
-                    if _add_pathway(
+                    _add_pathway(
                         graph=graph,
-                        pathways=pathways,
+                        pathways=culture_pathways,
                         seen_hashes=seen_hashes,
-                        pivot_ids=pivot_ids,
+                        shared_pivots_by_node=shared_pivots_by_node,
                         culture=culture,
                         node_ids=[l3, l2, l1],
                         triple_ids=comp_edge_ids,
-                    ):
-                        count += 1
+                        support_node_ids=comp_nodes,
+                    )
 
-        # Finally keep meaningful directed partial pathways exactly as extracted.
-        # This preserves L2->L1, L2->L3, L1->L3, etc. instead of forcing them
-        # into L3->L2->L1 form.
         for _record_id, edges in sorted(by_record.items()):
-            if count >= max_per_culture:
-                break
             for u, v, triple_id, _data in edges:
-                if count >= max_per_culture:
-                    break
                 if _node_layer(graph.nodes[u]) == LayerLabel.UNKNOWN:
                     continue
                 if _node_layer(graph.nodes[v]) == LayerLabel.UNKNOWN:
                     continue
-                if _add_pathway(
+                _add_pathway(
                     graph=graph,
-                    pathways=pathways,
+                    pathways=culture_pathways,
                     seen_hashes=seen_hashes,
-                    pivot_ids=pivot_ids,
+                    shared_pivots_by_node=shared_pivots_by_node,
                     culture=culture,
                     node_ids=[u, v],
                     triple_ids={triple_id},
-                ):
-                    count += 1
+                    support_node_ids={u, v},
+                )
+
+        culture_pathways.sort(key=_pathway_priority)
+        if max_per_culture > 0:
+            culture_pathways = culture_pathways[:max_per_culture]
+        pathways.extend(culture_pathways)
 
     LOGGER.info("Built %d pathways across %d cultures.", len(pathways), len(cultures))
     return pathways
-
-
-def pathways_for_culture(pathways: list[CulturalPathway], culture: str) -> list[CulturalPathway]:
-    c = normalize_text(culture).lower()
-    return [p for p in pathways if normalize_text(p.culture).lower() == c]
