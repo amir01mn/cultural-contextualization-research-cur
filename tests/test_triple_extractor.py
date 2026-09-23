@@ -3,16 +3,36 @@ from src.local_llm import LLMUnavailableError
 from src.schemas import CulturalTriple
 
 
-def test_schema_fallback_produces_grounded_triples(sample_record):
-    triples = triple_extractor.extract_triples(sample_record, mode="schema_fallback")
+def test_schema_fallback_preserves_provenance_and_marks_inferred_bridges(sample_record):
+    triples = triple_extractor.extract_triples(
+        sample_record,
+        mode="schema_fallback",
+    )
+
     assert len(triples) > 0
     assert all(isinstance(t, CulturalTriple) for t in triples)
-    # Schema fallback triples are grounded (generated=False) with provenance.
+
+    # Every fallback triple must preserve its source provenance.
     for t in triples:
-        assert t.generated is False
         assert t.extraction_method == "schema_fallback"
         assert t.instance_id == "test_001"
         assert t.source_text
+
+    # Direct field-derived relationships should remain grounded.
+    grounded = [t for t in triples if t.predicate != "may express"]
+    assert grounded
+    assert all(t.generated is False for t in grounded)
+
+    # Value bridges inferred from the record wording must be marked as
+    # generated rather than presented as directly observed facts.
+    value_bridges = [t for t in triples if t.predicate == "may express"]
+    assert value_bridges
+    assert all(t.generated is True for t in value_bridges)
+    assert all(t.confidence < 0.5 for t in value_bridges)
+    assert all(
+        "Cautious value bridge" in (t.notes or "")
+        for t in value_bridges
+    )
 
 
 def test_llm_mode_unavailable_without_fallback_raises(monkeypatch, sample_record):
