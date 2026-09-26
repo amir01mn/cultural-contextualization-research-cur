@@ -21,93 +21,69 @@ flowchart TD
 
 ## 0. Storage layout (where things live)
 
-The git repo is one folder inside a larger workspace. Model weights and
-dataset caches deliberately stay **outside** the repo: they are tens of GB,
+Everything lives in one backed-up workspace under `/project`. **Nothing depends
+on `$SCRATCH`** (it is purged and was retired on 2026-09-25). Model weights and
+dataset caches deliberately stay *outside* the git repo: they are tens of GB,
 must never be committed, and would slow every Lustre directory walk (pytest,
 `git status`).
 
 ```text
-/project/def-enaskt/amir01mn/cultural-contextualization-research-cur/   workspace (backed up; group quota 1 TB)
-├── cultural-contextualization-research-cur/   this git repo (the active checkout)
-├── models/
-│   ├── Qwen2.5-7B-Instruct/   13 GB, byte-identical to HF revision a09a354 that every run loaded
-│   └── Qwen2.5-3B-Instruct/   5 GB, not referenced by any code (carried over from culfit)
-└── hf_cache/                  empty; nothing points here
-
-/scratch/amir01mn/   ($SCRATCH: fast, NOT backed up, unused files purged after ~60 days)
-├── hf_cache/        THE LIVE CACHE. HF_HOME for every job (slurm/env_hf.sh):
-│                    CultureBank, CulturalBench, Qwen2.5-7B-Instruct@a09a354,
-│                    and an NLI model used only by the abandoned rebuild v2
-├── models/          another copy of the same two Qwen models
-├── cultural-contextualization-research-cur/   OLD clone (Aug 3); do not edit
-└── venvs/           culfit project environments (unrelated)
+/project/def-enaskt/amir01mn/cultural-contextualization-research-cur/   workspace (group quota 1 TB)
+├── cultural-contextualization-research-cur/   this git repo
+│   ├── .venv/                     Python environment (built from requirements-lock.txt)
+│   └── requirements-lock.txt      exact package versions of the Aug 2026 full run
+├── hf_cache/                      HF_HOME for every job (set by slurm/env_hf.sh)
+│   ├── datasets/                  CultureBank (22,990 rows), CulturalBench Easy/Hard
+│   └── hub/                       Qwen/Qwen2.5-7B-Instruct @ a09a354 + dataset repos
+└── models/                        older plain copies of Qwen2.5-7B/3B; not used by the code
 ```
 
-Jobs read datasets and weights from `$SCRATCH/hf_cache` only. The
-`/project` copy of the 7B weights is the purge-proof backup. If scratch is
-purged, point vLLM at it directly (a local path is accepted):
+`slurm/env_hf.sh` finds `hf_cache/` relative to the repo, so the workspace
+can be moved as a unit. It ignores any `HF_HOME` inherited from the login
+shell. Set `CKG_HF_HOME=/path` only to deliberately use another cache.
 
-```bash
-VLLM_MODEL=/project/def-enaskt/amir01mn/cultural-contextualization-research-cur/models/Qwen2.5-7B-Instruct \
-  sbatch slurm/eval_full.sh
-```
-
-Datasets have no backup copy; re-stage them with `slurm/prep_offline.sh` on a
-login node.
-
-> **Known issue: the venv points at the old scratch clone.** This checkout's
-> `.venv` was copied from the scratch clone, and 62 of its `bin/` scripts
-> (including `activate` and `pip`) still hardcode
-> `/scratch/amir01mn/cultural-contextualization-research-cur/.venv`. So
-> `source .venv/bin/activate`, which every SLURM job runs, actually switches
-> to the scratch venv, and `pip install` installs there. The package sets are
-> currently identical, so results are unaffected. But if scratch purges the
-> old clone, jobs will lose their packages. Calling `.venv/bin/python`
-> directly (as the test commands do) is unaffected.
+Every run so far used `Qwen/Qwen2.5-7B-Instruct` at revision
+`a09a35458c702b33eeacc393d103063234e8bc28`. `prep_offline_data.py` logs the
+revision it downloads; check it matches before comparing new results with old.
 
 ## 1. One-time setup (login node)
 
 ```bash
-# Clone / copy the project into your project or scratch space.
-cd $SCRATCH
-git clone <your-repo-url> cultural-contextualization-research
-cd cultural-contextualization-research
+cd /project/def-enaskt/amir01mn/cultural-contextualization-research-cur
+git clone https://github.com/amir01mn/cultural-contextualization-research-cur.git
+cd cultural-contextualization-research-cur
 
 # Load modules exactly as the jobs do (StdEnv/2023, python/3.11, arrow/21.0.0,
 # opencv/4.13.0). Source it in the current shell; never pipe it.
 source slurm/load_modules.sh && load_login_modules
 
-# Create an isolated virtualenv (Alliance recommends venv + prebuilt wheels).
+# Create the venv and install the pinned versions (vLLM 0.23.0, torch 2.11.0, ...).
+# scipy, pandas and pyarrow come from the modules, not pip.
 python -m venv .venv
-source .venv/bin/activate
-pip install --no-index --upgrade pip
-
-# Install dependencies from the Alliance wheelhouse where possible.
-# Check availability first, e.g.:  avail_wheels vllm
-pip install --no-index -r requirements.txt
-
-# vLLM (cluster only). If a wheel is available:
-pip install --no-index vllm
-# If not available via --no-index, install on the login node with internet:
-#   pip install vllm
+.venv/bin/pip install --upgrade pip
+.venv/bin/pip install -r requirements-lock.txt
 ```
 
-Notes:
-- `pyvis` is only used for the optional HTML graph view; if it is not in the
-  wheelhouse you can omit it (the corpus build still writes graphml/json/csv).
-- `sentence-transformers` is optional; without it, retrieval uses TF-IDF.
+`requirements.txt` lists the direct dependencies without versions, for
+non-cluster machines. `requirements-lock.txt` is the reproducible cluster
+environment. Most wheels come from the Alliance wheelhouse; a few
+(`transformers`, `huggingface_hub`, `sentence-transformers`) come from PyPI,
+so run the install on a login node, which has internet.
 
-## 2. Stage data (and model) for offline use (login node)
+Never copy a `.venv` from another location. Its scripts hardcode the path
+where it was created, so `source .venv/bin/activate` would silently switch to
+the original environment.
+
+## 2. Stage data and model for offline use (login node)
 
 ```bash
-export HF_HOME=$SCRATCH/hf_cache
-export VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct   # non-gated default
-bash slurm/prep_offline.sh
+VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct bash slurm/prep_offline.sh
 ```
 
-This caches CultureBank + CulturalBench and (if `VLLM_MODEL` is set) the model
-weights into `$HF_HOME`. Gated models (e.g. `meta-llama/Llama-3.1-8B-Instruct`)
-require `huggingface-cli login` and accepting the license first.
+This downloads CultureBank, CulturalBench, and the model weights into
+`<workspace>/hf_cache`. GPU jobs then read them with `HF_*_OFFLINE=1`. Gated
+models (e.g. `meta-llama/Llama-3.1-8B-Instruct`) require `huggingface-cli login`
+and accepting the license first.
 
 ## 3. Verify the allocation in the SLURM scripts
 
@@ -118,7 +94,6 @@ change them to the appropriate `def-<pi>` account if the deployment changes.
 ## 4. Build and validate the retrieval corpus
 
 ```bash
-export HF_HOME=$SCRATCH/hf_cache
 # Full CultureBank run (checkpoint/resume enabled by default):
 RUN_TAG=<new-tag> CORPUS_LIMIT=100000 BATCH_SIZE=32 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/build_corpus.sh
 
@@ -172,7 +147,6 @@ pip install sentence-transformers
 ## 5. Evaluate S0–S4 and ablations
 
 ```bash
-export HF_HOME=$SCRATCH/hf_cache
 LIMIT=100000 TOP_K=8 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/eval_full.sh
 ```
 
@@ -189,8 +163,10 @@ or custom system set.
 
 ## Offline environment variables (set by the GPU job scripts)
 
+`source slurm/env_hf.sh && setup_hf_offline` sets all of these:
+
 ```bash
-export HF_HOME=$SCRATCH/hf_cache
+export HF_HOME=<workspace>/hf_cache   # resolved from the repo location
 export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export HF_HUB_OFFLINE=1

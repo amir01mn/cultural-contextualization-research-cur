@@ -279,7 +279,7 @@ def load_culturalbench(variants: tuple[str, ...] = ("easy", "hard"),
             raise RuntimeError(
                 "CulturalBench load failed and allow_fallback=False. "
                 "Run slurm/prep_offline.sh on the login node, then ensure GPU jobs "
-                "set HF_HOME/HF_DATASETS_CACHE to $SCRATCH/hf_cache."
+                "source slurm/env_hf.sh (HF_HOME=<workspace>/hf_cache)."
             ) from exc
         LOGGER.warning("Using built-in fallback CulturalBench sample.")
         questions = _fallback_dataset()

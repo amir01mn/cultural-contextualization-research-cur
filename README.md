@@ -160,6 +160,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+On Narval, install the pinned environment instead with
+`.venv/bin/pip install -r requirements-lock.txt` after loading the modules. The
+datasets and model live in the sibling `hf_cache/` folder; see
+[`docs/NARVAL_SETUP.md`](docs/NARVAL_SETUP.md) §0–2.
+
 `sentence-transformers` is optional but recommended for dense retrieval. Without
 it, supported retrieval components use TF-IDF where applicable.
 

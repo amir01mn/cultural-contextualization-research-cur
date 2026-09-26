@@ -73,9 +73,12 @@ if the login node's Lustre client stalls.
 - GPU work (corpus build, eval) runs only through SLURM (`slurm/*.sh`). vLLM
   model load alone takes about 16–18 minutes per job; jobs cap at 3 hours on
   `gpubase_bygpu_b1`.
-- The repo sits inside a workspace folder with sibling `models/` (backup weights)
-  and `hf_cache/` (empty). Jobs use `$SCRATCH/hf_cache`. Never copy weights or
-  caches into the repo. See NARVAL_SETUP §0, including the `.venv` path issue.
+- The repo sits inside a workspace folder whose sibling `hf_cache/` holds the
+  datasets and model weights (HF_HOME, set by `slurm/env_hf.sh`). Nothing may
+  depend on `$SCRATCH`. Never copy weights, caches, or a `.venv` into or
+  between checkouts. See NARVAL_SETUP §0.
+- The venv is built from `requirements-lock.txt` (exact versions of the
+  Aug 2026 run). Add or upgrade packages only deliberately, and update the lock.
 - Never start a GPU job, or anything that overwrites `data/processed/` or
   `data/outputs/`, without the user's explicit go-ahead. Those files are the
   only copy of the August full run.

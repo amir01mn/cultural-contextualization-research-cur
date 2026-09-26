@@ -36,8 +36,12 @@ stage reads and writes. For the research question and hypotheses see
 │   └── watchers/             overnight babysitters that chain/resubmit jobs
 ├── tests/                    offline unit + pipeline-integrity + architecture tests
 ├── data/                     raw/ processed/ outputs/ (mostly git-ignored, see §5)
+├── requirements-lock.txt     exact versions of the cluster environment
 └── docs/                     research design, architecture, conventions, run history
 ```
+
+Datasets and model weights live outside the repo in the sibling
+`../hf_cache/` (see `NARVAL_SETUP.md` §0).
 
 ## 2. Package layering
 
