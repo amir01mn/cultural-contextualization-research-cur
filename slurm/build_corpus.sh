@@ -74,7 +74,7 @@ echo "  state_path=$STATE_PATH"
 python scripts/build_corpus.py "${EXTRA_ARGS[@]}"
 
 echo "Running Phase 2 validation..."
-VALIDATE_ARGS=()
+VALIDATE_ARGS=(--state_path "$STATE_PATH")
 if [[ "$STRICT" == "1" ]]; then
   VALIDATE_ARGS+=(--strict)
 fi

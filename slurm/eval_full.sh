@@ -49,7 +49,8 @@ SWEEP_SYSTEMS="${SWEEP_SYSTEMS:-S4_abstraction_refinement_kg}"
 # pays it again. Skip it here by default and validate in a separate job.
 if [[ "${SKIP_VALIDATE:-1}" != "1" ]]; then
   echo "===== STEP 1: validate rebuilt corpus ====="
-  python scripts/validate_corpus.py --strict
+  STATE_PATH="${STATE_PATH:-data/processed/corpus_build_state${RUN_TAG:+_${RUN_TAG}}.json}"
+  python scripts/validate_corpus.py --strict --state_path "$STATE_PATH"
   VAL_RC=$?
   if [[ $VAL_RC -ne 0 ]]; then
     echo "QUALITY GATES FAILED - see data/outputs/phase2_validation.md" >&2

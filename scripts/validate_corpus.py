@@ -45,9 +45,9 @@ def _generated_support_ratio(triples: list[dict]) -> float:
     return sum(1 for t in triples if t.get("generated")) / len(triples)
 
 
-def collect_metrics() -> dict:
+def collect_metrics(state_path: str | Path = config.CORPUS_STATE_PATH) -> dict:
     """Gather the measurements the gates are evaluated against."""
-    state = load_corpus_state(config.CORPUS_STATE_PATH)
+    state = load_corpus_state(state_path)
     raw = read_jsonl_list(config.PROCESSED_DIR / "corpus_triples.jsonl")
     refined = read_jsonl_list(config.CORPUS_TRIPLES_REFINED_PATH)
     entities = read_jsonl_list(config.ENTITY_MAP_PATH)
@@ -155,8 +155,9 @@ def build_validation_report(
     *,
     query: str = "respect for elders in Japan",
     top_k: int = 5,
+    state_path: str | Path = config.CORPUS_STATE_PATH,
 ) -> tuple[str, bool]:
-    m = collect_metrics()
+    m = collect_metrics(state_path)
     gates = evaluate_gates(m)
     all_passed = all(passed for _n, passed, _d in gates)
 
@@ -230,15 +231,20 @@ def build_validation_report(
 def main(argv=None) -> None:
     import argparse
 
-    p = argparse.ArgumentParser(description="Validate Phase 2 artifacts.")
+    p = argparse.ArgumentParser(description="Validate corpus artifacts against quality gates.")
     p.add_argument("--query", default="respect for elders in Japan")
     p.add_argument("--top_k", type=int, default=5)
     p.add_argument("--output", default=str(config.PHASE2_VALIDATION_PATH))
     p.add_argument("--strict", action="store_true", default=False,
                    help="Exit non-zero if any quality gate fails.")
+    # Must match the build's --state_path: a RUN_TAG build writes
+    # corpus_build_state_<tag>.json, and validating against the default file
+    # reports a different run's checkpoint.
+    p.add_argument("--state_path", default=str(config.CORPUS_STATE_PATH))
     args = p.parse_args(argv)
 
-    report, passed = build_validation_report(query=args.query, top_k=args.top_k)
+    report, passed = build_validation_report(
+        query=args.query, top_k=args.top_k, state_path=args.state_path)
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_text(report, encoding="utf-8")
     print(report)
