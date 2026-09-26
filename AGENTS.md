@@ -42,7 +42,7 @@ diagnosis and consolidation stage, not tuning for a paper. Read
 | Coding and research-integrity rules | `docs/CONVENTIONS.md` |
 | Past runs, artifact lineage, branches, stash, open issues | `docs/RUN_HISTORY.md` |
 | Hypotheses H1–H3, ablations, statistics protocol | `docs/RESEARCH_DESIGN.md` |
-| Narval setup, SLURM jobs, offline staging | `docs/NARVAL_SETUP.md` |
+| Narval setup, SLURM jobs, offline staging, **where models/caches live** | `docs/NARVAL_SETUP.md` (§0 storage layout) |
 | Plain-language overview and results | `README.md`, `docs/PROJECT_OVERVIEW.md` |
 
 Code layout: `src/{core,llm,loaders,construction,retrieval,evaluation,legacy}`.
@@ -73,6 +73,9 @@ if the login node's Lustre client stalls.
 - GPU work (corpus build, eval) runs only through SLURM (`slurm/*.sh`). vLLM
   model load alone takes about 16–18 minutes per job; jobs cap at 3 hours on
   `gpubase_bygpu_b1`.
+- The repo sits inside a workspace folder with sibling `models/` (backup weights)
+  and `hf_cache/` (empty). Jobs use `$SCRATCH/hf_cache`. Never copy weights or
+  caches into the repo. See NARVAL_SETUP §0, including the `.venv` path issue.
 - Never start a GPU job, or anything that overwrites `data/processed/` or
   `data/outputs/`, without the user's explicit go-ahead. Those files are the
   only copy of the August full run.

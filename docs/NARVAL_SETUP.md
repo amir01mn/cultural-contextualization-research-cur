@@ -19,6 +19,52 @@ flowchart TD
   eval --> out["Evaluation, mechanism, and comparison reports"]
 ```
 
+## 0. Storage layout (where things live)
+
+The git repo is one folder inside a larger workspace. Model weights and
+dataset caches deliberately stay **outside** the repo: they are tens of GB,
+must never be committed, and would slow every Lustre directory walk (pytest,
+`git status`).
+
+```text
+/project/def-enaskt/amir01mn/cultural-contextualization-research-cur/   workspace (backed up; group quota 1 TB)
+├── cultural-contextualization-research-cur/   this git repo (the active checkout)
+├── models/
+│   ├── Qwen2.5-7B-Instruct/   13 GB, byte-identical to HF revision a09a354 that every run loaded
+│   └── Qwen2.5-3B-Instruct/   5 GB, not referenced by any code (carried over from culfit)
+└── hf_cache/                  empty; nothing points here
+
+/scratch/amir01mn/   ($SCRATCH: fast, NOT backed up, unused files purged after ~60 days)
+├── hf_cache/        THE LIVE CACHE. HF_HOME for every job (slurm/env_hf.sh):
+│                    CultureBank, CulturalBench, Qwen2.5-7B-Instruct@a09a354,
+│                    and an NLI model used only by the abandoned rebuild v2
+├── models/          another copy of the same two Qwen models
+├── cultural-contextualization-research-cur/   OLD clone (Aug 3); do not edit
+└── venvs/           culfit project environments (unrelated)
+```
+
+Jobs read datasets and weights from `$SCRATCH/hf_cache` only. The
+`/project` copy of the 7B weights is the purge-proof backup. If scratch is
+purged, point vLLM at it directly (a local path is accepted):
+
+```bash
+VLLM_MODEL=/project/def-enaskt/amir01mn/cultural-contextualization-research-cur/models/Qwen2.5-7B-Instruct \
+  sbatch slurm/eval_full.sh
+```
+
+Datasets have no backup copy; re-stage them with `slurm/prep_offline.sh` on a
+login node.
+
+> **Known issue: the venv points at the old scratch clone.** This checkout's
+> `.venv` was copied from the scratch clone, and 62 of its `bin/` scripts
+> (including `activate` and `pip`) still hardcode
+> `/scratch/amir01mn/cultural-contextualization-research-cur/.venv`. So
+> `source .venv/bin/activate`, which every SLURM job runs, actually switches
+> to the scratch venv, and `pip install` installs there. The package sets are
+> currently identical, so results are unaffected. But if scratch purges the
+> old clone, jobs will lose their packages. Calling `.venv/bin/python`
+> directly (as the test commands do) is unaffected.
+
 ## 1. One-time setup (login node)
 
 ```bash
