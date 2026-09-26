@@ -16,7 +16,7 @@ from ..core import config
 from ..core.schemas import CulturalRecord
 from ..core.utils import coalesce, get_logger, normalize_text, stable_id, write_jsonl
 
-LOGGER = get_logger("data_loader")
+LOGGER = get_logger("culturebank_loader")
 
 
 # Candidate source-field names in CultureBank-style datasets, mapped to our

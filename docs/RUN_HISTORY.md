@@ -4,7 +4,7 @@ This page records what was run, which artifacts came from which run, where
 unmerged work lives, and which issues are still open. Update it whenever a run
 finishes or a branch changes state. The code cannot tell you any of this.
 
-Last updated: 2026-09-25.
+Last updated: 2026-09-26.
 
 ## 1. Runs, oldest first
 
@@ -19,6 +19,14 @@ unless noted.
 | 2026-08-03 → 05 | **Rebuilt full run (current checked-in result)** | 22,990 records, 153,882 raw / 186,691 refined triples, 29,578 pathways, 2,454 units | **negative**: S0 52.2% beats every retrieval system; S4 38.4% | `data/outputs/culturalbench_summary.md`, `mechanism_analysis.md`, `before_after_comparison.md`; checkpoint `corpus_build_state_full.json`, cache `llm_cache_full/` |
 | 2026-07-30 → 09-04 | Controlled food/hospitality experiments | best: 77 audited records, 19 pathway cultures, 40 units | S4 75.0% vs S0 65.0%; S4 +4/−0 vs S3; **not significant** | branch `origin/fix-flexible-pathways`, tag `full77-baseline`, `docs/experiments/` on that branch |
 | 2026-09-05 | USA-only "rebuild v2" pilot | USA records, 16,162 triples, 233 pathways, 40 units | S0 70.0%, S3 62.5%, S4 52.5%; unsatisfactory, parked | `stash@{0}` (code **and** `data/rebuild_v2_usa/`: unlabeled audit packets, a failed `validation_report.json`, exploratory results), `slurm/logs/*usa*` |
+
+### Environment change (2026-09-25)
+
+The project no longer uses `$SCRATCH`. The venv was rebuilt from
+`requirements-lock.txt` with the identical package set. CultureBank,
+CulturalBench, and Qwen2.5-7B-Instruct were re-downloaded into
+`<workspace>/hf_cache`, at the same model revision `a09a354` that every run
+above used. Results are therefore directly comparable across the change.
 
 ### Why the July full run was broken
 
