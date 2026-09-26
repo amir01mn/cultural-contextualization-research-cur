@@ -1,5 +1,5 @@
-from src.entity_resolver import apply_entity_map, resolve_entities
-from src.schemas import CulturalTriple, LayerLabel
+from src.construction.entity_resolver import apply_entity_map, resolve_entities
+from src.core.schemas import CulturalTriple, LayerLabel
 
 
 def test_resolve_entities_merges_similar_labels(sample_record):

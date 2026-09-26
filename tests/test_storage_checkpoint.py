@@ -1,8 +1,8 @@
-from src.mcq_systems import SYSTEM_S4, RetrievalContext, build_prompt
-from src.pathway_retriever import PathwayRetriever, build_pathway_index
-from src.schemas import CulturalPathway, LayerLabel, PathwayCompleteness, PathwayNodeRef
-from src.schemas import CorpusBuildState
-from src.storage import prepare_stage_state, save_corpus_state
+from src.evaluation.mcq_systems import SYSTEM_S4, RetrievalContext, build_prompt
+from src.retrieval.pathway_retriever import PathwayRetriever, build_pathway_index
+from src.core.schemas import CulturalPathway, LayerLabel, PathwayCompleteness, PathwayNodeRef
+from src.core.schemas import CorpusBuildState
+from src.core.storage import prepare_stage_state, save_corpus_state
 
 
 def test_prepare_stage_state_preserves_other_stage(tmp_path):

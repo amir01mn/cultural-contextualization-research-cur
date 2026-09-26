@@ -3,8 +3,8 @@ import types
 
 import pytest
 
-from src import llm_backend
-from src.llm_backend import OllamaBackend, VLLMBackend, get_backend
+from src.llm import llm_backend
+from src.llm.llm_backend import OllamaBackend, VLLMBackend, get_backend
 
 
 def test_factory_returns_ollama_by_default():

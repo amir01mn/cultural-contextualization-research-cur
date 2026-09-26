@@ -1,6 +1,6 @@
-from src.graph_builder import build_graph_resolved
-from src.pathway_builder import build_pathways
-from src.schemas import CanonicalEntity, LayerLabel, PathwayCompleteness
+from src.construction.graph_builder import build_graph_resolved
+from src.construction.pathway_builder import build_pathways
+from src.core.schemas import CanonicalEntity, LayerLabel, PathwayCompleteness
 
 
 def test_build_pathways_finds_full_path():
@@ -17,7 +17,7 @@ def test_build_pathways_finds_full_path():
         ("deference norm", LayerLabel.LAYER_2_SOCIAL.value): "l2",
         ("remove shoes", LayerLabel.LAYER_1_SURFACE.value): "l1",
     }
-    from src.schemas import CulturalTriple
+    from src.core.schemas import CulturalTriple
 
     triples = [
         CulturalTriple(

@@ -1,4 +1,4 @@
-from src.schemas import (
+from src.core.schemas import (
     CulturalRecord,
     CulturalTriple,
     EvaluationExample,

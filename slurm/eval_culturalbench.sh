@@ -49,7 +49,7 @@ SEED="${SEED:-42}"
 SYSTEMS="${SYSTEMS:-S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg,S4_abstraction_refinement_kg,S4_triple_retrieval,S4_no_shared_pivot}"
 
 echo "Evaluating on CulturalBench with vLLM model: $VLLM_MODEL"
-python scripts/07_eval_culturalbench.py \
+python scripts/eval_culturalbench.py \
   --provider vllm \
   --model "$VLLM_MODEL" \
   --variants easy,hard \

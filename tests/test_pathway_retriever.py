@@ -1,5 +1,5 @@
-from src.pathway_retriever import PathwayRetriever, build_pathway_index, pathway_document
-from src.schemas import CulturalPathway, LayerLabel, PathwayCompleteness, PathwayNodeRef
+from src.retrieval.pathway_retriever import PathwayRetriever, build_pathway_index, pathway_document
+from src.core.schemas import CulturalPathway, LayerLabel, PathwayCompleteness, PathwayNodeRef
 
 
 def test_pathway_index_roundtrip(tmp_path):

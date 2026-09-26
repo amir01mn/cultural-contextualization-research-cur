@@ -6,7 +6,7 @@ benchmark culture labels and the pathway culture labels.
 """
 import pytest
 
-from src.culture_normalizer import (
+from src.core.culture_normalizer import (
     canonical_culture,
     canonical_cultures,
     cultures_match,

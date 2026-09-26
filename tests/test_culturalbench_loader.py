@@ -1,5 +1,5 @@
-from src import culturalbench_loader as cbl
-from src.schemas import MCQVariant
+from src.loaders import culturalbench_loader as cbl
+from src.core.schemas import MCQVariant
 
 
 def test_fallback_dataset_has_easy_and_hard():

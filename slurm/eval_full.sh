@@ -49,7 +49,7 @@ SWEEP_SYSTEMS="${SWEEP_SYSTEMS:-S4_abstraction_refinement_kg}"
 # pays it again. Skip it here by default and validate in a separate job.
 if [[ "${SKIP_VALIDATE:-1}" != "1" ]]; then
   echo "===== STEP 1: validate rebuilt corpus ====="
-  python scripts/09_validate_phase2.py --strict
+  python scripts/validate_corpus.py --strict
   VAL_RC=$?
   if [[ $VAL_RC -ne 0 ]]; then
     echo "QUALITY GATES FAILED - see data/outputs/phase2_validation.md" >&2
@@ -60,7 +60,7 @@ else
 fi
 
 echo "===== STEP 2: evaluate on full CulturalBench ====="
-python scripts/07_eval_culturalbench.py \
+python scripts/eval_culturalbench.py \
   --provider vllm \
   --model "$VLLM_MODEL" \
   --variants easy,hard \
@@ -78,6 +78,6 @@ if [[ $EVAL_RC -ne 0 ]]; then
 fi
 
 echo "===== STEP 3: before/after comparison ====="
-python scripts/10_compare_runs.py
+python scripts/compare_runs.py
 
 echo "Phase 8 complete. See data/outputs/culturalbench_summary.md and before_after_comparison.md"

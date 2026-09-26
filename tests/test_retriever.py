@@ -1,4 +1,4 @@
-from src.retriever import TripleRetriever, retrieve_triples
+from src.retrieval.retriever import TripleRetriever, retrieve_triples
 
 
 def test_retriever_returns_relevant_triple(sample_triples):

@@ -14,7 +14,7 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 import pytest
 
-from src.schemas import CulturalTriple, LayerLabel, MCQQuestion, MCQVariant
+from src.core.schemas import CulturalTriple, LayerLabel, MCQQuestion, MCQVariant
 
 
 class FakeBackend:

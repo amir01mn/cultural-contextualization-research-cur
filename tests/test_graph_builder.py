@@ -1,4 +1,4 @@
-from src import graph_builder
+from src.construction import graph_builder
 
 
 def test_build_graph_nodes_and_edges(sample_triples):

@@ -9,12 +9,12 @@ Each test pins one link in the measured causal chain:
 import networkx as nx
 import pytest
 
-from src import config, storage
-from src.critique_agent import _is_content_issue, build_refined_triples
-from src.graph_builder import build_graph_resolved
-from src.pathway_builder import build_pathways
-from src.retrieval_ranking import rerank_hits
-from src.schemas import (
+from src.core import config, storage
+from src.construction.critique_agent import _is_content_issue, build_refined_triples
+from src.construction.graph_builder import build_graph_resolved
+from src.construction.pathway_builder import build_pathways
+from src.retrieval.retrieval_ranking import rerank_hits
+from src.core.schemas import (
     CanonicalEntity,
     CorpusBuildState,
     CritiqueIssue,
@@ -25,7 +25,7 @@ from src.schemas import (
     LayerLabel,
     PathwayCompleteness,
 )
-from src.triple_extractor import extract_triples_schema
+from src.construction.triple_extractor import extract_triples_schema
 
 
 # --- Phase 1: token budgets and cache keying -------------------------------

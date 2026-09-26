@@ -1,6 +1,6 @@
-from src.mechanism_analysis import summarize_mechanisms
-from src.mcq_systems import SYSTEM_S2, SYSTEM_S4
-from src.schemas import MCQQuestion, MCQSystemAnswer, MCQVariant
+from src.evaluation.mechanism_analysis import summarize_mechanisms
+from src.evaluation.mcq_systems import SYSTEM_S2, SYSTEM_S4
+from src.core.schemas import MCQQuestion, MCQSystemAnswer, MCQVariant
 
 
 def _easy(qid, culture="Japan"):

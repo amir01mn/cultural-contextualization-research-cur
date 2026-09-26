@@ -71,14 +71,14 @@ fi
 echo "Building Phase 2 corpus with vLLM model: $VLLM_MODEL (limit=$CORPUS_LIMIT batch=$BATCH_SIZE)"
 echo "  cache_dir=$CACHE_DIR"
 echo "  state_path=$STATE_PATH"
-python scripts/06_build_retrieval_corpus.py "${EXTRA_ARGS[@]}"
+python scripts/build_corpus.py "${EXTRA_ARGS[@]}"
 
 echo "Running Phase 2 validation..."
 VALIDATE_ARGS=()
 if [[ "$STRICT" == "1" ]]; then
   VALIDATE_ARGS+=(--strict)
 fi
-if ! python scripts/09_validate_phase2.py "${VALIDATE_ARGS[@]}"; then
+if ! python scripts/validate_corpus.py "${VALIDATE_ARGS[@]}"; then
   echo "QUALITY GATES FAILED - see data/outputs/phase2_validation.md" >&2
   exit 1
 fi

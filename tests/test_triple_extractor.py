@@ -1,6 +1,6 @@
-from src import triple_extractor
-from src.local_llm import LLMUnavailableError
-from src.schemas import CulturalTriple
+from src.construction import triple_extractor
+from src.llm.local_llm import LLMUnavailableError
+from src.core.schemas import CulturalTriple
 
 
 def test_schema_fallback_produces_grounded_triples(sample_record):

@@ -1,4 +1,0 @@
-[2026-07-08T02:59:10-04:00] === Starting 23k babysit ===
-sbatch: NOTE: Your memory request of 32768.0M was likely submitted as 32.0G. Please note that Slurm interprets memory requests denominated in G as multiples of 1024M, not 1000M.
-[2026-07-08T02:59:10-04:00] Corpus job: 64882277
-[2026-07-08T02:59:10-04:00] Watching job 64882277 ...
