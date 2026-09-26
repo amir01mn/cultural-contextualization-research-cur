@@ -18,7 +18,7 @@ unless noted.
 | 2026-07-10 | **"Broken" full run** | 22,990 records, 500 eval units | S0 76.6%, S4 73.2% (McNemar p=0.04). The build was silently broken (below). | `data/outputs/broken_run_baseline/` |
 | 2026-08-03 → 05 | **Rebuilt full run (current checked-in result)** | 22,990 records, 153,882 raw / 186,691 refined triples, 29,578 pathways, 2,454 units | **negative**: S0 52.2% beats every retrieval system; S4 38.4% | `data/outputs/culturalbench_summary.md`, `mechanism_analysis.md`, `before_after_comparison.md`; checkpoint `corpus_build_state_full.json`, cache `llm_cache_full/` |
 | 2026-07-30 → 09-04 | Controlled food/hospitality experiments | best: 77 audited records, 19 pathway cultures, 40 units | S4 75.0% vs S0 65.0%; S4 +4/−0 vs S3; **not significant** | branch `origin/fix-flexible-pathways`, tag `full77-baseline`, `docs/experiments/` on that branch |
-| 2026-09-05 | USA-only "rebuild v2" pilot | USA records, 16,162 triples, 233 pathways, 40 units | S0 70.0%, S3 62.5%, S4 52.5%; unsatisfactory, parked | `stash@{0}`, `slurm/logs/*usa*` (its `data/rebuild_v2_usa/` outputs no longer exist) |
+| 2026-09-05 | USA-only "rebuild v2" pilot | USA records, 16,162 triples, 233 pathways, 40 units | S0 70.0%, S3 62.5%, S4 52.5%; unsatisfactory, parked | `stash@{0}` (code **and** `data/rebuild_v2_usa/`: unlabeled audit packets, a failed `validation_report.json`, exploratory results), `slurm/logs/*usa*` |
 
 ### Why the July full run was broken
 
@@ -82,7 +82,7 @@ mechanism, and comparison reports from that single checkpoint.
 | `main` / `origin/main` | behind; `origin/main` has one extra commit | adds `docs/culturebank-culturalbench-coverage.pdf` |
 | `origin/fix-flexible-pathways` = `origin/validate-flexible-pathways` (tag `full77-baseline`) | **37 commits not merged**; forked at `491d33c` | controlled-subset tooling (`scripts/08`–`12_*`), flexible layer-aware pathways, layer repair, prompt guardrails, food/hospitality experiment docs |
 | `origin/meeting-fixes-s4-plan`, `origin/integrate-v43-extraction-schema` | old, July | early S4 wiring and an alternative extraction schema; likely superseded |
-| `stash@{0}` | parked 2026-09-21, based on `330b45d` | "provenance-safe rebuild v2": `artifact_manifest`, `bm25_index`, `candidate_reranker`, `grounding_verifier`, extra S4 ablations (`S4_path_raw`, `S4_no_gate`, …), USA pilot SLURM scripts, `tests/test_provenance_safe_rebuild.py` |
+| `stash@{0}` | parked 2026-09-21, based on `330b45d`; **not committed on any branch** | "provenance-safe rebuild v2" (design in the stash's `docs/PROVENANCE_SAFE_REBUILD.md`), plus the USA pilot's `data/rebuild_v2_usa/` (~12.5k files, mostly LLM cache): `artifact_manifest`, `bm25_index`, `candidate_reranker`, `grounding_verifier`, extra S4 ablations (`S4_path_raw`, `S4_no_gate`, …), USA pilot SLURM scripts, `tests/test_provenance_safe_rebuild.py` |
 
 ### Merging older work into the new layout
 
