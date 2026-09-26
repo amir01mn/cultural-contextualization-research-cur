@@ -1,8 +1,8 @@
 # Running on Narval (Digital Research Alliance of Canada)
 
-This guide covers running the CulturalBench evaluation harness (Phase 1, systems
-S0-S3) on Narval via SLURM. It assumes you have an Alliance account and an
-allocation (the `def-<pi>` account string).
+This guide covers building the full cultural KG and evaluating systems S0–S4 on
+Narval via SLURM. It assumes you have an Alliance account and an allocation (the
+`def-<pi>` account string).
 
 Two hard facts shape the workflow:
 
@@ -13,9 +13,10 @@ Two hard facts shape the workflow:
 
 ```mermaid
 flowchart TD
-  login["Login node (internet): create venv, stage data/model"] --> corpus["GPU job: build_corpus.sh (vLLM extraction)"]
-  corpus --> eval["GPU job: eval_culturalbench.sh (S0-S3, vLLM)"]
-  eval --> out["data/outputs/culturalbench_summary.md"]
+  login["Login node: create venv and stage data/model"] --> corpus["GPU job: build_corpus.sh"]
+  corpus --> validate["Strict corpus and pathway validation"]
+  validate --> eval["GPU job: eval_full.sh (S0-S4 + ablations)"]
+  eval --> out["Evaluation, mechanism, and comparison reports"]
 ```
 
 ## 1. One-time setup (login node)
@@ -23,8 +24,8 @@ flowchart TD
 ```bash
 # Clone / copy the project into your project or scratch space.
 cd $SCRATCH
-git clone <your-repo-url> cultural-kg-mvp   # or rsync it over
-cd cultural-kg-mvp
+git clone <your-repo-url> cultural-contextualization-research
+cd cultural-contextualization-research
 
 # Load modules (versions may differ; use `module spider` to check).
 module load StdEnv/2023 gcc/12.3 python/3.11 arrow/17.0.0 cuda/12.2
@@ -61,23 +62,24 @@ This caches CultureBank + CulturalBench and (if `VLLM_MODEL` is set) the model
 weights into `$HF_HOME`. Gated models (e.g. `meta-llama/Llama-3.1-8B-Instruct`)
 require `huggingface-cli login` and accepting the license first.
 
-## 3. Set your allocation in the SLURM scripts
+## 3. Verify the allocation in the SLURM scripts
 
-Edit the `--account=def-CHANGEME` line in `slurm/build_corpus.sh` and
-`slurm/eval_culturalbench.sh` to your `def-<pi>` allocation.
+The GPU scripts currently use `--account=def-enaskt_gpu`; `run_tests.sh` uses
+`--account=def-enaskt`. Confirm these are still the intended allocations and
+change them to the appropriate `def-<pi>` account if the deployment changes.
 
-## 4. Build the retrieval corpus — Phase 2 pipeline (GPU job)
+## 4. Build and validate the retrieval corpus
 
 ```bash
 export HF_HOME=$SCRATCH/hf_cache
-# Full run (checkpoint/resume enabled by default):
-CORPUS_LIMIT=2000 BATCH_SIZE=32 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/build_corpus.sh
+# Full CultureBank run (checkpoint/resume enabled by default):
+CORPUS_LIMIT=100000 BATCH_SIZE=32 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/build_corpus.sh
 
 # Smoke test:
 CORPUS_LIMIT=50 BATCH_SIZE=16 sbatch slurm/build_corpus.sh
 ```
 
-Phase 2 outputs (in addition to Phase 1 artifacts):
+Primary construction outputs:
 
 | Artifact | Path |
 |---|---|
@@ -92,7 +94,10 @@ Phase 2 outputs (in addition to Phase 1 artifacts):
 | Resolved graph | `data/outputs/resolved_cultural_kg.*` |
 | Validation report | `data/outputs/phase2_validation.md` |
 
-The SLURM script runs `scripts/09_validate_phase2.py` automatically after the build.
+The SLURM script runs `scripts/09_validate_phase2.py --strict` after the build.
+Do not evaluate a corpus that fails these gates. Also verify that the validation
+report, checkpoint, pathway index, and evaluation all belong to the same run;
+older checked-in reports span more than one artifact generation.
 
 Optional env vars for `build_corpus.sh`:
 
@@ -105,17 +110,23 @@ Install optional embedding model for better entity resolution / pathway retrieva
 pip install sentence-transformers
 ```
 
-## 5. Evaluate S0-S3 on CulturalBench (GPU job)
+## 5. Evaluate S0–S4 and ablations
 
 ```bash
 export HF_HOME=$SCRATCH/hf_cache
-LIMIT=250 TOP_K=8 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/eval_culturalbench.sh
+LIMIT=100000 TOP_K=8 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/eval_full.sh
 ```
 
 Outputs to `data/outputs/`:
 - `culturalbench_summary.md` (accuracy table + McNemar tests)
 - `culturalbench_results.json` / `.csv`
 - `culturalbench_accuracy.png`
+- `mechanism_analysis.md` / `mechanism_h2_completeness.png`
+- `before_after_comparison.md`
+
+`eval_full.sh` runs S0–S4 plus the triple-retrieval and no-shared-pivot
+ablations. Use `eval_culturalbench.sh` only when you intentionally need a smaller
+or custom system set.
 
 ## Offline environment variables (set by the GPU job scripts)
 
@@ -144,7 +155,19 @@ You can develop and smoke-test everything locally with Ollama:
 ```bash
 ollama serve & ollama pull llama3.1:8b
 python scripts/06_build_retrieval_corpus.py --provider ollama --limit 30
-python scripts/07_eval_culturalbench.py --provider ollama --limit 6
+python scripts/09_validate_phase2.py --strict
+python scripts/07_eval_culturalbench.py --provider ollama --limit 6 \
+  --systems S0_no_kg,S3_layered_kg,S4_abstraction_refinement_kg
 ```
 
 The harness is identical; only the backend (`--provider`) changes.
+
+## Current-result warning
+
+The checked-in full Qwen2.5-7B-Instruct run is a negative result: S0 reaches
+52.2% combined accuracy, S3 42.5%, and S4 38.4%. Treat a successful job as an
+engineering outcome, not evidence that the research hypothesis passed. Formal
+claims also require the human KG-quality, retrieval, stereotype, and fairness
+audits defined in `RESEARCH_DESIGN.md`.
+
+Last updated: 2026-09-22.

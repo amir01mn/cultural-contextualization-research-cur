@@ -1,222 +1,192 @@
-# cultural-kg-mvp
+# Abstraction→Refinement Cultural Knowledge Graph Research
 
-A Python MVP pipeline that tests whether a **layered cultural knowledge graph (KG)**
-improves cultural scenario reasoning compared to baseline prompting, and whether a
-**critique-refined KG** improves over a **raw KG**.
+A research system for testing whether structured cultural knowledge improves
+LLM performance on culturally grounded questions. The system builds a layered
+knowledge graph from CultureBank and evaluates it on the held-out CulturalBench
+benchmark.
 
-Everything runs on **local / open-source LLMs via [Ollama](https://ollama.com)**.
-No OpenAI, Claude, Anthropic, or any paid API is required or used.
+This repository is no longer a small MVP. It contains the full S0–S4 research
+pipeline, scalable vLLM/SLURM execution, full-corpus artifacts, ablations, and
+mechanism analysis. The project is currently in **experimental validation and
+retrieval-quality diagnosis**: the engineering pipeline is implemented, but the
+main full-benchmark result does not support the central hypothesis yet.
 
 ## Research question
 
-> Does a layered cultural KG help a local LLM reason about cultural scenarios more
-> respectfully and practically than baseline prompting — and does critique-refining
-> the KG help even more?
+Does an abstraction→refinement cultural KG improve culturally grounded
+reasoning compared with closed-book answering, raw-text RAG, and flat or layered
+triple retrieval?
 
-We compare three systems on the same local LLM:
+The graph organizes cultural evidence into:
 
-| System | Description |
-|---|---|
-| **A. Baseline** | Local LLM answers with only the scenario question (no KG). |
-| **B. Raw KG** | Local LLM answers using retrieved **raw** LLM-extracted triples. |
-| **C. Refined KG** | Local LLM answers using retrieved **critique-refined** triples. |
+- `LAYER_3_DEEP_VALUE`: values and beliefs such as respect or hospitality
+- `LAYER_2_SOCIAL`: roles, norms, expectations, and etiquette
+- `LAYER_1_SURFACE`: observable practices, objects, rituals, and gestures
 
-The hypothesis we test: **Baseline < Raw KG < Refined KG**.
+The target retrieval unit is a provenance-preserving pathway from an abstract
+value through a social norm to a culture-specific practice.
 
-## Why local LLMs?
+## Systems evaluated
 
-- **Reproducible and free** — no API keys, no per-token cost.
-- **Privacy** — cultural data and prompts stay on your machine.
-- **Research control** — you pin the exact open model (`llama3.1:8b` by default).
+| ID | System | Evidence supplied to the same base LLM |
+|---|---|---|
+| S0 | No-KG | Question and options only |
+| S1 | Raw-text RAG | Retrieved CultureBank passages |
+| S2 | Flat KG | Retrieved triples without layer structure |
+| S3 | Layered KG | Retrieved refined triples with layer labels |
+| S4 | Pathway KG | Retrieved abstraction→refinement pathways |
+| A3 | S4 triple ablation | Refined triples instead of pathways |
+| A4 | S4 no-shared ablation | Pathways without shared cross-cultural pivots |
 
-Rule-based extraction is **not** the main method. The main pipeline uses the local
-LLM to build triples, critique them, refine them, and generate answers. Rule/schema
-extraction exists **only as a fallback** when the local LLM is unavailable, and only
-when you explicitly pass `--allow_fallback`.
+CultureBank is used only for construction; CulturalBench is held out for
+evaluation. The same model, question, options, and decoding setup are used
+across systems. Only the evidence block changes.
 
-## Cultural layers
+## Current project status
 
-Each triple element is assigned an abstraction layer:
+Implemented:
 
-- `LAYER_1_SURFACE` — visible practices, objects, rituals, gestures, food, etc.
-- `LAYER_2_SOCIAL` — roles, expectations, host/guest norms, hierarchy, etiquette.
-- `LAYER_3_DEEP_VALUE` — values/beliefs: respect, harmony, hospitality, honor, etc.
-- `UNKNOWN` — only when genuinely unclear.
+- LLM-based extraction and critique/refinement with provenance
+- entity resolution and canonical culture normalization
+- cross-cultural abstraction alignment
+- L3→L2→L1 pathway construction and persistent pathway retrieval
+- S0–S4 CulturalBench evaluation and targeted ablations
+- paired-bootstrap confidence intervals, McNemar tests, and mechanism analysis
+- checkpoint/resume, caching, Parquet mirrors, Ollama, vLLM, and SLURM support
+- fail-loud corpus quality gates
 
-## Project structure
+Still required before publication-quality claims:
 
+- consolidate the later experimental branches and establish a canonical run
+- complete human audits of triples, layers, merges, pathways, and retrieval
+- improve culture matching, retrieval precision, and evidence gating
+- run at least two base models and at least three seeds
+- complete generated-evidence, top-k, stereotype, and fairness analyses
+- reconcile and regenerate reports from one frozen corpus/checkpoint
+
+See [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md) for the system and
+artifact map and [`docs/RESEARCH_DESIGN.md`](docs/RESEARCH_DESIGN.md) for the
+formal hypotheses and evaluation protocol.
+
+## Current full-run result
+
+The checked-in full evaluation uses Qwen2.5-7B-Instruct, top-k 8, 22,990
+CultureBank passages, 153,882 raw triples, 186,691 refined triples, 29,578
+pathways, and 2,454 CulturalBench units.
+
+| System | Combined accuracy |
+|---|---:|
+| S0 No-KG | **52.2%** |
+| S1 Raw-text RAG | 41.4% |
+| S2 Flat KG | 42.1% |
+| S3 Layered KG | 42.5% |
+| S4 Pathway KG | **38.4%** |
+| S4 Triple ablation | 42.3% |
+| S4 No-shared ablation | 38.2% |
+
+This result is negative: every retrieval condition underperforms the closed-book
+baseline, and pathway retrieval underperforms refined-triple retrieval. It
+indicates that retrieved evidence is often mismatched or distracting. The result
+is a diagnosis of the current system, not evidence for the target claim.
+
+Later controlled food/hospitality experiments on a manually audited,
+multi-culture subset produced promising but small-sample pathway gains. Those
+results remain preliminary and do not supersede the full-run result.
+
+Primary checked-in reports:
+
+- `data/outputs/culturalbench_summary.md`
+- `data/outputs/mechanism_analysis.md`
+- `data/outputs/before_after_comparison.md`
+- `data/outputs/culturalbench_results.json`
+
+The existing `phase2_validation.md` was generated from an older pilot artifact
+set and must not be interpreted as validation of the later 29,578-pathway corpus.
+
+## Repository layout
+
+```text
+.
+├── src/                         core construction, retrieval, and evaluation code
+├── scripts/
+│   ├── 01_*.py through 05_*.py   legacy small-sample/debug pipeline
+│   ├── 06_build_retrieval_corpus.py
+│   ├── 07_eval_culturalbench.py
+│   ├── 09_validate_phase2.py
+│   └── 10_compare_runs.py
+├── slurm/                       Narval job scripts
+├── tests/                       offline unit and pipeline-integrity tests
+├── data/processed/              triples, entities, pathways, and indexes
+├── data/outputs/                graphs, benchmark results, and reports
+└── docs/                        design, architecture, and cluster instructions
 ```
-cultural-kg-mvp/
-  README.md
-  requirements.txt
-  .env.example
-  data/
-    raw/  processed/  outputs/
-  src/
-    config.py  data_loader.py  schemas.py  local_llm.py
-    triple_extractor.py  layer_classifier.py  graph_builder.py
-    retriever.py  critique_agent.py  evaluator.py  prompts.py  utils.py
-  scripts/
-    01_load_dataset.py  02_extract_triples.py  03_build_graph.py
-    04_run_critique.py  05_evaluate.py  run_mvp.py
-  tests/
-    test_schemas.py  test_triple_extractor.py  test_graph_builder.py
-    test_retriever.py  test_critique_agent.py  test_evaluator.py
-```
 
-## Requirements
-
-- Python **3.11+**
-- [Ollama](https://ollama.com) running locally with the `llama3.1:8b` model pulled.
+The scripts numbered 01–05 and `run_mvp.py` are retained as a legacy
+small-sample debugging path. They are not the primary research evaluation.
 
 ## Installation
 
-```bash
-# 1. (optional) create a virtual environment
-python3.11 -m venv .venv && source .venv/bin/activate
+Requirements:
 
-# 2. install Python dependencies
+- Python 3.11+
+- Ollama for local development, or vLLM on a GPU node
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-
-# 3. (optional) copy env defaults
-cp .env.example .env
 ```
 
-`sentence-transformers` is optional. If installed, retrieval uses embeddings;
-otherwise it falls back to TF-IDF automatically.
+`sentence-transformers` is optional but recommended for dense retrieval. Without
+it, supported retrieval components use TF-IDF where applicable.
 
-## Install and run Ollama
+## Local smoke test
 
 ```bash
-# Install Ollama: https://ollama.com/download
-# Start the local server (if not already running):
 ollama serve
-
-# Pull the default open model:
 ollama pull llama3.1:8b
+
+python scripts/06_build_retrieval_corpus.py \
+  --provider ollama --limit 30
+
+python scripts/09_validate_phase2.py --strict
+
+python scripts/07_eval_culturalbench.py \
+  --provider ollama --limit 6 \
+  --systems S0_no_kg,S3_layered_kg,S4_abstraction_refinement_kg
 ```
 
-Verify it is up: `curl http://localhost:11434/api/tags` should list your models.
+Do not use `--allow_fallback` for a research run. It is intended only for
+development and tests.
 
-## Run the 100-sample experiment
+## Full cluster workflow
+
+Stage datasets and model weights on the Narval login node, then run:
 
 ```bash
-python scripts/run_mvp.py \
-  --dataset culturebank --split train --limit 100 \
-  --extraction_mode llm_based --critic llm_based \
-  --llm_provider ollama --ollama_model llama3.1:8b
+sbatch slurm/build_corpus.sh
+sbatch slurm/eval_full.sh
 ```
 
-This will:
-
-1. Load 100 CultureBank records (auto-falls back to a small built-in set if the
-   Hugging Face download is unavailable, so the pipeline always runs).
-2. Save normalized records to `data/processed/`.
-3. Use the local LLM to extract triples → save raw triples.
-4. Build and export the **raw** KG.
-5. Run the local LLM **critique agent** → save critiques.
-6. Build **refined** triples (`data/processed/refined_triples_100.jsonl`) and the
-   **refined** KG.
-7. Generate cultural scenario questions.
-8. Generate baseline / raw-KG / refined-KG answers and score them.
-9. Save all evaluation outputs and print a summary.
-
-> If Ollama is not running (or the model is not pulled), the run **stops** with
-> setup instructions — it never pretends LLM extraction happened. To run with the
-> rule/schema-based fallback instead, add `--allow_fallback`. For a real research
-> run, keep the default (`--allow_fallback` off).
-
-### Run step-by-step (optional)
-
-```bash
-python scripts/01_load_dataset.py --limit 100
-python scripts/02_extract_triples.py --extraction_mode llm_based
-python scripts/03_build_graph.py
-python scripts/04_run_critique.py --critic llm_based
-python scripts/05_evaluate.py
-```
-
-## Outputs
-
-All artifacts are written to `data/outputs/`:
-
-- `raw_cultural_kg.{graphml,json,html}` + `_nodes.csv` / `_edges.csv`
-- `refined_cultural_kg.{graphml,json,html}` + `_nodes.csv` / `_edges.csv`
-- `evaluation_examples_100.json` — the generated scenario questions
-- `evaluation_results_100.json` — per-example answers + scores + summary
-- `evaluation_results_100.csv` — flat table (one row per example × system)
-- `evaluation_summary_100.md` — human-readable summary
-- `evaluation_average_scores_100.png` — bar chart of average scores
-- `retrieval_debug_100.json` — which triples were retrieved per question
-
-## How to read the evaluation summary
-
-Open `data/outputs/evaluation_summary_100.md`. The key numbers:
-
-- **Average scores** for Baseline, Raw KG, Refined KG (out of 100).
-- **Raw KG − Baseline** and **Refined KG − Raw KG** improvements.
-- **Generated support ratio** — how much the refined system leaned on generated
-  (inferred) triples. Lower is better (we want grounded evidence).
-- **Layer 2 / Layer 3 coverage** — how often answers explained social and deep-value
-  layers.
-
-### Interpreting PASS / PARTIAL PASS / FAIL
-
-- **PASS**
-  - Raw KG average ≥ Baseline + 5, **and**
-  - Refined KG average ≥ Raw KG + 3, **and**
-  - Refined generated support ratio ≤ 25%.
-- **PARTIAL PASS**
-  - Raw KG improves on Baseline, but refined improvement is small, **or**
-  - Refined KG improves but generated dominance is too high.
-- **FAIL**
-  - Raw KG does not improve on Baseline, **or**
-  - Refined KG performs worse than Raw KG.
-
-## Scoring formula (automatic, out of 100)
-
-| Component | Max points |
-|---|---|
-| Keyword coverage | 30 |
-| Cultural group match | 15 |
-| Provenance use | 20 |
-| Layer coverage | 20 |
-| Answer specificity | 10 |
-| Avoids bad keywords | 5 |
-| Generated dominance penalty | up to −15 |
-
-An optional LLM-as-judge can be added later (`USE_LLM_EVALUATION`), but it is not
-required.
+See [`docs/NARVAL_SETUP.md`](docs/NARVAL_SETUP.md) for environment variables,
+offline staging, outputs, and validation requirements.
 
 ## Testing
 
 ```bash
-pytest -q
+python -m pytest -q
 ```
 
-Tests run fully offline and do not require Ollama (LLM calls are mocked).
+The suite contains 130 tests. In the current repository-local `.venv`, 117 pass and
+13 cannot run because `scipy` and `pandas` are missing, although both are listed
+in `requirements.txt`. Reinstall the requirements before treating the suite as
+green.
 
-## Scaling later
+## Research and ethical constraints
 
-- Increase `--limit` and `--num_scenarios` to use the full CultureBank dataset.
-- Try larger local models (e.g. `--ollama_model llama3.1:70b`) for higher quality.
-- Install `sentence-transformers` for stronger semantic retrieval.
-- Add LLM-as-judge evaluation by setting `USE_LLM_EVALUATION=true` and extending
-  `src/evaluator.py`.
-
-## Limitations
-
-- CultureBank field names vary; the loader maps common candidates and may miss
-  dataset-specific fields (kept under `raw`).
-- Automatic scoring is a proxy, not human judgment; treat it as a directional signal.
-- Local 8B models can produce imperfect JSON; the adapter repairs/retries, but some
-  records may yield fewer triples.
-- The graph and triples reflect the source records only — they should not be read as
-  generalizations about an entire culture.
-- This is an MVP for 100 samples; validate carefully before running the full dataset.
-
-## License / data note
-
-CultureBank is provided by its original authors under their own terms. This project
-is a research MVP; use cultural data responsibly and avoid stereotyping.
-test from Narval
+- Graph claims apply to source records, not entire cultures.
+- Generated or critique-suggested evidence must remain visibly uncertain.
+- Benchmark gains are insufficient without human pathway and stereotype audits.
+- Culture coverage and per-culture accuracy must be reported.
+- CultureBank and CulturalBench remain subject to their original licenses and
+  terms.

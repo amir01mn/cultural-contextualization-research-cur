@@ -1,9 +1,10 @@
 # Research Design: Abstraction→Refinement Cultural Knowledge Graphs for Culturally Grounded Reasoning
 
-> Status: design lock (pre-implementation). This document defines the claim,
-> hypotheses, formal definitions, the exact ablation/evaluation matrix, and the
-> metrics. It is the contract we build against. Everything implemented must serve
-> a hypothesis or a metric defined here.
+> Status: implemented research design under empirical validation. The S0–S4
+> pipeline, full-corpus construction, core ablations, and mechanism reports now
+> exist. The checked-in full run does not support H1 or H2, so this document is
+> the evaluation contract for the next frozen, provenance-safe run—not a claim
+> that the hypotheses have been confirmed.
 
 ---
 
@@ -144,8 +145,7 @@ Used to test whether cross-cultural pivots specifically help (H2 transfer claim)
 ### 3.5 Safety / quality metrics
 
 - **Generated-support ratio** `gsr(q)`: fraction of retrieved triples used for `q`
-  that have `generated = true`. Reported per system (lower is safer). Already in
-  the MVP.
+  that have `generated = true`. Reported per system (lower is safer).
 - **Stereotype rate**: fraction of (a) refinement-suggested triples and (b) model
   answers flagged as over-generalizing/stereotyping by a rubric (human-rated on a
   sample; optionally LLM-screened on the full set with human-validated screener).
@@ -177,7 +177,7 @@ CulturalBench (no second benchmark needed).
 
 ## 5. Method / system to build
 
-1. **Layered LLM extraction** (exists in MVP): triples + layer labels + full
+1. **Layered LLM extraction** (implemented): triples + layer labels + full
    provenance, local LLM main, schema fallback only.
 2. **Entity resolution & node canonicalization** (NEW, critical): merge
    surface/lexical variants; produce canonical nodes per layer.
@@ -189,8 +189,8 @@ CulturalBench (no second benchmark needed).
 5. **Critique-refinement** (exists, repurposed): detect *incomplete* pathways and
    complete them (add missing L2/L3 bridges) under hallucination/stereotype
    control; measured by H3.
-6. **Pathway retrieval + answering** (extends MVP): retrieve pathways (not just
-   isolated triples) and inject them into the MCQ answering prompt.
+6. **Pathway retrieval + answering** (implemented): retrieve pathways rather
+   than isolated triples and inject them into the MCQ answering prompt.
 
 ---
 
@@ -303,15 +303,15 @@ Reviewers grade construction quality independently of downstream accuracy:
 
 ---
 
-## 12. Scalable engineering (to support the full run)
+## 12. Scalable engineering status
 
-| Concern | MVP today | Target |
+| Concern | Implemented now | Remaining improvement |
 |---|---|---|
-| LLM serving | Ollama, serial | batched (vLLM/TGI) or async-concurrent; cache by content hash |
-| Orchestration | for-loop | checkpoint/resume; per-stage token/time logging; budget caps |
-| Triples store | JSONL | Parquet (+ DuckDB for analysis) |
-| Graph | in-memory networkx | entity-resolved canonical graph; Neo4j/RDF optional; networkx for analysis |
-| Retrieval | TF-IDF / MiniLM | persistent FAISS/Qdrant; hybrid BM25+dense; **pathway** retrieval |
+| LLM serving | Ollama locally; batched vLLM on Narval | freeze exact model/runtime versions |
+| Orchestration | cache plus checkpoint/resume and SLURM jobs | one manifest-backed end-to-end run |
+| Stores | JSONL plus Parquet mirrors | optional DuckDB analysis layer |
+| Graph | entity-resolved canonical networkx graph | optional Neo4j/RDF export if analytically useful |
+| Retrieval | persistent dense pathway index plus triple/text retrieval | stronger hybrid ranking, culture matching, and abstention |
 
 Reproducibility: pinned configs/seeds/model versions, `make reproduce`, released
 KG + all prompts (extraction/critique/answer), leaderboard-style tables. Selling
@@ -319,19 +319,26 @@ point: fully open-source/local, **no paid API required**.
 
 ---
 
-## 13. Phased timeline
+## 13. Phase status and forward plan
 
-1. **Phase 1 (2–3 wks) — Design lock & benchmark wiring.** This doc; load
-   CulturalBench; implement the **S0/S1/S2/S3 baselines + MCQ accuracy + CIs** to
-   get a first real number. Draft intro + related work.
-2. **Phase 2 (3–4 wks) — Scalable pipeline.** Batched inference, caching,
-   checkpointing, Parquet; **entity resolution + cross-cultural alignment**;
-   FAISS pathway retrieval. Validate on ~1k records.
-3. **Phase 3 (3–4 wks) — Full construction + S4 + ablations** across ≥2 models.
-4. **Phase 4 (3–4 wks) — Evaluation & mechanism analysis** (completeness/shared-
-   node buckets, regression) + KG-quality human study + stereotype audit.
-5. **Phase 5 (2–3 wks) — Analysis, ethics, writing**, error analysis, qualitative
-   pathway examples, paper draft.
+1. **Design lock and benchmark wiring — complete.** CulturalBench loading,
+   S0–S3, exact-match scoring, confidence intervals, and McNemar tests exist.
+2. **Scalable construction — complete.** Batched inference, caching,
+   checkpointing, Parquet, entity resolution, culture normalization,
+   cross-cultural alignment, and pathway indexing exist.
+3. **Full construction, S4, and first ablations — complete for one main model.**
+   The checked-in run covers all 2,454 official scoring units. It is a negative
+   result: S0 reaches 52.2%, S3 42.5%, and S4 38.4%.
+4. **Controlled validation and recovery — current.** Consolidate branches and
+   artifacts, freeze a provenance-safe corpus, complete human audits, and improve
+   culture matching, relevance gating, and evidence abstention. Small controlled
+   food/hospitality experiments are promising but not statistically decisive.
+5. **Confirmatory evaluation — pending.** Run at least two base models and three
+   seeds, top-k and generated-evidence ablations, multiple-comparison correction,
+   per-culture analysis, and the full mechanism protocol.
+6. **Safety and writing — pending.** Complete stereotype/representation audits,
+   error analysis, artifact release, and paper framing based on the confirmed
+   evidence rather than the intended hypothesis.
 
 **Venue fit:** EMNLP/ACL/NAACL (NLP-methods framing) or FAccT/CSCW (cultural-
 fairness/HCI). C3NLP / cross-cultural NLP workshop as a de-risking stepping stone.
@@ -351,21 +358,22 @@ fairness/HCI). C3NLP / cross-cultural NLP workshop as a de-risking stepping ston
 
 ---
 
-## 15. Decisions still needed (inputs from the researcher)
+## 15. Decisions still needed
 
 1. **Target venue + rough deadline** (sets scope and framing).
-2. **Compute** available (local Ollama only vs. GPU box/cluster) → sets base
-   model sizes and whether we adopt vLLM.
-3. **Base models** to compare (recommend: Llama-3.1-8B + one of Qwen2.5-7B/14B or
-   Llama-3.1-70B; optional frontier ceiling for eval only).
+2. **Canonical branch and artifact lineage** for the next frozen run.
+3. **Second base model** to pair with Qwen2.5-7B-Instruct.
 4. **Preregistered thresholds** confirmation (H3 `gsr` ≤ 25%, significance level,
    #seeds).
 
 ---
 
-## 16. First build step (proposed)
+## 16. Immediate execution step
 
-Implement the **CulturalBench evaluator** + baselines (S0/S1/S2/S3) with MCQ
-accuracy and bootstrap CIs, reusing the existing local-LLM adapter, retriever, and
-graph. This produces the first real, publishable-style number and de-risks the
-eval harness before we build entity resolution and the S4 pathway system.
+Consolidate the active full-pathway branch, the later controlled-experiment
+branch, and the provenance-safe rebuild work into one canonical branch. Rebuild
+the corpus under a frozen manifest, complete the independent audit packets, and
+regenerate validation and evaluation reports from that exact artifact set before
+running further benchmark-driven tuning.
+
+Last updated: 2026-09-22.
