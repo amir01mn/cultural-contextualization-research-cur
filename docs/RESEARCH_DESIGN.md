@@ -216,6 +216,12 @@ CulturalBench (no second benchmark needed).
 | **S3** | Layered KG (raw) | triples with layers; pathways **not** completed by critique |
 | **S4** | Abstraction→Refinement KG (ours, refined) | completed pathways + cross-cultural shared nodes; pathway retrieval |
 
+> **Implementation note (2026-09-25).** The code currently feeds S3 the
+> *refined* triple store, not the raw one defined here. S3 therefore matches
+> the A3 triple-retrieval ablation, and A2 (S3 vs S4) does not isolate
+> refinement. See open issue 1 in [`RUN_HISTORY.md`](RUN_HISTORY.md) before
+> interpreting A1/A2.
+
 All systems share the same base LLM, retriever budget (top-k), and prompt
 scaffold except for the injected evidence. Accuracy is exact-match on the MCQ
 gold answer.
@@ -363,7 +369,9 @@ fairness/HCI). C3NLP / cross-cultural NLP workshop as a de-risking stepping ston
 1. **Target venue + rough deadline** (sets scope and framing).
 2. **Canonical branch and artifact lineage** for the next frozen run.
 3. **Second base model** to pair with Qwen2.5-7B-Instruct.
-4. **Preregistered thresholds** confirmation (H3 `gsr` ≤ 25%, significance level,
+4. **S3 evidence source**: raw triples as designed (restores A2) or refined
+   triples as implemented (then drop the duplicate A3 or redefine it).
+5. **Preregistered thresholds** confirmation (H3 `gsr` ≤ 25%, significance level,
    #seeds).
 
 ---
@@ -376,4 +384,4 @@ the corpus under a frozen manifest, complete the independent audit packets, and
 regenerate validation and evaluation reports from that exact artifact set before
 running further benchmark-driven tuning.
 
-Last updated: 2026-09-22.
+Last updated: 2026-09-25.

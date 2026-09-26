@@ -1,6 +1,6 @@
 """Pluggable LLM backend abstraction.
 
-The MVP pipeline talks to Ollama directly via ``src/local_llm.py``. For the
+The MVP pipeline talks to Ollama directly via ``src/llm/local_llm.py``. For the
 scalable / publishable experiments we also need batched GPU inference on a SLURM
 cluster (Narval), where Ollama is not the right tool. This module provides a
 single ``LLMBackend`` interface with two implementations:

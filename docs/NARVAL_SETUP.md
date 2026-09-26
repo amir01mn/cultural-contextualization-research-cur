@@ -27,8 +27,9 @@ cd $SCRATCH
 git clone <your-repo-url> cultural-contextualization-research
 cd cultural-contextualization-research
 
-# Load modules (versions may differ; use `module spider` to check).
-module load StdEnv/2023 gcc/12.3 python/3.11 arrow/17.0.0 cuda/12.2
+# Load modules exactly as the jobs do (StdEnv/2023, python/3.11, arrow/21.0.0,
+# opencv/4.13.0). Source it in the current shell; never pipe it.
+source slurm/load_modules.sh && load_login_modules
 
 # Create an isolated virtualenv (Alliance recommends venv + prebuilt wheels).
 python -m venv .venv
@@ -73,10 +74,11 @@ change them to the appropriate `def-<pi>` account if the deployment changes.
 ```bash
 export HF_HOME=$SCRATCH/hf_cache
 # Full CultureBank run (checkpoint/resume enabled by default):
-CORPUS_LIMIT=100000 BATCH_SIZE=32 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/build_corpus.sh
+RUN_TAG=<new-tag> CORPUS_LIMIT=100000 BATCH_SIZE=32 VLLM_MODEL=Qwen/Qwen2.5-7B-Instruct sbatch slurm/build_corpus.sh
 
-# Smoke test:
-CORPUS_LIMIT=50 BATCH_SIZE=16 sbatch slurm/build_corpus.sh
+# Smoke test. Still overwrites data/processed and data/outputs; use a separate
+# checkout if those hold artifacts you need. STRICT=0: full-size gates fail at 50.
+RUN_TAG=smoke CORPUS_LIMIT=50 BATCH_SIZE=16 STRICT=0 sbatch slurm/build_corpus.sh
 ```
 
 Primary construction outputs:
@@ -94,15 +96,26 @@ Primary construction outputs:
 | Resolved graph | `data/outputs/resolved_cultural_kg.*` |
 | Validation report | `data/outputs/phase2_validation.md` |
 
-The SLURM script runs `scripts/09_validate_phase2.py --strict` after the build.
+The SLURM script runs `scripts/validate_corpus.py --strict --state_path "$STATE_PATH"`
+after the build, so the gates check the checkpoint this build wrote.
 Do not evaluate a corpus that fails these gates. Also verify that the validation
 report, checkpoint, pathway index, and evaluation all belong to the same run;
 older checked-in reports span more than one artifact generation.
 
 Optional env vars for `build_corpus.sh`:
 
-- `RESUME=0` — disable checkpoint resume (start fresh)
-- `SKIP_ALIGNMENT_VERIFY=1` — embedding-only alignment (faster smoke)
+- `RUN_TAG=<tag>`: use `llm_cache_<tag>/` and `corpus_build_state_<tag>.json`.
+  **Always set a new tag for a rebuild.** An old checkpoint marks every record
+  complete, so a resumed run would skip extraction entirely. The tag does *not*
+  rename the triple, pathway, or report files, so copy `data/` aside before
+  rebuilding in a checkout whose artifacts you need (see
+  [`RUN_HISTORY.md`](RUN_HISTORY.md) §2).
+- `RESUME=0`: disable checkpoint resume and start fresh.
+- `SKIP_ALIGNMENT_VERIFY=1`: embedding-only alignment (faster smoke).
+- `STRICT=0`: report gate failures without failing the job.
+- `GATE_MIN_PATHWAYS`, `GATE_MIN_EXTRACTION_SUCCESS`, `GATE_MIN_CRITIQUE_SUCCESS`,
+  `GATE_MIN_L3_SHARE`, `GATE_MIN_FULL_PATHWAYS`, `GATE_MIN_SHARED_PIVOT`: gate
+  thresholds. The defaults are sized for the full corpus; lower them for pilots.
 
 Install optional embedding model for better entity resolution / pathway retrieval:
 
@@ -148,15 +161,35 @@ login node to cache it.
 - Right-size `--time` and `--mem`; A100 (40/80GB) easily holds a 7-8B model at
   `gpu_memory_utilization=0.90`.
 
+## Running the tests
+
+```bash
+source slurm/load_modules.sh && load_login_modules   # venv needs scipy/pandas/pyarrow from modules
+source slurm/env_hf.sh && setup_hf_offline
+export EMBEDDING_BACKEND=tfidf                        # MiniLM from Lustre can take ~10 minutes
+.venv/bin/python -m pytest -q -p no:cacheprovider
+```
+
+`bash slurm/run_tests.sh` wraps these steps. If the login node's Lustre client
+stalls, `sbatch slurm/run_tests.sh` runs the same thing on a CPU compute node.
+
+## Overnight watchers
+
+`slurm/watchers/watch_*_run.sh` are nohup babysitters from the July runs. They
+resubmit `build_corpus.sh` after timeouts until the checkpoint is complete, then
+submit evaluation. Their limits (`CORPUS_LIMIT`, `EVAL_LIMIT`) are hardcoded for
+those runs, so review them before reuse. Their logs go to `slurm/watch/`, which
+is git-ignored.
+
 ## Local development (no cluster)
 
 You can develop and smoke-test everything locally with Ollama:
 
 ```bash
 ollama serve & ollama pull llama3.1:8b
-python scripts/06_build_retrieval_corpus.py --provider ollama --limit 30
-python scripts/09_validate_phase2.py --strict
-python scripts/07_eval_culturalbench.py --provider ollama --limit 6 \
+python scripts/build_corpus.py --provider ollama --limit 30
+python scripts/validate_corpus.py      # report only; full-corpus gates fail at 30 records
+python scripts/eval_culturalbench.py --provider ollama --limit 6 \
   --systems S0_no_kg,S3_layered_kg,S4_abstraction_refinement_kg
 ```
 
@@ -170,4 +203,4 @@ engineering outcome, not evidence that the research hypothesis passed. Formal
 claims also require the human KG-quality, retrieval, stereotype, and fairness
 audits defined in `RESEARCH_DESIGN.md`.
 
-Last updated: 2026-09-22.
+Last updated: 2026-09-25.

@@ -64,9 +64,17 @@ Still required before publication-quality claims:
 - complete generated-evidence, top-k, stereotype, and fairness analyses
 - reconcile and regenerate reports from one frozen corpus/checkpoint
 
-See [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md) for the system and
-artifact map and [`docs/RESEARCH_DESIGN.md`](docs/RESEARCH_DESIGN.md) for the
-formal hypotheses and evaluation protocol.
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md) | end-to-end overview of the method, results, and priorities |
+| [`docs/RESEARCH_DESIGN.md`](docs/RESEARCH_DESIGN.md) | formal definitions, hypotheses H1–H3, ablations, statistics |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | package map, data flow, artifact files, configuration |
+| [`docs/RUN_HISTORY.md`](docs/RUN_HISTORY.md) | every run so far, artifact lineage, branches, open issues |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | coding and research-integrity rules |
+| [`docs/NARVAL_SETUP.md`](docs/NARVAL_SETUP.md) | cluster setup, offline staging, SLURM jobs |
+| [`AGENTS.md`](AGENTS.md) | briefing for AI agents (loaded by Claude Code via `CLAUDE.md`) |
 
 ## Current full-run result
 
@@ -89,6 +97,11 @@ baseline, and pathway retrieval underperforms refined-triple retrieval. It
 indicates that retrieved evidence is often mismatched or distracting. The result
 is a diagnosis of the current system, not evidence for the target claim.
 
+Caveat: S3 and the S4 triple ablation currently receive identical evidence
+(refined triples) and differ only in a one-line header, yet they disagree on 70
+units. Treat differences of about 3 points as within prompt-wording noise. See
+open issue 1 in [`docs/RUN_HISTORY.md`](docs/RUN_HISTORY.md).
+
 Later controlled food/hospitality experiments on a manually audited,
 multi-culture subset produced promising but small-sample pathway gains. Those
 results remain preliminary and do not supersede the full-run result.
@@ -107,22 +120,32 @@ set and must not be interpreted as validation of the later 29,578-pathway corpus
 
 ```text
 .
-├── src/                         core construction, retrieval, and evaluation code
+├── src/
+│   ├── core/            config, schemas, IO, checkpoints, LLM cache, culture names, embeddings
+│   ├── llm/             Ollama / vLLM backends and all prompt templates
+│   ├── loaders/         CultureBank (construction) and CulturalBench (evaluation) loaders
+│   ├── construction/    extraction, critique, entity resolution, alignment, graph, pathways
+│   ├── retrieval/       passage, triple, and pathway retrieval with reranking
+│   ├── evaluation/      S0–S4 systems, scoring, statistics, mechanism analysis
+│   └── legacy/          original MVP evaluator (not a research metric)
 ├── scripts/
-│   ├── 01_*.py through 05_*.py   legacy small-sample/debug pipeline
-│   ├── 06_build_retrieval_corpus.py
-│   ├── 07_eval_culturalbench.py
-│   ├── 09_validate_phase2.py
-│   └── 10_compare_runs.py
-├── slurm/                       Narval job scripts
-├── tests/                       offline unit and pipeline-integrity tests
-├── data/processed/              triples, entities, pathways, and indexes
+│   ├── prep_offline_data.py     stage datasets/model for offline GPU jobs
+│   ├── build_corpus.py          1. build passages, triples, entities, pathways, index
+│   ├── validate_corpus.py       2. quality gates (fail loud)
+│   ├── eval_culturalbench.py    3. evaluate S0–S4 and ablations
+│   ├── compare_runs.py          4. before/after report against an archived run
+│   └── legacy/                  MVP steps 01–05 and run_mvp.py (debugging only)
+├── slurm/                       Narval jobs; watchers/ holds overnight babysitters
+├── tests/                       offline unit, pipeline-integrity, and architecture tests
+├── data/processed/              triples, entities, pathways, indexes (git-ignored)
 ├── data/outputs/                graphs, benchmark results, and reports
-└── docs/                        design, architecture, and cluster instructions
+└── docs/                        design, architecture, conventions, run history, cluster guide
 ```
 
-The scripts numbered 01–05 and `run_mvp.py` are retained as a legacy
-small-sample debugging path. They are not the primary research evaluation.
+Subpackages depend on each other in one direction only (`core` ← `llm` ←
+`construction`; `core` ← `retrieval` ← `evaluation`), and
+`tests/test_architecture.py` enforces it. See
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Installation
 
@@ -146,12 +169,14 @@ it, supported retrieval components use TF-IDF where applicable.
 ollama serve
 ollama pull llama3.1:8b
 
-python scripts/06_build_retrieval_corpus.py \
+python scripts/build_corpus.py \
   --provider ollama --limit 30
 
-python scripts/09_validate_phase2.py --strict
+# Report only: the gates are sized for the full corpus (>= 5,000 pathways)
+# and will FAIL on 30 records. Lower GATE_MIN_* to gate a pilot.
+python scripts/validate_corpus.py
 
-python scripts/07_eval_culturalbench.py \
+python scripts/eval_culturalbench.py \
   --provider ollama --limit 6 \
   --systems S0_no_kg,S3_layered_kg,S4_abstraction_refinement_kg
 ```
@@ -173,14 +198,20 @@ offline staging, outputs, and validation requirements.
 
 ## Testing
 
+The suite is offline and deterministic: 133 tests, about 1–2 minutes. On Narval
+the venv takes scipy, pandas, and pyarrow from the cluster modules, so load them
+first, in the current shell:
+
 ```bash
-python -m pytest -q
+source slurm/load_modules.sh && load_login_modules
+source slurm/env_hf.sh && setup_hf_offline
+export EMBEDDING_BACKEND=tfidf
+.venv/bin/python -m pytest -q -p no:cacheprovider
 ```
 
-The suite contains 130 tests. In the current repository-local `.venv`, 117 pass and
-13 cannot run because `scipy` and `pandas` are missing, although both are listed
-in `requirements.txt`. Reinstall the requirements before treating the suite as
-green.
+`bash slurm/run_tests.sh` wraps these steps, and `sbatch slurm/run_tests.sh`
+runs them on a compute node. On a machine with every requirement pip-installed,
+`python -m pytest -q` is enough.
 
 ## Research and ethical constraints
 

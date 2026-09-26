@@ -128,7 +128,7 @@ def build_report(baseline_dir: Path, current_results: Path,
     lines = ["# Before / after comparison", ""]
 
     if not cur:
-        lines.append(f"No current results at `{current_results}`. Run scripts/07 first.")
+        lines.append(f"No current results at `{current_results}`. Run scripts/eval_culturalbench.py first.")
         return "\n".join(lines) + "\n"
 
     base_acc = _accuracy_table(base)
