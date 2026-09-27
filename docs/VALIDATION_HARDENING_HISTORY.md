@@ -1428,3 +1428,55 @@ This avoids treating pairwise alignment count, pivot count, and marked-member co
 ```
 
 Because this changes alignment candidate selection and pivot identity, the 77-record corpus must be rebuilt once more before the final CulturalBench rerun.
+
+
+---
+
+# 20. Validated 77-record Baseline v2 freeze
+
+The final hardened 77-record corpus and seven-system CulturalBench development evaluation were completed successfully.
+
+Final method commit:
+
+```text
+b4eb022 Fix token matching in alignment actor filter
+```
+
+Final corpus:
+
+```text
+431 raw triples
+431 refined triples
+496 canonical entities
+56 verified pairwise alignments
+6 unique shared abstraction pivots
+315 pathways
+39 FULL
+162 SOCIAL
+114 SURFACE
+67 shared-pivot pathways
+```
+
+Final 40-unit CulturalBench combined accuracies:
+
+```text
+S0 No-KG:            65.0%
+S1 Raw-text RAG:     65.0%
+S2 Flat KG:          67.5%
+S3 Layered KG:       65.0%
+S4 Pathway KG:       70.0%
+S4 Triple:           65.0%
+S4 No-shared:        72.5%
+```
+
+The validated S4 pathway condition retained a 5-point development-set advantage over S3 and the refined-triple ablation, based on two gains and zero losses, but the paired difference was not statistically significant.
+
+The shared-pivot ablation did not show an accuracy benefit from shared pivots in this small run. The no-shared condition scored 72.5%, and full S4 retrieved substantially more generated bridge support.
+
+The detailed frozen result and interpretation are recorded in:
+
+```text
+docs/experiments/validated77_baseline_v2.md
+```
+
+This is the stopping point for tuning the 77-record development experiment. Subsequent work should scale the validated method rather than optimizing against these 40 questions.
