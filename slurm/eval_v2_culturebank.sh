@@ -24,6 +24,15 @@ load_gpu_modules
 cd "$PROJECT_DIR"
 mkdir -p slurm/logs data/outputs/eval_v2
 
+# Duplicate submissions (full A100 + MIG slice) race for the queue; the first to
+# start takes this lock and any later copy exits without touching outputs.
+LOCK_DIR="data/eval_v2/LOCK_${LOCK_NAME:-culturebank}"
+if ! mkdir -p data/eval_v2 || ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  echo "Another job owns $LOCK_DIR ($(cat "$LOCK_DIR/job" 2>/dev/null)); exiting."
+  exit 0
+fi
+echo "${SLURM_JOB_ID:-local}" > "$LOCK_DIR/job"
+
 # shellcheck source=env_hf.sh
 source "${PROJECT_DIR}/slurm/env_hf.sh"
 setup_hf_offline
