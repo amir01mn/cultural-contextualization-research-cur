@@ -172,6 +172,10 @@ RETRIEVAL_MIN_SCORE = float(os.getenv("RETRIEVAL_MIN_SCORE", "0.15"))
 # Cap how much of one retrieval result set may come from a single culture, to
 # stop one generic pathway dominating (one was returned for 239/500 questions).
 RETRIEVAL_MAX_PER_CULTURE = int(os.getenv("RETRIEVAL_MAX_PER_CULTURE", "3"))
+# Relevance gate (eval v2): when on, evidence whose culture does not match the
+# question culture is dropped rather than ranked last, so a question with no
+# same-culture evidence above RETRIEVAL_MIN_SCORE is answered closed-book.
+RETRIEVAL_STRICT_CULTURE = _get_bool("RETRIEVAL_STRICT_CULTURE", False)
 # Include answer options in the retrieval query. Off by default: distractor text
 # pulls in evidence supporting wrong options.
 RETRIEVAL_QUERY_INCLUDES_OPTIONS = _get_bool("RETRIEVAL_QUERY_INCLUDES_OPTIONS", False)

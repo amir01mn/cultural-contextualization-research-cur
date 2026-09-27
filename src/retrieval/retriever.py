@@ -46,6 +46,17 @@ def _get_st_model():
     return get_sentence_transformer()
 
 
+def _apply_exclude(scores, exclude_mask):
+    """Return scores with excluded items set to -inf (no-op when mask is None)."""
+    if exclude_mask is None:
+        return scores
+    import numpy as np
+
+    scores = np.array(scores, dtype=float, copy=True)
+    scores[np.asarray(exclude_mask, dtype=bool)] = -np.inf
+    return scores
+
+
 class TripleRetriever:
     """Index a set of triples and retrieve the most relevant ones per query."""
 
@@ -77,12 +88,25 @@ class TripleRetriever:
         self._matrix = self._vectorizer.fit_transform(self.documents)
         self.backend = "tfidf"
 
+    def mask_for_instance_ids(self, instance_ids) -> "np.ndarray":
+        """Boolean array: True for triples whose ``instance_id`` is in the set."""
+        import numpy as np
+
+        ids = set(instance_ids or ())
+        return np.array([t.instance_id in ids for t in self.triples], dtype=bool)
+
     def retrieve(self,
                  question: str,
                  top_k: int = 8,
                  *,
-                 question_culture: Optional[str] = None) -> list[tuple[CulturalTriple, float]]:
-        """Return up to top_k (triple, score) pairs sorted by relevance."""
+                 question_culture: Optional[str] = None,
+                 exclude_mask=None) -> list[tuple[CulturalTriple, float]]:
+        """Return up to top_k (triple, score) pairs sorted by relevance.
+
+        ``exclude_mask`` (optional boolean array aligned with ``self.triples``,
+        see ``mask_for_instance_ids``) removes items before ranking, as if they
+        were not in the index. Default ``None`` leaves behaviour unchanged.
+        """
         if not self.triples:
             return []
         query = normalize_text(question)
@@ -98,8 +122,10 @@ class TripleRetriever:
             model = _get_st_model()
             q_emb = model.encode([query], normalize_embeddings=True)[0]
             scores = self._embeddings @ q_emb
+            scores = _apply_exclude(scores, exclude_mask)
             order = np.argsort(-scores)[:candidate_k]
-            hits = [(self.triples[i], float(scores[i])) for i in order]
+            hits = [(self.triples[i], float(scores[i])) for i in order
+                    if scores[i] != -np.inf]
 
         elif self.backend == "tfidf":
             from sklearn.metrics.pairwise import cosine_similarity
@@ -107,8 +133,10 @@ class TripleRetriever:
 
             q_vec = self._vectorizer.transform([query])
             scores = cosine_similarity(q_vec, self._matrix)[0]
+            scores = _apply_exclude(scores, exclude_mask)
             order = np.argsort(-scores)[:candidate_k]
-            hits = [(self.triples[i], float(scores[i])) for i in order]
+            hits = [(self.triples[i], float(scores[i])) for i in order
+                    if scores[i] != -np.inf]
 
         return rerank_hits(
             hits,
@@ -161,11 +189,22 @@ class TextRetriever:
         self._matrix = self._vectorizer.fit_transform(self.texts)
         self.backend = "tfidf"
 
+    def mask_for_instance_ids(self, instance_ids) -> "np.ndarray":
+        """Boolean array: True for documents whose instance/passage id is masked."""
+        import numpy as np
+
+        ids = set(instance_ids or ())
+        return np.array(
+            [str(d.get("instance_id") or d.get("passage_id") or "") in ids
+             for d in self.documents], dtype=bool)
+
     def retrieve(self,
                  query: str,
                  top_k: int = 8,
                  *,
-                 question_culture: Optional[str] = None) -> list[tuple[dict, float]]:
+                 question_culture: Optional[str] = None,
+                 exclude_mask=None) -> list[tuple[dict, float]]:
+        """``exclude_mask``: see ``TripleRetriever.retrieve`` (default off)."""
         if not self.documents:
             return []
         query = normalize_text(query)
@@ -181,8 +220,10 @@ class TextRetriever:
             model = _get_st_model()
             q_emb = model.encode([query], normalize_embeddings=True)[0]
             scores = self._embeddings @ q_emb
+            scores = _apply_exclude(scores, exclude_mask)
             order = np.argsort(-scores)[:candidate_k]
-            hits = [(self.documents[i], float(scores[i])) for i in order]
+            hits = [(self.documents[i], float(scores[i])) for i in order
+                    if scores[i] != -np.inf]
 
         elif self.backend == "tfidf":
             from sklearn.metrics.pairwise import cosine_similarity
@@ -190,8 +231,10 @@ class TextRetriever:
 
             q_vec = self._vectorizer.transform([query])
             scores = cosine_similarity(q_vec, self._matrix)[0]
+            scores = _apply_exclude(scores, exclude_mask)
             order = np.argsort(-scores)[:candidate_k]
-            hits = [(self.documents[i], float(scores[i])) for i in order]
+            hits = [(self.documents[i], float(scores[i])) for i in order
+                    if scores[i] != -np.inf]
 
         return rerank_hits(
             hits,

@@ -101,11 +101,22 @@ class PathwayRetriever:
             self.embeddings = embed_texts(self.documents, fit=True)
             self.backend = backend_name()
 
+    def mask_for_instance_ids(self, instance_ids,
+                              triple_to_instance: dict) -> np.ndarray:
+        """True for pathways built from ANY triple whose instance_id is masked."""
+        ids = set(instance_ids or ())
+        return np.array(
+            [any(triple_to_instance.get(tid) in ids for tid in pw.triple_ids)
+             for pw in self.pathways], dtype=bool)
+
     def retrieve(self,
                  query: str,
                  top_k: int = 5,
                  *,
-                 question_culture: Optional[str] = None) -> list[tuple[CulturalPathway, float]]:
+                 question_culture: Optional[str] = None,
+                 exclude_mask: Optional[np.ndarray] = None) -> list[tuple[CulturalPathway, float]]:
+        """``exclude_mask`` (optional, aligned with ``self.pathways``) drops
+        pathways before ranking; default ``None`` leaves behaviour unchanged."""
         if not self.pathways or self.embeddings is None:
             return []
         candidate_k = min(len(self.pathways), max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k))
@@ -114,6 +125,9 @@ class PathwayRetriever:
         if q_emb.shape[0] == 0:
             return []
         scores = cosine_similarity_matrix(q_emb, self.embeddings)[0]
+        if exclude_mask is not None:
+            scores = np.array(scores, dtype=float, copy=True)
+            scores[np.asarray(exclude_mask, dtype=bool)] = -np.inf
         idx = np.argsort(scores)[::-1][:candidate_k]
         hits = [(self.pathways[i], float(scores[i])) for i in idx if scores[i] > 0]
         return rerank_hits(
