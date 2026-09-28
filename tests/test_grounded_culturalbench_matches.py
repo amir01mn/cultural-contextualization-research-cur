@@ -143,7 +143,7 @@ def test_stage2_prompt_reviews_prior_elements_without_grammatical_over_split():
 
 def test_stage2_system_allows_cultural_record_to_support_common_wording():
     assert (
-        'Do NOT require exact adjectives such as "common", "customary", or "typically"'
+        'Do NOT require literal "common", "customary", "typically", or "usually"'
         in gm.STAGE2_SYSTEM
     )
     assert (
