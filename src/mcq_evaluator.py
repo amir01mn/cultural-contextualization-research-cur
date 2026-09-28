@@ -208,6 +208,18 @@ def summarize(questions: list[MCQQuestion],
         )
     summary["generated_support_ratio"] = generated_support_ratio
 
+    category_candidate_pathways = {}
+    for system, answers in answers_by_system.items():
+        values = [
+            int(answer.category_candidate_pathways)
+            for answer in answers
+            if answer is not None and answer.category_candidate_pathways is not None
+        ]
+        category_candidate_pathways[system] = (
+            round(sum(values) / len(values), 1) if values else None
+        )
+    summary["category_candidate_pathways"] = category_candidate_pathways
+
     summary["mechanism_analysis"] = summarize_mechanisms(questions, answers_by_system)
 
     # Per-culture accuracy (combined units).
@@ -299,6 +311,12 @@ def _write_summary_md(path, summary: dict, run_meta: dict) -> None:
         f"passages: {run_meta.get('corpus_passages', 'n/a')}",
         f"- Units: {summary['num_units_total']} "
         f"(easy={summary['num_units_easy']}, hard={summary['num_units_hard']})",
+        (
+            "- Category filter topics: "
+            + "; ".join(run_meta.get("category_filter_topics", []))
+            if run_meta.get("category_filter_topics")
+            else "- Category filter topics: none"
+        ),
         "",
         "## Accuracy (95% paired-bootstrap CI)",
         "",
@@ -313,6 +331,7 @@ def _write_summary_md(path, summary: dict, run_meta: dict) -> None:
         "S4_abstraction_refinement_kg": "S4 Pathway KG",
         "S4_triple_retrieval": "S4 Triple ablation",
         "S4_no_shared_pivot": "S4 No-shared ablation",
+        "S4_category_filtered": "S4 Category-filtered",
     }
     for s in systems:
         c = combined.get(s, {})
@@ -333,6 +352,23 @@ def _write_summary_md(path, summary: dict, run_meta: dict) -> None:
     for system in systems:
         ratio = summary.get("generated_support_ratio", {}).get(system, 0.0)
         lines.append(f"| {labels.get(system, system)} | {ratio*100:.1f}% |")
+
+    category_counts = summary.get("category_candidate_pathways", {})
+    shown_category_counts = {
+        system: value
+        for system, value in category_counts.items()
+        if value is not None
+    }
+    if shown_category_counts:
+        lines += [
+            "",
+            "## Category-filter diagnostics",
+            "",
+            "| System | Mean eligible pathways before semantic ranking |",
+            "|---|---:|",
+        ]
+        for system, value in shown_category_counts.items():
+            lines.append(f"| {labels.get(system, system)} | {value:.1f} |")
 
     lines += ["", "## McNemar pairwise tests (combined units)", "",
               "| Comparison | delta acc | discordant (b/c) | p-value | method |",
