@@ -51,10 +51,12 @@ would support it.
 Coverage labels:
 - COVERED: one or more target-culture passages directly state or clearly entail
   enough information to support the gold answer/judgment.
-- PARTIAL: target-culture passages are relevant to the question/topic, but do
-  not contain enough information to establish the gold answer/judgment.
-- ABSENT: no supplied target-culture passage materially supports the gold
-  answer/judgment.
+- PARTIAL: a target-culture passage discusses the SAME practice, event,
+  situation, or norm asked about, but a decisive detail needed to establish the
+  gold answer/judgment is missing.
+- ABSENT: the exact practice/event/norm needed for the gold target is not
+  discussed by the supplied target-culture passages. Merely sharing the same
+  culture, broad topic, or value is ABSENT rather than PARTIAL.
 
 Important rules:
 1. Only passages about the target culture can count as supporting evidence.
@@ -62,17 +64,23 @@ Important rules:
    evidence that it is false. COVERED requires affirmative contrary evidence or
    a passage that directly refutes the candidate.
 3. Do not infer a specific practice from a broad value or vaguely related norm.
-4. supporting_instance_ids must contain only exact IDs from the supplied
-   passages that actually support the label.
-5. If evidence is ambiguous, choose PARTIAL rather than COVERED.
-6. Return JSON only, with no markdown.
+4. PARTIAL requires direct topical overlap with the exact practice/event/norm.
+   A passage about cultural identity, food in general, or an unrelated social
+   norm is ABSENT for a question about a different practice.
+5. supporting_instance_ids must contain only exact IDs from the supplied
+   passages that actually support COVERED or directly relevant PARTIAL evidence.
+6. If evidence discusses the exact practice but is ambiguous about the decisive
+   detail, choose PARTIAL rather than COVERED.
+7. Choose a confidence value from 0 to 1 that reflects your actual confidence;
+   do not mechanically copy the example value.
+8. Return JSON only, with no markdown.
 
 Return exactly:
 {
   "label": "COVERED | PARTIAL | ABSENT",
   "supporting_instance_ids": ["..."],
   "rationale": "brief evidence-grounded explanation",
-  "confidence": 0.0
+  "confidence": 0.85
 }
 """
 
@@ -84,6 +92,27 @@ def _variant_name(q: MCQQuestion) -> str:
 
 def load_questions(path: Path) -> list[MCQQuestion]:
     return [MCQQuestion(**row) for row in read_jsonl(path)]
+
+
+def record_to_passage(rec: dict) -> dict:
+    """Create the same raw-text passage view used by the corpus builder."""
+    parts = []
+    for key in (
+        "cultural_group", "context", "actor", "recipient", "relation",
+        "actor_behavior", "recipient_behavior", "topic", "source_text",
+    ):
+        value = normalize_text(rec.get(key))
+        if value:
+            parts.append(value)
+    text = ". ".join(dict.fromkeys(parts))
+    return {
+        "passage_id": rec.get("instance_id", ""),
+        "instance_id": rec.get("instance_id", ""),
+        "dataset_id": rec.get("dataset_id", "culturebank"),
+        "cultural_group": rec.get("cultural_group"),
+        "topic": rec.get("topic"),
+        "text": text or normalize_text(rec.get("source_text")),
+    }
 
 
 def gold_description(q: MCQQuestion) -> str:
@@ -249,6 +278,7 @@ def write_markdown(path: Path, rows: list[dict], run_meta: dict) -> None:
         "",
         f"- Model judge: {run_meta['model']}",
         f"- Corpus passages: {run_meta['num_passages']}",
+        f"- Corpus source: {run_meta.get('corpus_source', 'unknown')}",
         f"- Questions: {len(rows)}",
         f"- Semantic fallback k: {run_meta['semantic_fallback_k']}",
         f"- Max target-culture records per question: {run_meta['max_culture_records']}",
@@ -300,6 +330,15 @@ def main(argv=None) -> None:
         default="data/controlled/food_hospitality_culturalbench_questions.jsonl",
     )
     p.add_argument("--passages", default="data/processed/corpus_passages.jsonl")
+    p.add_argument(
+        "--records_jsonl",
+        default=None,
+        help=(
+            "Optional normalized CultureBank records JSONL. When supplied, "
+            "passages are constructed deterministically in memory using the "
+            "same record fields as the corpus builder."
+        ),
+    )
     p.add_argument("--semantic_fallback_k", type=int, default=10)
     p.add_argument("--max_culture_records", type=int, default=80)
     p.add_argument("--max_passage_chars", type=int, default=500)
@@ -311,11 +350,20 @@ def main(argv=None) -> None:
     passages_path = Path(args.passages)
     if not questions_path.exists():
         raise FileNotFoundError(questions_path)
-    if not passages_path.exists():
-        raise FileNotFoundError(passages_path)
 
     questions = load_questions(questions_path)
-    passages = list(read_jsonl(passages_path))
+    if args.records_jsonl:
+        records_path = Path(args.records_jsonl)
+        if not records_path.exists():
+            raise FileNotFoundError(records_path)
+        passages = [record_to_passage(row) for row in read_jsonl(records_path)]
+        corpus_source = str(records_path)
+    else:
+        if not passages_path.exists():
+            raise FileNotFoundError(passages_path)
+        passages = list(read_jsonl(passages_path))
+        corpus_source = str(passages_path)
+
     retriever = TextRetriever(passages)
 
     backend = get_backend(args.provider, model=args.model)
@@ -414,6 +462,7 @@ def main(argv=None) -> None:
         "provider": args.provider,
         "model": backend.model,
         "num_passages": len(passages),
+        "corpus_source": corpus_source,
         "semantic_fallback_k": args.semantic_fallback_k,
         "max_culture_records": args.max_culture_records,
         "max_passage_chars": args.max_passage_chars,
