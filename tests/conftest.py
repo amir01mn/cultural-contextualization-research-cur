@@ -1,12 +1,20 @@
+import os
 import sys
 from pathlib import Path
 
 # Ensure the project root is importable as `src` during tests.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+# Keep the suite offline and deterministic. Set before importing `src` so
+# config picks them up: otherwise retrieval loads sentence-transformers from
+# shared storage (minutes per run) and may reach for the network.
+# setdefault, so an explicit override from the environment still wins.
+os.environ.setdefault("EMBEDDING_BACKEND", "tfidf")
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+
 import pytest
 
-from src.schemas import CulturalTriple, LayerLabel, MCQQuestion, MCQVariant
+from src.core.schemas import CulturalTriple, LayerLabel, MCQQuestion, MCQVariant
 
 
 class FakeBackend:

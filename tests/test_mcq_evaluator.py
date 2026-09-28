@@ -1,6 +1,6 @@
-from src import mcq_evaluator
-from src.mcq_evaluator import compute_units, mcnemar, paired_bootstrap, summarize
-from src.schemas import MCQQuestion, MCQSystemAnswer, MCQVariant
+from src.evaluation import mcq_evaluator
+from src.evaluation.mcq_evaluator import compute_units, mcnemar, paired_bootstrap, summarize
+from src.core.schemas import MCQQuestion, MCQSystemAnswer, MCQVariant
 
 
 def _easy(qid, key="B"):

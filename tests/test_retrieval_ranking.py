@@ -1,5 +1,5 @@
-from src.retrieval_ranking import culture_match_score, rerank_hits
-from src.schemas import CulturalPathway, LayerLabel, PathwayCompleteness, PathwayNodeRef
+from src.retrieval.retrieval_ranking import culture_match_score, rerank_hits
+from src.core.schemas import CulturalPathway, LayerLabel, PathwayCompleteness, PathwayNodeRef
 
 
 def test_culture_match_aliases():

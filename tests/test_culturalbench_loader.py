@@ -1,5 +1,5 @@
-from src import culturalbench_loader as cbl
-from src.schemas import MCQVariant
+from src.loaders import culturalbench_loader as cbl
+from src.core.schemas import MCQVariant
 
 
 def test_fallback_dataset_has_easy_and_hard():
@@ -76,3 +76,37 @@ def test_normalize_hard_groups_items():
     assert len(qs) == 2
     assert all(q.group_id == "hard_7" for q in qs)
     assert qs[0].answer_bool is True and qs[1].answer_bool is False
+
+
+def test_hard_items_group_by_question_not_row():
+    """CulturalBench-Hard scores a question only when ALL of its items are right.
+
+    The real dataset carries a per-row ``data_idx`` and a per-question
+    ``question_idx``. Grouping on ``data_idx`` puts every item in its own group,
+    silently turning the metric into per-item True/False accuracy - far easier,
+    and it inflated the reported Hard numbers.
+    """
+    rows = [
+        {"data_idx": i, "question_idx": 0, "prompt_question": "Q1?",
+         "prompt_option": f"opt{i}", "answer": "true", "country": "X"}
+        for i in range(4)
+    ] + [
+        {"data_idx": 4 + i, "question_idx": 1, "prompt_question": "Q2?",
+         "prompt_option": f"opt{i}", "answer": "false", "country": "Y"}
+        for i in range(4)
+    ]
+    qs = cbl._normalize_hard(rows, limit_groups=10)
+    assert len(qs) == 8
+    assert len({q.group_id for q in qs}) == 2, "8 items must form 2 question groups"
+    assert len({q.question_id for q in qs}) == 8, "item ids stay unique"
+
+
+def test_hard_limit_counts_groups_not_items():
+    rows = [
+        {"data_idx": i, "question_idx": i // 4, "prompt_question": f"Q{i // 4}?",
+         "prompt_option": f"opt{i}", "answer": "true", "country": "X"}
+        for i in range(12)
+    ]
+    qs = cbl._normalize_hard(rows, limit_groups=2)
+    assert len({q.group_id for q in qs}) == 2
+    assert len(qs) == 8

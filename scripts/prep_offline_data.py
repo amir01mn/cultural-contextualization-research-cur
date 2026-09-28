@@ -4,10 +4,9 @@ Run this on the Narval LOGIN node (which has internet). It downloads CultureBank
 and CulturalBench into the Hugging Face cache (HF_HOME) so that compute nodes,
 which have NO internet, can load them with HF_DATASETS_OFFLINE=1.
 
-Usage (login node):
-    export HF_HOME=$SCRATCH/hf_cache
-    python scripts/prep_offline_data.py
-    # optionally also pre-download the model weights:
+Usage (login node): prefer ``bash slurm/prep_offline.sh``, which sets HF_HOME to
+the workspace cache (``<workspace>/hf_cache``, see slurm/env_hf.sh). Directly:
+    source slurm/env_hf.sh && setup_hf_cache
     python scripts/prep_offline_data.py --model Qwen/Qwen2.5-7B-Instruct
 """
 
@@ -18,8 +17,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import config  # noqa: E402
-from src.utils import get_logger  # noqa: E402
+from src.core import config  # noqa: E402
+from src.core.utils import get_logger  # noqa: E402
 
 LOGGER = get_logger("prep_offline_data")
 
@@ -64,8 +63,10 @@ def _stage_model(model: str) -> None:
     try:
         from huggingface_hub import snapshot_download
 
-        snapshot_download(repo_id=model)
-        LOGGER.info("  model '%s' cached.", model)
+        path = snapshot_download(repo_id=model)
+        # The snapshot directory name is the commit hash. Record it: every run
+        # through Sep 2026 used Qwen2.5-7B-Instruct @ a09a35458c70.
+        LOGGER.info("  model '%s' cached at revision %s.", model, Path(path).name)
     except Exception as exc:  # noqa: BLE001
         LOGGER.warning("  failed to download model '%s': %s", model, exc)
         LOGGER.warning("  (gated models like Llama need `huggingface-cli login`.)")

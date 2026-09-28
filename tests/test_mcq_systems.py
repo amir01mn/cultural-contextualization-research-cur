@@ -1,5 +1,5 @@
-from src import mcq_systems
-from src.mcq_systems import (
+from src.evaluation import mcq_systems
+from src.evaluation.mcq_systems import (
     SYSTEM_S0,
     SYSTEM_S2,
     SYSTEM_S3,

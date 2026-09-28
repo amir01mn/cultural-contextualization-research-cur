@@ -1,5 +1,5 @@
-from src.entity_resolver import apply_entity_map, resolve_entities
-from src.schemas import CulturalTriple, LayerLabel
+from src.construction.entity_resolver import apply_entity_map, resolve_entities
+from src.core.schemas import CulturalTriple, LayerLabel
 
 
 def test_resolve_entities_merges_similar_labels(sample_record):
@@ -31,6 +31,13 @@ def test_resolve_entities_merges_similar_labels(sample_record):
 
 
 def test_entity_cultures_from_record(sample_record, sample_triples):
+    """Entity cultures are stored canonically, not as the raw record string.
+
+    The record says "Japanese"; the canonical key is "japan". Canonicalizing
+    here is what lets a benchmark question about "Japan" match corpus entities
+    tagged "Japanese", and what lets pathway hops agree on a culture.
+    """
     entities, _ = resolve_entities(sample_triples, [sample_record], similarity_threshold=0.99)
     assert entities
-    assert any("Japanese" in e.cultures for e in entities)
+    assert any("japan" in e.cultures for e in entities)
+    assert not any("Japanese" in e.cultures for e in entities)

@@ -1,5 +1,7 @@
 datasets
 pandas
+# Parquet mirrors. On Narval this comes from `module load arrow` instead of pip.
+pyarrow
 pydantic
 networkx
 numpy

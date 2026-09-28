@@ -5,7 +5,7 @@
 #   bash slurm/prep_offline.sh
 #
 # It loads the Python module, activates the project venv, points HF_HOME at
-# $SCRATCH, and pre-downloads CultureBank + CulturalBench (and optionally the
+# the workspace cache (<workspace>/hf_cache, see env_hf.sh), and pre-downloads CultureBank + CulturalBench (and optionally the
 # model). After this, GPU jobs can run fully offline.
 
 set -euo pipefail

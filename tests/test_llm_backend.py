@@ -1,7 +1,10 @@
+import sys
+import types
+
 import pytest
 
-from src import llm_backend
-from src.llm_backend import OllamaBackend, VLLMBackend, get_backend
+from src.llm import llm_backend
+from src.llm.llm_backend import OllamaBackend, VLLMBackend, get_backend
 
 
 def test_factory_returns_ollama_by_default():
@@ -42,8 +45,26 @@ def test_ollama_backend_threaded_preserves_order(monkeypatch):
     assert out == [f"P{i}" for i in range(10)]
 
 
-def test_vllm_status_reports_when_not_installed():
+def test_vllm_status_reports_when_not_installed(monkeypatch):
+    """status() must report cleanly when vLLM cannot be imported.
+
+    The absent-vLLM case is simulated rather than assumed. Letting the real
+    import run makes the outcome depend on the machine, and on a cluster node it
+    cold-loads the entire torch/CUDA stack from shared storage - which stalled
+    this single test for over 20 minutes and timed out the whole suite.
+    """
+    monkeypatch.setitem(sys.modules, "vllm", None)  # forces ImportError
     backend = VLLMBackend(model="some/model")
     status = backend.status()
-    # vLLM is not installed locally; status should be a dict, not raise.
-    assert "available" in status and "message" in status
+    assert status["available"] is False
+    assert "vLLM not installed" in status["message"]
+    assert status["model"] == "some/model"
+
+
+def test_vllm_status_reports_when_installed(monkeypatch):
+    """The available branch, with a stub module so no real import happens."""
+    monkeypatch.setitem(sys.modules, "vllm", types.ModuleType("vllm"))
+    backend = VLLMBackend(model="some/model")
+    status = backend.status()
+    assert status["available"] is True
+    assert "some/model" in status["message"]

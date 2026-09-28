@@ -1,5 +1,5 @@
-from src.cross_cultural_aligner import align_cross_cultural
-from src.schemas import CanonicalEntity, LayerLabel
+from src.construction.cross_cultural_aligner import align_cross_cultural
+from src.core.schemas import CanonicalEntity, LayerLabel
 
 
 def test_align_cross_cultural_embedding_only():

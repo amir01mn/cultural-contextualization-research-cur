@@ -1,6 +1,6 @@
-from src import critique_agent
-from src.local_llm import LLMUnavailableError
-from src.schemas import CulturalTriple, LayerLabel
+from src.construction import critique_agent
+from src.llm.local_llm import LLMUnavailableError
+from src.core.schemas import CulturalTriple, LayerLabel
 
 
 def test_rule_based_critique_flags_missing_layers(sample_record):

@@ -17,4 +17,9 @@ data/outputs/*
 !data/outputs/.gitkeep
 !data/outputs/culturalbench_*
 !data/outputs/corpus_cultural_kg*
-slurm/logs/
+slurm/logs/*
+!slurm/logs/.gitkeep
+slurm/watch/
+
+# pyvis writes its JS/CSS bundle into ./lib on every HTML graph export
+lib/
