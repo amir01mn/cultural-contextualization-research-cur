@@ -45,13 +45,20 @@ SYSTEM_S3 = "S3_layered_kg"
 SYSTEM_S4 = "S4_abstraction_refinement_kg"
 SYSTEM_S4_TRIPLE = "S4_triple_retrieval"
 SYSTEM_S4_NO_SHARED = "S4_no_shared_pivot"
+SYSTEM_S4_CATEGORY = "S4_category_filtered"
 
-ALL_SYSTEMS = [
+DEFAULT_SYSTEMS = [
     SYSTEM_S0, SYSTEM_S1, SYSTEM_S2, SYSTEM_S3,
     SYSTEM_S4, SYSTEM_S4_TRIPLE, SYSTEM_S4_NO_SHARED,
 ]
-KG_SYSTEMS = {SYSTEM_S2, SYSTEM_S3, SYSTEM_S4, SYSTEM_S4_TRIPLE, SYSTEM_S4_NO_SHARED}
-S4_SYSTEMS = {SYSTEM_S4, SYSTEM_S4_TRIPLE, SYSTEM_S4_NO_SHARED}
+ALL_SYSTEMS = DEFAULT_SYSTEMS + [SYSTEM_S4_CATEGORY]
+KG_SYSTEMS = {
+    SYSTEM_S2, SYSTEM_S3, SYSTEM_S4, SYSTEM_S4_TRIPLE,
+    SYSTEM_S4_NO_SHARED, SYSTEM_S4_CATEGORY,
+}
+S4_SYSTEMS = {
+    SYSTEM_S4, SYSTEM_S4_TRIPLE, SYSTEM_S4_NO_SHARED, SYSTEM_S4_CATEGORY,
+}
 
 _LAYER_SCORE = {
     LayerLabel.LAYER_1_SURFACE: 1,
@@ -67,20 +74,47 @@ class RetrievalContext:
                  passages: Optional[list[dict]] = None,
                  triples: Optional[list[CulturalTriple]] = None,
                  refined_triples: Optional[list[CulturalTriple]] = None,
-                 pathway_retriever: Optional[PathwayRetriever] = None):
-        self.passage_retriever = TextRetriever(passages or []) if passages else None
+                 pathway_retriever: Optional[PathwayRetriever] = None,
+                 category_topics: Optional[list[str]] = None):
+        self.passages = list(passages or [])
+        self.passage_retriever = TextRetriever(self.passages) if self.passages else None
         self.triple_retriever = TripleRetriever(triples or []) if triples else None
         self.refined_triple_retriever = (
             TripleRetriever(refined_triples or []) if refined_triples else None
         )
         self.pathway_retriever = pathway_retriever
+
+        self.category_topics = [
+            normalize_text(topic)
+            for topic in (category_topics or [])
+            if normalize_text(topic)
+        ]
+        self._instance_ids_by_topic: dict[str, set[str]] = {}
+        for passage in self.passages:
+            topic = normalize_text(passage.get("topic"))
+            instance_id = str(
+                passage.get("instance_id") or passage.get("passage_id") or ""
+            ).strip()
+            if not topic or not instance_id:
+                continue
+            self._instance_ids_by_topic.setdefault(topic.lower(), set()).add(instance_id)
+
         LOGGER.info(
-            "RetrievalContext: passages=%s raw_triples=%s refined_triples=%s pathways=%d",
+            "RetrievalContext: passages=%s raw_triples=%s refined_triples=%s "
+            "pathways=%d category_topics=%s",
             self.passage_retriever.backend if self.passage_retriever else "none",
             self.triple_retriever.backend if self.triple_retriever else "none",
             self.refined_triple_retriever.backend if self.refined_triple_retriever else "none",
             len(pathway_retriever.pathways) if pathway_retriever else 0,
+            self.category_topics,
         )
+
+    def category_allowed_instance_ids(self) -> set[str]:
+        """Return source records belonging to the configured category topics."""
+        allowed: set[str] = set()
+        for topic in self.category_topics:
+            allowed.update(self._instance_ids_by_topic.get(topic.lower(), set()))
+        return allowed
 
 
 def _query_for(q: MCQQuestion) -> str:
@@ -261,24 +295,29 @@ def _layered_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
 
 def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
                       q: MCQQuestion, *,
-                      exclude_shared: bool = False) -> tuple[str, list[str], dict]:
+                      exclude_shared: bool = False,
+                      allowed_instance_ids: Optional[set[str]] = None,
+                      selected_categories: Optional[list[str]] = None) -> tuple[str, list[str], dict]:
     if not ctx.pathway_retriever:
         return "", [], {
             "completeness": PathwayCompleteness.NONE.value,
             "completeness_score": 0.0,
             "shared_node_available": False,
             "generated_support_ratio": 0.0,
+            "selected_categories": list(selected_categories or []),
+            "category_candidate_pathways": 0 if allowed_instance_ids is not None else None,
         }
-    if exclude_shared:
-        hits = ctx.pathway_retriever.retrieve(
-            query,
-            top_k=top_k,
-            question_culture=q.cultural_group,
-            exclude_shared=True,
-        )
-    else:
-        hits = ctx.pathway_retriever.retrieve(
-            query, top_k=top_k, question_culture=q.cultural_group)
+
+    retrieve_kwargs = {
+        "query": query,
+        "top_k": top_k,
+        "question_culture": q.cultural_group,
+        "exclude_shared": exclude_shared,
+    }
+    if allowed_instance_ids is not None:
+        retrieve_kwargs["allowed_instance_ids"] = allowed_instance_ids
+
+    hits = ctx.pathway_retriever.retrieve(**retrieve_kwargs)
     ranked = _rank_pathways(hits, q.cultural_group, exclude_shared=exclude_shared)[:top_k]
     lines, ids, pathways = [], [], []
     for i, (pw, _score) in enumerate(ranked, 1):
@@ -286,11 +325,23 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
         ids.append(pw.pathway_id)
         pathways.append(pw)
     bucket, score, shared = _completeness_from_pathways(pathways)
+
+    category_candidate_pathways = None
+    if allowed_instance_ids is not None:
+        counter = getattr(ctx.pathway_retriever, "count_eligible", None)
+        if callable(counter):
+            category_candidate_pathways = counter(
+                exclude_shared=exclude_shared,
+                allowed_instance_ids=allowed_instance_ids,
+            )
+
     meta = {
         "completeness": bucket,
         "completeness_score": score,
         "shared_node_available": shared,
         "generated_support_ratio": _generated_ratio_pathways(pathways),
+        "selected_categories": list(selected_categories or []),
+        "category_candidate_pathways": category_candidate_pathways,
     }
     return "\n".join(lines), ids, meta
 
@@ -318,6 +369,15 @@ def _evidence_for(system: str, ctx: Optional[RetrievalContext],
         )
     elif system == SYSTEM_S4:
         body, ids, meta = _pathway_evidence(ctx, query, top_k, q)
+    elif system == SYSTEM_S4_CATEGORY:
+        body, ids, meta = _pathway_evidence(
+            ctx,
+            query,
+            top_k,
+            q,
+            allowed_instance_ids=ctx.category_allowed_instance_ids(),
+            selected_categories=ctx.category_topics,
+        )
     elif system == SYSTEM_S4_NO_SHARED:
         body, ids, meta = _pathway_evidence(ctx, query, top_k, q, exclude_shared=True)
     elif system == SYSTEM_S4_TRIPLE:
@@ -437,5 +497,7 @@ def run_system(system: str,
                 completeness_score=meta.get("completeness_score"),
                 shared_node_available=meta.get("shared_node_available"),
                 generated_support_ratio=meta.get("generated_support_ratio"),
+                selected_categories=meta.get("selected_categories") or [],
+                category_candidate_pathways=meta.get("category_candidate_pathways"),
             )
     return [a for a in answers]  # type: ignore[return-value]
