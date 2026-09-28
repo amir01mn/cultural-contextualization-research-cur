@@ -42,6 +42,7 @@ LIMIT="${LIMIT:-250}"
 TOP_K="${TOP_K:-8}"
 SEED="${SEED:-42}"
 QUESTIONS_JSONL="${QUESTIONS_JSONL:-}"
+CATEGORY_TOPICS="${CATEGORY_TOPICS:-}"
 
 SYSTEMS="${SYSTEMS:-S0_no_kg,S1_raw_text_rag,S2_flat_kg,S3_layered_kg,S4_abstraction_refinement_kg}"
 
@@ -49,10 +50,16 @@ EXTRA_ARGS=()
 if [[ -n "$QUESTIONS_JSONL" ]]; then
   EXTRA_ARGS+=(--questions_jsonl "$QUESTIONS_JSONL")
 fi
+if [[ -n "$CATEGORY_TOPICS" ]]; then
+  EXTRA_ARGS+=(--category_topics "$CATEGORY_TOPICS")
+fi
 
 echo "Evaluating on CulturalBench with vLLM model: $VLLM_MODEL"
 if [[ -n "$QUESTIONS_JSONL" ]]; then
   echo "Using selected question file: $QUESTIONS_JSONL"
+fi
+if [[ -n "$CATEGORY_TOPICS" ]]; then
+  echo "Category filter topics: $CATEGORY_TOPICS"
 fi
 python scripts/07_eval_culturalbench.py \
   --provider vllm \
