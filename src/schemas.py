@@ -252,6 +252,8 @@ class MCQSystemAnswer(BaseModel):
     completeness_score: Optional[float] = None
     shared_node_available: Optional[bool] = None
     generated_support_ratio: Optional[float] = None
+    selected_categories: list[str] = Field(default_factory=list)
+    category_candidate_pathways: Optional[int] = None
 
 
 class MCQItemResult(BaseModel):
