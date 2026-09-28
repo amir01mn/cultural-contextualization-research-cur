@@ -1,0 +1,1123 @@
+{
+  "meta": {
+    "judge_model": "microsoft/phi-4",
+    "provider": "vllm",
+    "data_dir": "/lustre06/project/6113454/amir01mn/cultural-contextualization-research-cur/cultural-contextualization-research-cur/data/eval_v2/intrinsic",
+    "limit": null,
+    "smoke": false,
+    "stage_seconds": {
+      "facts": 17.7,
+      "retention": 43.2,
+      "triple_audit": 21.6,
+      "pathway_audit": 12.8,
+      "open_judge": 132.0
+    }
+  },
+  "stages": {
+    "facts": {
+      "n_records": 300,
+      "n_parse_failed": 0,
+      "n_fewer_than_3": 5,
+      "n_facts_total": 1441,
+      "mean_facts_per_record": 4.803
+    },
+    "retention": {
+      "overall": {
+        "raw_triples": {
+          "rate": 0.9285,
+          "n": 1441,
+          "n_unparsed": 0,
+          "record_macro": 0.9338,
+          "n_records": 300
+        },
+        "refined_triples": {
+          "rate": 0.9271,
+          "n": 1441,
+          "n_unparsed": 0,
+          "record_macro": 0.9322,
+          "n_records": 300
+        },
+        "pathways": {
+          "rate": 0.2866,
+          "n": 1441,
+          "n_unparsed": 0,
+          "record_macro": 0.2926,
+          "n_records": 300
+        }
+      },
+      "per_culture": {
+        "argentina": {
+          "raw_triples": {
+            "rate": 0.9643,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9643,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 28,
+            "n_unparsed": 0
+          }
+        },
+        "asia": {
+          "raw_triples": {
+            "rate": 0.9677,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9677,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.2903,
+            "n": 31,
+            "n_unparsed": 0
+          }
+        },
+        "australia": {
+          "raw_triples": {
+            "rate": 0.913,
+            "n": 23,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.913,
+            "n": 23,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 23,
+            "n_unparsed": 0
+          }
+        },
+        "austria": {
+          "raw_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.2333,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "belgium": {
+          "raw_triples": {
+            "rate": 0.931,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.931,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.4483,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "brazil": {
+          "raw_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.1,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "californians": {
+          "raw_triples": {
+            "rate": 0.9091,
+            "n": 33,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9091,
+            "n": 33,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.5152,
+            "n": 33,
+            "n_unparsed": 0
+          }
+        },
+        "canada": {
+          "raw_triples": {
+            "rate": 0.8966,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8966,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "china": {
+          "raw_triples": {
+            "rate": 0.9259,
+            "n": 27,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9259,
+            "n": 27,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.037,
+            "n": 27,
+            "n_unparsed": 0
+          }
+        },
+        "denmark": {
+          "raw_triples": {
+            "rate": 0.9231,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9231,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.5,
+            "n": 26,
+            "n_unparsed": 0
+          }
+        },
+        "egypt": {
+          "raw_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.8276,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "europe": {
+          "raw_triples": {
+            "rate": 0.8966,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8966,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "finland": {
+          "raw_triples": {
+            "rate": 0.8788,
+            "n": 33,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8788,
+            "n": 33,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0606,
+            "n": 33,
+            "n_unparsed": 0
+          }
+        },
+        "france": {
+          "raw_triples": {
+            "rate": 0.9615,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9615,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0769,
+            "n": 26,
+            "n_unparsed": 0
+          }
+        },
+        "germany": {
+          "raw_triples": {
+            "rate": 0.92,
+            "n": 25,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.92,
+            "n": 25,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 25,
+            "n_unparsed": 0
+          }
+        },
+        "greece": {
+          "raw_triples": {
+            "rate": 0.9375,
+            "n": 32,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9375,
+            "n": 32,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.3438,
+            "n": 32,
+            "n_unparsed": 0
+          }
+        },
+        "hungary": {
+          "raw_triples": {
+            "rate": 0.9062,
+            "n": 32,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.875,
+            "n": 32,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.375,
+            "n": 32,
+            "n_unparsed": 0
+          }
+        },
+        "india": {
+          "raw_triples": {
+            "rate": 0.9355,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9677,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.3548,
+            "n": 31,
+            "n_unparsed": 0
+          }
+        },
+        "indonesia": {
+          "raw_triples": {
+            "rate": 0.9032,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9355,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.2903,
+            "n": 31,
+            "n_unparsed": 0
+          }
+        },
+        "ireland": {
+          "raw_triples": {
+            "rate": 0.9,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8667,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.4667,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "italy": {
+          "raw_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.1333,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "japan": {
+          "raw_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.069,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "korea": {
+          "raw_triples": {
+            "rate": 0.9286,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9286,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0357,
+            "n": 28,
+            "n_unparsed": 0
+          }
+        },
+        "latin america": {
+          "raw_triples": {
+            "rate": 0.9697,
+            "n": 33,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9394,
+            "n": 33,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.6364,
+            "n": 33,
+            "n_unparsed": 0
+          }
+        },
+        "malaysia": {
+          "raw_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.4333,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "mexico": {
+          "raw_triples": {
+            "rate": 1.0,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 1.0,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.4643,
+            "n": 28,
+            "n_unparsed": 0
+          }
+        },
+        "middle east": {
+          "raw_triples": {
+            "rate": 1.0,
+            "n": 24,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 1.0,
+            "n": 24,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.7083,
+            "n": 24,
+            "n_unparsed": 0
+          }
+        },
+        "muslims": {
+          "raw_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9333,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.4333,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "netherlands": {
+          "raw_triples": {
+            "rate": 0.8438,
+            "n": 32,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8438,
+            "n": 32,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 32,
+            "n_unparsed": 0
+          }
+        },
+        "new yorkers": {
+          "raw_triples": {
+            "rate": 1.0,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 1.0,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "new zealand": {
+          "raw_triples": {
+            "rate": 0.75,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.75,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 28,
+            "n_unparsed": 0
+          }
+        },
+        "nigeria": {
+          "raw_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.5172,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "norway": {
+          "raw_triples": {
+            "rate": 0.8621,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8621,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.3448,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "philippines": {
+          "raw_triples": {
+            "rate": 0.9667,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9667,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.1,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "poland": {
+          "raw_triples": {
+            "rate": 0.9643,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9643,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.3571,
+            "n": 28,
+            "n_unparsed": 0
+          }
+        },
+        "portugal": {
+          "raw_triples": {
+            "rate": 0.8667,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8667,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.2667,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "romania": {
+          "raw_triples": {
+            "rate": 0.9677,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9677,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.6452,
+            "n": 31,
+            "n_unparsed": 0
+          }
+        },
+        "russia": {
+          "raw_triples": {
+            "rate": 0.9032,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9032,
+            "n": 31,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.2581,
+            "n": 31,
+            "n_unparsed": 0
+          }
+        },
+        "scotland": {
+          "raw_triples": {
+            "rate": 0.8846,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8846,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.5769,
+            "n": 26,
+            "n_unparsed": 0
+          }
+        },
+        "singapore": {
+          "raw_triples": {
+            "rate": 0.9118,
+            "n": 34,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9118,
+            "n": 34,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.6176,
+            "n": 34,
+            "n_unparsed": 0
+          }
+        },
+        "south africa": {
+          "raw_triples": {
+            "rate": 0.9643,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9643,
+            "n": 28,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.4643,
+            "n": 28,
+            "n_unparsed": 0
+          }
+        },
+        "spain": {
+          "raw_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9655,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.2759,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "sweden": {
+          "raw_triples": {
+            "rate": 0.92,
+            "n": 25,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.88,
+            "n": 25,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 25,
+            "n_unparsed": 0
+          }
+        },
+        "switzerland": {
+          "raw_triples": {
+            "rate": 1.0,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 1.0,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.3793,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        },
+        "thailand": {
+          "raw_triples": {
+            "rate": 1.0,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 1.0,
+            "n": 30,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.3667,
+            "n": 30,
+            "n_unparsed": 0
+          }
+        },
+        "turkey": {
+          "raw_triples": {
+            "rate": 0.9167,
+            "n": 24,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9167,
+            "n": 24,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.5,
+            "n": 24,
+            "n_unparsed": 0
+          }
+        },
+        "ukraine": {
+          "raw_triples": {
+            "rate": 0.9048,
+            "n": 21,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9048,
+            "n": 21,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.4286,
+            "n": 21,
+            "n_unparsed": 0
+          }
+        },
+        "united kingdom": {
+          "raw_triples": {
+            "rate": 0.8519,
+            "n": 27,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.8519,
+            "n": 27,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 27,
+            "n_unparsed": 0
+          }
+        },
+        "united states": {
+          "raw_triples": {
+            "rate": 0.9231,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.9231,
+            "n": 26,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.0,
+            "n": 26,
+            "n_unparsed": 0
+          }
+        },
+        "vietnam": {
+          "raw_triples": {
+            "rate": 0.931,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "refined_triples": {
+            "rate": 0.931,
+            "n": 29,
+            "n_unparsed": 0
+          },
+          "pathways": {
+            "rate": 0.2414,
+            "n": 29,
+            "n_unparsed": 0
+          }
+        }
+      },
+      "n_records": 300,
+      "n_judge_prompts": 3575,
+      "n_empty_evidence_facts": {
+        "pathways": 748
+      }
+    },
+    "triple_audit": {
+      "n": 500,
+      "overall": {
+        "faithful": {
+          "rate": 0.718,
+          "n": 500,
+          "n_unparsed": 0
+        },
+        "layers_correct": {
+          "rate": 0.888,
+          "n": 500,
+          "n_unparsed": 0
+        },
+        "culture_specific": {
+          "rate": 0.796,
+          "n": 500,
+          "n_unparsed": 0
+        },
+        "stereotyping": {
+          "rate": 0.266,
+          "n": 500,
+          "n_unparsed": 0
+        }
+      },
+      "by_generated": {
+        "False": {
+          "faithful": {
+            "rate": 0.7478,
+            "n": 341,
+            "n_unparsed": 0
+          },
+          "layers_correct": {
+            "rate": 0.912,
+            "n": 341,
+            "n_unparsed": 0
+          },
+          "culture_specific": {
+            "rate": 0.8094,
+            "n": 341,
+            "n_unparsed": 0
+          },
+          "stereotyping": {
+            "rate": 0.2346,
+            "n": 341,
+            "n_unparsed": 0
+          }
+        },
+        "True": {
+          "faithful": {
+            "rate": 0.6541,
+            "n": 159,
+            "n_unparsed": 0
+          },
+          "layers_correct": {
+            "rate": 0.8365,
+            "n": 159,
+            "n_unparsed": 0
+          },
+          "culture_specific": {
+            "rate": 0.7673,
+            "n": 159,
+            "n_unparsed": 0
+          },
+          "stereotyping": {
+            "rate": 0.3333,
+            "n": 159,
+            "n_unparsed": 0
+          }
+        }
+      }
+    },
+    "pathway_audit": {
+      "n": 200,
+      "overall": {
+        "coherent": {
+          "rate": 0.225,
+          "n": 200,
+          "n_unparsed": 0
+        },
+        "culture_consistent": {
+          "rate": 0.19,
+          "n": 200,
+          "n_unparsed": 0
+        },
+        "correct": {
+          "rate": 0.17,
+          "n": 200,
+          "n_unparsed": 0
+        }
+      }
+    },
+    "open_judge": {
+      "per_system": {
+        "S0": {
+          "mean_entailment": 0.788,
+          "n": 500
+        },
+        "S1": {
+          "mean_entailment": 0.894,
+          "n": 500
+        },
+        "S3": {
+          "mean_entailment": 0.862,
+          "n": 500
+        },
+        "S4": {
+          "mean_entailment": 0.828,
+          "n": 500
+        },
+        "S4g": {
+          "mean_entailment": 0.826,
+          "n": 500
+        }
+      },
+      "comparisons": {
+        "S1 vs S0": {
+          "system_a": "S1",
+          "system_b": "S0",
+          "b_a_only": 64,
+          "c_b_only": 11,
+          "n_discordant": 75,
+          "delta_accuracy": 0.106,
+          "p_value": 0.0,
+          "method": "exact_binomial",
+          "n_paired": 500,
+          "delta_ci95": [
+            0.074,
+            0.14
+          ],
+          "p_holm": 0.0
+        },
+        "S3 vs S0": {
+          "system_a": "S3",
+          "system_b": "S0",
+          "b_a_only": 54,
+          "c_b_only": 17,
+          "n_discordant": 71,
+          "delta_accuracy": 0.074,
+          "p_value": 1.3e-05,
+          "method": "exact_binomial",
+          "n_paired": 500,
+          "delta_ci95": [
+            0.042,
+            0.106
+          ],
+          "p_holm": 6.5e-05
+        },
+        "S4 vs S0": {
+          "system_a": "S4",
+          "system_b": "S0",
+          "b_a_only": 38,
+          "c_b_only": 18,
+          "n_discordant": 56,
+          "delta_accuracy": 0.04,
+          "p_value": 0.010455,
+          "method": "exact_binomial",
+          "n_paired": 500,
+          "delta_ci95": [
+            0.01,
+            0.07
+          ],
+          "p_holm": 0.031365
+        },
+        "S4g vs S0": {
+          "system_a": "S4g",
+          "system_b": "S0",
+          "b_a_only": 39,
+          "c_b_only": 20,
+          "n_discordant": 59,
+          "delta_accuracy": 0.038,
+          "p_value": 0.018337,
+          "method": "exact_binomial",
+          "n_paired": 500,
+          "delta_ci95": [
+            0.008,
+            0.068
+          ],
+          "p_holm": 0.036674
+        },
+        "S4 vs S1": {
+          "system_a": "S4",
+          "system_b": "S1",
+          "b_a_only": 12,
+          "c_b_only": 45,
+          "n_discordant": 57,
+          "delta_accuracy": -0.066,
+          "p_value": 1.3e-05,
+          "method": "exact_binomial",
+          "n_paired": 500,
+          "delta_ci95": [
+            -0.096,
+            -0.036
+          ],
+          "p_holm": 6.5e-05
+        },
+        "S4g vs S4": {
+          "system_a": "S4g",
+          "system_b": "S4",
+          "b_a_only": 16,
+          "c_b_only": 17,
+          "n_discordant": 33,
+          "delta_accuracy": -0.002,
+          "p_value": 1.0,
+          "method": "exact_binomial",
+          "n_paired": 500,
+          "delta_ci95": [
+            -0.024,
+            0.02
+          ],
+          "p_holm": 1.0
+        }
+      },
+      "n_answers": 2500,
+      "n_unparsed_by_system": {},
+      "protocol": "CultureBank §6 knowledge entailment; judge yes=1/no=0; unparseable counted as 0; McNemar + paired bootstrap; Holm over the primary family"
+    }
+  }
+}
