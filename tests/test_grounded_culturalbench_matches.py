@@ -295,3 +295,94 @@ def test_stage2_schema_does_not_request_new_element_checks():
     assert "unsupported_prior_element_indices" in gm.STAGE2_SYSTEM
     assert "missing_material_elements" in gm.STAGE2_SYSTEM
     assert '"element_checks"' not in gm.STAGE2_SYSTEM.split("Return exactly:", 1)[1]
+
+
+def test_validate_stage2_review_ignores_question_grammar_and_norm_words():
+    prior = {
+        "accepted": True,
+        "element_checks": [
+            {
+                "element": "customary shoe removal",
+                "supported": True,
+                "quote": "remove shoes and wear slippers",
+            }
+        ],
+    }
+    review = {
+        "decision": "ACCEPT",
+        "unsupported_prior_element_indices": [],
+        "missing_material_elements": ["why", "customary", "common practice"],
+        "rationale": "no material omission",
+        "confidence": 1.0,
+    }
+    out = gm.validate_stage2_review(review, prior)
+    assert out["accepted"] is True
+    assert out["stage2_review"]["missing_material_elements"] == []
+
+
+def test_run_stage_stage2_uses_prior_element_audit(tmp_path):
+    q = MCQQuestion(
+        question_id="stage2_q",
+        group_id="stage2_q",
+        variant="easy",
+        question="Why remove shoes before entering a Japanese home?",
+        cultural_group="Japan",
+        options={"A": "Respect and cleanliness", "B": "Other"},
+        answer_key="A",
+    )
+    rec = {
+        "instance_id": "stage2_rec",
+        "cultural_group": "Japanese",
+        "topic": "Social Norms and Etiquette",
+        "context": "in homes",
+        "actor_behavior": "remove shoes as a sign of respect and cleanliness",
+        "recipient_behavior": None,
+        "source_text": "Japanese. in homes. remove shoes as a sign of respect and cleanliness.",
+    }
+    pair_id = gm.stable_id(q.question_id, rec["instance_id"], prefix="gm_")
+    prior = {
+        pair_id: {
+            "pair_id": pair_id,
+            "accepted": True,
+            "label": "MATCH",
+            "element_checks": [
+                {
+                    "element": "remove shoes",
+                    "supported": True,
+                    "quote": "remove shoes",
+                },
+                {
+                    "element": "respect and cleanliness",
+                    "supported": True,
+                    "quote": "respect and cleanliness",
+                },
+            ],
+            "rationale": "direct",
+        }
+    }
+
+    class FakeBackend:
+        def generate(self, prompts, system_prompt=None, **kwargs):
+            return [
+                '{"decision":"ACCEPT",'
+                '"unsupported_prior_element_indices":[],'
+                '"missing_material_elements":[],'
+                '"rationale":"all covered","confidence":1.0}'
+            ]
+
+        def generate_one(self, prompt, system_prompt=None, **kwargs):
+            raise AssertionError("retry should not be needed")
+
+    state = gm.run_stage(
+        stage=2,
+        pairs=[(q, rec)],
+        backend=FakeBackend(),
+        state_path=tmp_path / "stage2.jsonl",
+        batch_size=1,
+        prior_state=prior,
+    )
+    row = state[pair_id]
+    assert row["accepted"] is True
+    assert row["label"] == "MATCH"
+    assert row["element_checks"] == prior[pair_id]["element_checks"]
+    assert row["stage2_review"]["decision"] == "ACCEPT"
