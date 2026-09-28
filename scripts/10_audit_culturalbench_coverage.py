@@ -269,9 +269,10 @@ def write_markdown(path: Path, rows: list[dict], run_meta: dict) -> None:
     for row in rows:
         rationale = row["rationale"].replace("|", "\\|")
         support = ", ".join(row["supporting_instance_ids"]) or "—"
+        culture = (row.get("cultural_group") or "unknown").replace("|", "\\|")
         lines.append(
             f"| {row['question_id']} | {row['variant']} | "
-            f"{(row.get('cultural_group') or 'unknown').replace('|', '\\|')} | "
+            f"{culture} | "
             f"{row['label']} | {row['target_culture_record_count']} | "
             f"{support} | {row['confidence']:.2f} | {rationale} |"
         )
