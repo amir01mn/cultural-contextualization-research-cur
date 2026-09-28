@@ -407,6 +407,9 @@ MCQ_EVIDENCE_HEADERS = {
     "S4_no_shared_pivot": (
         "Retrieved flexible cultural evidence pathways (without cross-cultural pivots):"
     ),
+    "S4_category_filtered": (
+        "Retrieved category-filtered flexible cultural evidence pathways:"
+    ),
 }
 
 MCQ_EASY_USER = """{evidence_block}Question:
