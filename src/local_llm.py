@@ -114,7 +114,8 @@ def generate_text(prompt: str,
                   model: Optional[str] = None,
                   temperature: Optional[float] = None,
                   base_url: Optional[str] = None,
-                  json_mode: bool = False) -> str:
+                  json_mode: bool = False,
+                  num_predict: Optional[int] = None) -> str:
     """Call Ollama's /api/generate and return the raw response text.
 
     Raises LLMUnavailableError if the server cannot be reached.
@@ -130,7 +131,11 @@ def generate_text(prompt: str,
         "keep_alive": config.OLLAMA_KEEP_ALIVE,
         "options": {
             "temperature": temperature,
-            "num_predict": config.OLLAMA_NUM_PREDICT,
+            "num_predict": (
+                config.OLLAMA_NUM_PREDICT
+                if num_predict is None
+                else int(num_predict)
+            ),
         },
     }
     if system_prompt:
