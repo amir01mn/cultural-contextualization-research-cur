@@ -173,3 +173,53 @@ def test_real_case_regression_fixture_pairing_and_expectation():
     assert expected["expected_pairs"] == [
         {"question_id": "easy_214", "instance_id": "cb_cfa83c007b0d"}
     ]
+
+
+def test_run_stage_retries_unparseable_output(tmp_path):
+    q = MCQQuestion(
+        question_id="retry_q",
+        group_id="retry_q",
+        variant="easy",
+        question="Why remove shoes before entering a Japanese home?",
+        cultural_group="Japan",
+        options={"A": "Respect and cleanliness", "B": "Other"},
+        answer_key="A",
+    )
+    rec = {
+        "instance_id": "retry_rec",
+        "cultural_group": "Japanese",
+        "topic": "Social Norms and Etiquette",
+        "context": "in homes",
+        "actor_behavior": "remove shoes as a sign of respect and cleanliness",
+        "recipient_behavior": None,
+        "source_text": "Japanese. in homes. remove shoes as a sign of respect and cleanliness.",
+    }
+
+    class FakeBackend:
+        def generate(self, prompts, system_prompt=None, **kwargs):
+            return ["analysis only, no json"]
+
+        def generate_one(self, prompt, system_prompt=None, **kwargs):
+            return (
+                '{"label":"MATCH","element_checks":['
+                '{"element":"Japanese culture","supported":true,"quote":"Japanese."},'
+                '{"element":"remove shoes","supported":true,"quote":"remove shoes"},'
+                '{"element":"respect and cleanliness","supported":true,'
+                '"quote":"respect and cleanliness"}],'
+                '"rationale":"direct","confidence":1.0}'
+            )
+
+    state_path = tmp_path / "state.jsonl"
+    state = gm.run_stage(
+        stage=1,
+        pairs=[(q, rec)],
+        backend=FakeBackend(),
+        state_path=state_path,
+        batch_size=1,
+    )
+
+    row = next(iter(state.values()))
+    assert row["accepted"] is True
+    assert row["retry_used"] is True
+    assert row["parse_error"] is None
+    assert row["initial_raw_output"] == "analysis only, no json"
