@@ -194,3 +194,56 @@ def test_pathway_retrieval_no_shared_backfills_to_top_k(tmp_path):
     )
     assert len(hits) == 1
     assert hits[0][0].pathway_id == "plain"
+
+
+def test_pathway_retrieval_category_filter_applies_before_candidate_selection(tmp_path):
+    def pathway(pathway_id: str, instance_id: str, label: str) -> CulturalPathway:
+        return CulturalPathway(
+            pathway_id=pathway_id,
+            culture="Japan",
+            nodes=[
+                PathwayNodeRef(
+                    entity_id=f"{pathway_id}_l2",
+                    label=label,
+                    layer=LayerLabel.LAYER_2_SOCIAL,
+                ),
+                PathwayNodeRef(
+                    entity_id=f"{pathway_id}_l1",
+                    label="hospitality practice",
+                    layer=LayerLabel.LAYER_1_SURFACE,
+                ),
+            ],
+            edges=[
+                PathwayEdgeRef(
+                    triple_id=f"{pathway_id}_t1",
+                    source_entity_id=f"{pathway_id}_l2",
+                    target_entity_id=f"{pathway_id}_l1",
+                    source_label=label,
+                    target_label="hospitality practice",
+                    predicate="expressed as",
+                    source_layer=LayerLabel.LAYER_2_SOCIAL,
+                    target_layer=LayerLabel.LAYER_1_SURFACE,
+                    instance_id=instance_id,
+                    cultural_group="Japan",
+                    generated=False,
+                ),
+            ],
+            triple_ids=[f"{pathway_id}_t1"],
+            completeness=PathwayCompleteness.SOCIAL,
+        )
+
+    food = pathway("food", "record_food", "dining etiquette")
+    work = pathway("work", "record_work", "workplace etiquette")
+    retriever = build_pathway_index([food, work], tmp_path)
+
+    hits = retriever.retrieve(
+        "Japan etiquette hospitality",
+        top_k=2,
+        question_culture="Japan",
+        allowed_instance_ids={"record_food"},
+    )
+
+    assert [pw.pathway_id for pw, _score in hits] == ["food"]
+    assert retriever.count_eligible(
+        allowed_instance_ids={"record_food"},
+    ) == 1
