@@ -96,3 +96,51 @@ def test_validate_verdict_rejects_hallucinated_quote():
     out = gm.validate_verdict(verdict, source)
     assert out["accepted"] is False
     assert "quote not found" in out["validation_problems"][0]
+
+
+def test_stage2_prompt_reviews_prior_elements_without_grammatical_over_split():
+    q = MCQQuestion(
+        question_id="easy_japan",
+        group_id="easy_japan",
+        variant="easy",
+        question="In Japanese culture, why is it customary to remove shoes before entering a home?",
+        cultural_group="Japan",
+        options={"A": "Show respect and cleanliness", "B": "Other"},
+        answer_key="A",
+    )
+    rec = {
+        "instance_id": "jp1",
+        "cultural_group": "Japanese",
+        "topic": "Social Norms and Etiquette",
+        "context": "in homes",
+        "actor_behavior": "remove shoes before entering the home as a sign of respect and cleanliness",
+        "recipient_behavior": None,
+        "source_text": "Japanese. in homes. remove shoes before entering the home as a sign of respect and cleanliness.",
+    }
+    prior = {
+        "label": "MATCH",
+        "element_checks": [
+            {
+                "element": "customary to remove shoes before entering a home",
+                "supported": True,
+                "quote": "remove shoes before entering the home",
+            },
+            {
+                "element": "to show respect and cleanliness",
+                "supported": True,
+                "quote": "as a sign of respect and cleanliness",
+            },
+        ],
+        "rationale": "direct",
+    }
+
+    prompt = gm.pair_prompt(q, rec, stage2=True, prior_verdict=prior)
+
+    assert "PREVIOUS VERIFIER ELEMENT CHECKS" in prompt
+    assert "customary to remove shoes before entering a home" in prompt
+    assert "as a sign of respect and cleanliness" in prompt
+
+
+def test_stage2_system_allows_cultural_record_to_support_common_wording():
+    assert "may support wording such as \"common\", \"customary\", or" in gm.STAGE2_SYSTEM
+    assert "Do NOT create standalone elements for grammatical/question words" in gm.STAGE2_SYSTEM
