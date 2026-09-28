@@ -30,15 +30,36 @@ export VLLM_MODEL="${VLLM_MODEL:-Qwen/Qwen2.5-7B-Instruct}"
 
 QUESTIONS_JSONL="${QUESTIONS_JSONL:-data/controlled/food_hospitality_culturalbench_questions.jsonl}"
 PASSAGES="${PASSAGES:-data/processed/corpus_passages.jsonl}"
+RECORDS_JSONL="${RECORDS_JSONL:-}"
 SEMANTIC_FALLBACK_K="${SEMANTIC_FALLBACK_K:-10}"
 MAX_CULTURE_RECORDS="${MAX_CULTURE_RECORDS:-80}"
 MAX_PASSAGE_CHARS="${MAX_PASSAGE_CHARS:-500}"
+OUTPUT_JSONL="${OUTPUT_JSONL:-data/outputs/coverage_audit.jsonl}"
+OUTPUT_MD="${OUTPUT_MD:-data/outputs/coverage_audit.md}"
 
 echo "Running CulturalBench corpus coverage audit"
 echo "Questions: $QUESTIONS_JSONL"
 echo "Passages: $PASSAGES"
+if [[ -n "$RECORDS_JSONL" ]]; then
+  echo "Records source: $RECORDS_JSONL"
+fi
 echo "Model: $VLLM_MODEL"
 
-python scripts/10_audit_culturalbench_coverage.py   --provider vllm   --model "$VLLM_MODEL"   --questions_jsonl "$QUESTIONS_JSONL"   --passages "$PASSAGES"   --semantic_fallback_k "$SEMANTIC_FALLBACK_K"   --max_culture_records "$MAX_CULTURE_RECORDS"   --max_passage_chars "$MAX_PASSAGE_CHARS"
+EXTRA_ARGS=()
+if [[ -n "$RECORDS_JSONL" ]]; then
+  EXTRA_ARGS+=(--records_jsonl "$RECORDS_JSONL")
+fi
 
-echo "Coverage audit complete. See data/outputs/coverage_audit.md"
+python scripts/10_audit_culturalbench_coverage.py \
+  --provider vllm \
+  --model "$VLLM_MODEL" \
+  --questions_jsonl "$QUESTIONS_JSONL" \
+  --passages "$PASSAGES" \
+  --semantic_fallback_k "$SEMANTIC_FALLBACK_K" \
+  --max_culture_records "$MAX_CULTURE_RECORDS" \
+  --max_passage_chars "$MAX_PASSAGE_CHARS" \
+  --output_jsonl "$OUTPUT_JSONL" \
+  --output_md "$OUTPUT_MD" \
+  "${EXTRA_ARGS[@]}"
+
+echo "Coverage audit complete. See $OUTPUT_MD"
