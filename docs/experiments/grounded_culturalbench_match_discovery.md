@@ -45,18 +45,32 @@ record's normalized `source_text`.
 
 ### Stage 2: adversarial adjudication
 
-Only Stage-1 matches are reconsidered. The second prompt explicitly attempts to
-reject the match and emphasizes common false-positive modes:
+Only Stage-1 matches are reconsidered. Stage 2 audits the **existing Stage-1
+element checks** rather than generating a second decomposition.
 
-- missing causal/reason qualifiers;
-- missing common/customary/usually qualifiers;
+It returns:
+
+- zero-based indices for any Stage-1 elements that are not actually supported;
+- any genuinely missing material factual requirements from the gold target;
+- an ACCEPT or REJECT decision.
+
+The reviewer is explicitly told not to create standalone elements for question
+grammar such as `why`, `what`, or `how`, and not to require literal
+`common`/`customary` wording when a normalized CultureBank record directly
+asserts the cultural behavior in the relevant context. The program also ignores
+reviewer complaints that consist only of those non-material wording terms.
+
+Material omissions remain strict, including:
+
+- missing causal/reason qualifiers such as `beneficial for health`;
 - incomplete multi-clause answers;
 - named practices or events not actually present;
 - external definitions;
 - treating absence as evidence for a FALSE benchmark item.
 
-A pair becomes a final grounded match only if Stage 2 again returns MATCH and
-all exact-quote validations pass.
+A pair becomes a final grounded match only when Stage 2 returns ACCEPT, flags no
+supported Stage-1 element as unsupported, and identifies no missing material
+fact. Exact source-quote validation remains enforced in Stage 1.
 
 ## Outputs
 
