@@ -85,22 +85,35 @@ STAGE2_SYSTEM = """You are the final adversarial reviewer for a source-grounded
 benchmark match.
 
 A previous verifier proposed that ONE CultureBank record supports a CulturalBench
-gold target. Try to reject the proposal.
+gold target. You will receive that verifier's element checks. Review the proposed
+match critically, but do not mechanically re-decompose the question into
+grammatical fragments.
 
-Accept MATCH only if the record itself directly supports EVERY essential factual
-element of the target. Be especially strict about:
-- causal or reason claims such as "because", "to show", "beneficial for";
-- frequency/norm claims such as "common", "customary", "usually";
-- multi-clause answers where every clause must be supported;
-- named practices/events/rituals;
-- definitions that are not explicitly present in the record;
-- hard FALSE items, which require direct contradiction rather than absence.
-
-Do not use outside cultural knowledge or definitions. Similarity, plausibility,
-or related topic is not support.
-
-For every element you mark supported, provide an exact contiguous quote copied
-from SOURCE_TEXT. If any essential element is unsupported, output NO_MATCH.
+Use these rules:
+1. First confirm that the previous element list covers every MATERIAL factual
+   requirement of the gold target.
+2. Review each previous element against SOURCE_TEXT.
+3. You may add a missing element only when it represents a genuinely missing
+   MATERIAL fact or qualifier that changes the claim, such as:
+   - "beneficial for health";
+   - a causal/reason relation such as "to show respect";
+   - one clause of a multi-clause answer such as "elders pay for the meal";
+   - a named practice/event/ritual;
+   - a definition needed to connect the source phrase to the gold answer.
+4. Do NOT create standalone elements for grammatical/question words such as
+   "why", "what", or "how".
+5. Do NOT duplicate the same proposition in multiple phrasings.
+6. A normalized CultureBank record that asserts a cultural-group behavior in a
+   stated context may support wording such as "common", "customary", or
+   "typically" when the behavior itself is directly stated. Do not require those
+   exact adjectives to appear verbatim.
+7. For a hard FALSE item, MATCH still requires direct contradiction/refutation;
+   absence is never enough.
+8. Do not use outside cultural knowledge or definitions. Similarity,
+   plausibility, or related topic is not support.
+9. For every element marked supported, provide an exact contiguous quote copied
+   from SOURCE_TEXT.
+10. If any material factual element is unsupported, output NO_MATCH.
 
 Return JSON only:
 {
@@ -150,9 +163,31 @@ def record_source_text(rec: dict) -> str:
     return normalize_text(rec.get("source_text"))
 
 
-def pair_prompt(q: MCQQuestion, rec: dict, *, stage2: bool = False) -> str:
+def pair_prompt(
+    q: MCQQuestion,
+    rec: dict,
+    *,
+    stage2: bool = False,
+    prior_verdict: Optional[dict] = None,
+) -> str:
     source = record_source_text(rec)
     header = "FINAL ADJUDICATION" if stage2 else "FIRST-PASS VERIFICATION"
+    prior_block = ""
+    if stage2 and prior_verdict is not None:
+        prior_block = (
+            "\nPREVIOUS VERIFIER ELEMENT CHECKS:\n"
+            + json.dumps(
+                {
+                    "label": prior_verdict.get("label"),
+                    "element_checks": prior_verdict.get("element_checks") or [],
+                    "rationale": prior_verdict.get("rationale") or "",
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n"
+        )
+
     return f"""{header}
 
 TARGET CULTURE:
@@ -160,7 +195,7 @@ TARGET CULTURE:
 
 GOLD TARGET:
 {gold_target(q)}
-
+{prior_block}
 CULTUREBANK RECORD:
 instance_id: {rec.get('instance_id', '')}
 culture: {rec.get('cultural_group') or 'unknown'}
@@ -172,7 +207,7 @@ recipient_behavior: {rec.get('recipient_behavior') or ''}
 SOURCE_TEXT:
 {source}
 
-Does SOURCE_TEXT directly support every essential element of the gold target?
+Does SOURCE_TEXT directly support every material factual element of the gold target?
 """
 
 
@@ -284,6 +319,7 @@ def run_stage(
     backend,
     state_path: Path,
     batch_size: int,
+    prior_state: Optional[dict[str, dict]] = None,
 ) -> dict[str, dict]:
     state = load_state(state_path)
     system_prompt = STAGE1_SYSTEM if stage == 1 else STAGE2_SYSTEM
@@ -302,8 +338,17 @@ def run_stage(
     for start in range(0, len(pending), batch_size):
         batch = pending[start:start + batch_size]
         prompts = [
-            pair_prompt(q, rec, stage2=(stage == 2))
-            for _pair_id, q, rec in batch
+            pair_prompt(
+                q,
+                rec,
+                stage2=(stage == 2),
+                prior_verdict=(
+                    (prior_state or {}).get(pair_id)
+                    if stage == 2
+                    else None
+                ),
+            )
+            for pair_id, q, rec in batch
         ]
         outputs = backend.generate(
             prompts,
@@ -538,6 +583,7 @@ def main(argv=None) -> None:
         backend=backend,
         state_path=Path(args.stage2_state),
         batch_size=args.batch_size,
+        prior_state=stage1,
     )
 
     final_rows = [
