@@ -43,22 +43,29 @@ The model must:
 The program independently checks that every claimed support quote occurs in the
 record's normalized `source_text`.
 
-### Stage 2: adversarial adjudication
+### Stage 2: adversarial completeness audit
 
 Only Stage-1 matches are reconsidered. Stage 2 audits the **existing Stage-1
-element checks** rather than generating a second decomposition.
+element checks** rather than generating a second decomposition or re-deciding
+the entire match.
 
 It returns:
 
-- zero-based indices for any Stage-1 elements that are not actually supported;
-- any genuinely missing material factual requirements from the gold target;
-- an ACCEPT or REJECT decision.
+- zero-based indices for any Stage-1 elements whose semantic support deserves
+  human review;
+- any genuinely missing material factual requirements from the gold target.
+
+The unsupported-element indices are diagnostic only. They do not automatically
+reject a pair because Stage 1 has already required exact source quotes for every
+supported element, and local testing showed that a second LLM pass could
+over-reject valid evidence by demanding literal words such as `why` or
+`customary`.
 
 The reviewer is explicitly told not to create standalone elements for question
 grammar such as `why`, `what`, or `how`, and not to require literal
-`common`/`customary` wording when a normalized CultureBank record directly
-asserts the cultural behavior in the relevant context. The program also ignores
-reviewer complaints that consist only of those non-material wording terms.
+`common`/`customary` wording when the cultural behavior is already represented
+by a Stage-1 element. The program also removes non-material complaints and
+duplicate omissions that are already covered by a prior element.
 
 Material omissions remain strict, including:
 
@@ -68,9 +75,10 @@ Material omissions remain strict, including:
 - external definitions;
 - treating absence as evidence for a FALSE benchmark item.
 
-A pair becomes a final grounded match only when Stage 2 returns ACCEPT, flags no
-supported Stage-1 element as unsupported, and identifies no missing material
-fact. Exact source-quote validation remains enforced in Stage 1.
+A pair becomes a final grounded match only when Stage 1 is accepted and Stage 2
+finds no new material omission after these deterministic filters. Exact
+source-quote validation remains enforced in Stage 1, and all final candidates
+still require manual review.
 
 ## Outputs
 
