@@ -144,3 +144,32 @@ def test_stage2_prompt_reviews_prior_elements_without_grammatical_over_split():
 def test_stage2_system_allows_cultural_record_to_support_common_wording():
     assert "may support wording such as \"common\", \"customary\", or" in gm.STAGE2_SYSTEM
     assert "Do NOT create standalone elements for grammatical/question words" in gm.STAGE2_SYSTEM
+
+
+def test_real_case_regression_fixture_pairing_and_expectation():
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent / "fixtures"
+    questions = gm.load_questions(root / "grounded_real_cases_questions.jsonl")
+    records = list(gm.read_jsonl(root / "grounded_real_cases_records.jsonl"))
+    expected = json.loads(
+        (root / "grounded_real_cases_expected.json").read_text(encoding="utf-8")
+    )
+
+    counts = {
+        q.question_id: len(gm.culture_records_for_question(q, records))
+        for q in questions
+    }
+
+    assert counts == {
+        "easy_31": 2,
+        "easy_214": 1,
+        "easy_220": 1,
+        "easy_234": 1,
+        "hard_5_0": 4,
+    }
+    assert expected["expected_supported_units"] == ["easy_214"]
+    assert expected["expected_pairs"] == [
+        {"question_id": "easy_214", "instance_id": "cb_cfa83c007b0d"}
+    ]
