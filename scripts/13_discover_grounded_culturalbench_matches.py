@@ -81,41 +81,42 @@ Return exactly:
 }
 """
 
-STAGE2_SYSTEM = """You are the final adversarial reviewer for a source-grounded
-benchmark match.
+STAGE2_SYSTEM = """You are the adversarial completeness auditor for a
+source-grounded benchmark match.
 
-A previous verifier proposed that ONE CultureBank record supports a CulturalBench
-gold target. You will receive the verifier's existing element checks. Your job is
-to audit that proposal, not to create a new decomposition.
+Stage 1 already decomposed the CulturalBench gold target, checked each element
+against SOURCE_TEXT, and supplied exact source quotes. Your job is NOT to redo
+that support judgment. Instead, audit whether Stage 1 omitted any genuinely
+MATERIAL factual requirement from the gold target.
 
 Rules:
-1. Review the PREVIOUS VERIFIER ELEMENT CHECKS exactly as given.
-2. If one of those prior elements is not actually supported by SOURCE_TEXT,
-   list its ZERO-BASED index in unsupported_prior_element_indices.
-3. If the prior verifier omitted a genuinely MATERIAL factual requirement from
-   the gold target, list that missing requirement in missing_material_elements.
-4. Material omissions include facts/qualifiers that change the claim, such as:
+1. Read the PREVIOUS VERIFIER ELEMENT CHECKS exactly as given.
+2. Identify any genuinely missing MATERIAL factual requirement from the gold
+   target and list it in missing_material_elements.
+3. Material omissions include facts/qualifiers that change the claim, such as:
    - "beneficial for health";
    - a causal/reason relation such as "to show respect";
    - one clause of a multi-clause answer such as "elders pay for the meal";
    - a named practice/event/ritual;
    - a definition required to connect the source phrase to the gold answer.
+4. Do NOT list a requirement if it is already represented by a Stage-1 element,
+   even when the wording differs.
 5. Do NOT treat grammatical/question words such as "why", "what", or "how" as
    missing material elements.
-6. Do NOT require exact adjectives such as "common", "customary", or "typically"
-   when a normalized CultureBank record directly asserts that cultural-group
-   behavior in the relevant context.
-7. Do NOT add duplicate rephrasings of prior elements.
-8. For hard FALSE items, direct contradiction/refutation is still required;
-   absence is never enough.
+6. Do NOT require literal "common", "customary", "typically", or "usually"
+   wording when Stage 1 already represents the cultural behavior in context.
+7. Do NOT create duplicate rephrasings of prior elements.
+8. For hard FALSE items, Stage 1 already required direct contradiction/refutation;
+   do not weaken that rule.
 9. Do not use outside cultural knowledge or definitions.
-10. ACCEPT only if every prior element is supported and there are no missing
-    material elements. Otherwise REJECT.
+10. You may optionally list a Stage-1 element index in
+    unsupported_prior_element_indices if you think its semantic support deserves
+    human review. These indices are DIAGNOSTIC ONLY and are not the completeness
+    decision.
 11. Return JSON only.
 
 Return exactly:
 {
-  "decision": "ACCEPT | REJECT",
   "unsupported_prior_element_indices": [],
   "missing_material_elements": [],
   "rationale": "brief explanation",
@@ -264,10 +265,6 @@ def parse_stage2_review(text: str) -> dict:
         raise ValueError("No JSON object found")
     obj = json.loads(cleaned[start:end + 1])
 
-    decision = str(obj.get("decision", "")).strip().upper()
-    if decision not in {"ACCEPT", "REJECT"}:
-        raise ValueError(f"Invalid stage-2 decision: {decision!r}")
-
     raw_indices = obj.get("unsupported_prior_element_indices") or []
     if not isinstance(raw_indices, list):
         raw_indices = []
@@ -291,7 +288,6 @@ def parse_stage2_review(text: str) -> dict:
     confidence = max(0.0, min(1.0, confidence))
 
     return {
-        "decision": decision,
         "unsupported_prior_element_indices": indices,
         "missing_material_elements": missing,
         "rationale": normalize_text(obj.get("rationale")),
@@ -315,6 +311,32 @@ def _is_non_material_stage2_missing(text: str) -> bool:
     return bool(tokens) and tokens.issubset(non_material_tokens)
 
 
+def _informative_tokens(text: str) -> set[str]:
+    normalized = normalize_text(text).casefold()
+    stop = {
+        "a", "an", "the", "to", "of", "for", "in", "on", "at", "by",
+        "and", "or", "is", "are", "was", "were", "be", "being", "been",
+        "it", "its", "their", "his", "her", "one", "ones",
+    }
+    out = set()
+    for token in normalized.split():
+        cleaned = token.strip(".,:;!?()[]{}'\"")
+        if cleaned and cleaned not in stop:
+            out.add(cleaned)
+    return out
+
+
+def _missing_already_covered_by_prior(text: str, prior_checks: list[dict]) -> bool:
+    missing_tokens = _informative_tokens(text)
+    if not missing_tokens:
+        return True
+    for check in prior_checks:
+        prior_tokens = _informative_tokens(check.get("element", ""))
+        if missing_tokens.issubset(prior_tokens):
+            return True
+    return False
+
+
 def validate_stage2_review(review: dict, prior_verdict: Optional[dict]) -> dict:
     prior = prior_verdict or {}
     prior_checks = prior.get("element_checks") or []
@@ -334,22 +356,12 @@ def validate_stage2_review(review: dict, prior_verdict: Optional[dict]) -> dict:
         item
         for item in (review.get("missing_material_elements") or [])
         if not _is_non_material_stage2_missing(item)
+        and not _missing_already_covered_by_prior(item, prior_checks)
     ]
-    if valid_indices:
-        problems.append(
-            "unsupported prior elements: " + ", ".join(str(i) for i in valid_indices)
-        )
     if missing:
         problems.append("missing material elements: " + "; ".join(missing))
-    if review.get("decision") != "ACCEPT":
-        problems.append("stage-2 reviewer decision was REJECT")
 
-    accepted = (
-        review.get("decision") == "ACCEPT"
-        and not valid_indices
-        and not missing
-        and not problems
-    )
+    accepted = bool(prior.get("accepted")) and not missing and not problems
 
     return {
         "label": "MATCH" if accepted else "NO_MATCH",
@@ -359,8 +371,7 @@ def validate_stage2_review(review: dict, prior_verdict: Optional[dict]) -> dict:
         "rationale": review.get("rationale", ""),
         "confidence": float(review.get("confidence", 0.0)),
         "stage2_review": {
-            "decision": review.get("decision"),
-            "unsupported_prior_element_indices": valid_indices,
+            "diagnostic_unsupported_prior_element_indices": valid_indices,
             "missing_material_elements": missing,
         },
     }
@@ -511,9 +522,10 @@ def run_stage(
                     )
                     verdict = (
                         {
-                            "decision": "REJECT",
                             "unsupported_prior_element_indices": [],
-                            "missing_material_elements": [],
+                            "missing_material_elements": [
+                                "stage-2 review remained unparseable"
+                            ],
                             "rationale": (
                                 "Stage-2 review remained unparseable after one format retry."
                             ),
