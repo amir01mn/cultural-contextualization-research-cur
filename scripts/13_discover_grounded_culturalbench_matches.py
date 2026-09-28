@@ -6,7 +6,7 @@ checks every target-culture CultureBank record. A record is accepted only when:
 1. a first-pass verifier says the record directly supports every essential
    element of the gold target;
 2. every cited support quote is copied from the CultureBank source_text;
-3. an independent stricter adjudication pass reaches the same conclusion.
+3. a second-pass adversarial completeness audit finds no omitted material fact.
 
 The script deliberately has no PARTIAL category. Its goal is to construct a
 high-precision grounded subset for retrieval evaluation, not to measure topical
