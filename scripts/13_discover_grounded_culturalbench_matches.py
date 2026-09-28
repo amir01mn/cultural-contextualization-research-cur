@@ -131,7 +131,7 @@ Your previous response did not contain a complete parseable JSON object.
 Return the final verdict again as ONE compact JSON object.
 The FIRST character must be { and the LAST character must be }.
 Do not include analysis, markdown, or prose outside the JSON.
-Keep the rationale under 25 words and keep element names concise.
+Keep the rationale under 25 words.
 """
 
 def load_questions(path: Path) -> list[MCQQuestion]:
@@ -299,6 +299,22 @@ def parse_stage2_review(text: str) -> dict:
     }
 
 
+def _is_non_material_stage2_missing(text: str) -> bool:
+    """Ignore reviewer complaints that are only question grammar/norm wording."""
+    normalized = normalize_text(text).casefold()
+    tokens = {
+        token.strip(".,:;!?()[]{}'\"")
+        for token in normalized.split()
+        if token.strip(".,:;!?()[]{}'\"")
+    }
+    non_material_tokens = {
+        "why", "what", "how", "it", "is", "a", "an", "the",
+        "common", "customary", "typically", "usually", "usual",
+        "practice", "behavior", "behaviour",
+    }
+    return bool(tokens) and tokens.issubset(non_material_tokens)
+
+
 def validate_stage2_review(review: dict, prior_verdict: Optional[dict]) -> dict:
     prior = prior_verdict or {}
     prior_checks = prior.get("element_checks") or []
@@ -314,7 +330,11 @@ def validate_stage2_review(review: dict, prior_verdict: Optional[dict]) -> dict:
         else:
             problems.append(f"invalid prior element index {idx}")
 
-    missing = review.get("missing_material_elements") or []
+    missing = [
+        item
+        for item in (review.get("missing_material_elements") or [])
+        if not _is_non_material_stage2_missing(item)
+    ]
     if valid_indices:
         problems.append(
             "unsupported prior elements: " + ", ".join(str(i) for i in valid_indices)
