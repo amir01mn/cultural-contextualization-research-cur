@@ -142,8 +142,14 @@ def test_stage2_prompt_reviews_prior_elements_without_grammatical_over_split():
 
 
 def test_stage2_system_allows_cultural_record_to_support_common_wording():
-    assert "may support wording such as \"common\", \"customary\", or" in gm.STAGE2_SYSTEM
-    assert "Do NOT create standalone elements for grammatical/question words" in gm.STAGE2_SYSTEM
+    assert (
+        'Do NOT require exact adjectives such as "common", "customary", or "typically"'
+        in gm.STAGE2_SYSTEM
+    )
+    assert (
+        "Do NOT treat grammatical/question words such as \"why\", \"what\", or \"how\""
+        in gm.STAGE2_SYSTEM
+    )
 
 
 def test_real_case_regression_fixture_pairing_and_expectation():
