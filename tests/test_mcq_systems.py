@@ -7,6 +7,7 @@ from src.mcq_systems import (
     SYSTEM_S2,
     SYSTEM_S3,
     SYSTEM_S4,
+    SYSTEM_S4_CATEGORY,
     SYSTEM_S4_TRIPLE,
     RetrievalContext,
     build_prompt,
@@ -280,3 +281,56 @@ def test_s2_and_s3_use_same_raw_triple_retriever(mcq_easy_question):
 
     assert raw.calls == 2
     assert refined.calls == 0
+
+
+def test_s4_category_filter_uses_topic_source_records(mcq_easy_question):
+    class RecordingPathwayRetriever:
+        def __init__(self):
+            self.pathways = []
+            self.allowed_instance_ids = None
+
+        def retrieve(
+            self,
+            query,
+            top_k=5,
+            *,
+            question_culture=None,
+            exclude_shared=False,
+            allowed_instance_ids=None,
+        ):
+            self.allowed_instance_ids = allowed_instance_ids
+            return []
+
+        def count_eligible(self, *, exclude_shared=False, allowed_instance_ids=None):
+            return 0
+
+    pathway_retriever = RecordingPathwayRetriever()
+    ctx = RetrievalContext(
+        passages=[
+            {
+                "instance_id": "food_record",
+                "passage_id": "food_record",
+                "topic": "Food and Dining",
+                "text": "A dining record.",
+            },
+            {
+                "instance_id": "work_record",
+                "passage_id": "work_record",
+                "topic": "Workplace",
+                "text": "A workplace record.",
+            },
+        ],
+        pathway_retriever=pathway_retriever,
+        category_topics=["Food and Dining"],
+    )
+
+    _sp, _up, _ids, meta = build_prompt(
+        SYSTEM_S4_CATEGORY,
+        mcq_easy_question,
+        ctx,
+        top_k=4,
+    )
+
+    assert pathway_retriever.allowed_instance_ids == {"food_record"}
+    assert meta["selected_categories"] == ["Food and Dining"]
+    assert meta["category_candidate_pathways"] == 0
