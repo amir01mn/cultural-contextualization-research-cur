@@ -47,3 +47,18 @@ def test_vllm_status_reports_when_not_installed():
     status = backend.status()
     # vLLM is not installed locally; status should be a dict, not raise.
     assert "available" in status and "message" in status
+
+
+def test_ollama_backend_passes_max_tokens_to_local_adapter(monkeypatch):
+    seen = {}
+
+    def fake_generate_text(prompt, system_prompt=None, **kwargs):
+        seen.update(kwargs)
+        return "ok"
+
+    monkeypatch.setattr(llm_backend.local_llm, "generate_text", fake_generate_text)
+    backend = OllamaBackend(max_workers=1)
+    out = backend.generate(["a"], max_tokens=777)
+
+    assert out == ["ok"]
+    assert seen["num_predict"] == 777
