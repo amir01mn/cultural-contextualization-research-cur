@@ -312,8 +312,9 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
         "query": query,
         "top_k": top_k,
         "question_culture": q.cultural_group,
-        "exclude_shared": exclude_shared,
     }
+    if exclude_shared:
+        retrieve_kwargs["exclude_shared"] = True
     if allowed_instance_ids is not None:
         retrieve_kwargs["allowed_instance_ids"] = allowed_instance_ids
 
