@@ -22,6 +22,22 @@ Recommended destination:
 
 `$SCRATCH/cultural_kg_inputs/culturebank_full_normalized.jsonl`
 
+## Frozen full-CultureBank export
+
+Exported on Narval from the cached `SALT-NLP/CultureBank` dataset:
+
+- total records: 22,990
+- TikTok: 11,754
+- Reddit: 11,236
+- unique raw cultural-group labels: 2,410
+- unique topics: 36
+- normalized JSONL size: approximately 60 MB
+- SHA-256: `60ed452bdba3044d9f7159b6114ab34ee1e606cc449a016799c0c6ed7d31c544`
+- source file: `$SCRATCH/cultural_kg_inputs/culturebank_full_normalized.jsonl`
+
+This checksum identifies the exact normalized source used for the exhaustive
+coverage diagnostic.
+
 ## Step 2: exhaustive coverage audit
 
 The ordinary coverage audit can inspect all records for small corpora, but a
