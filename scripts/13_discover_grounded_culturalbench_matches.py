@@ -131,6 +131,16 @@ Return JSON only:
 """
 
 
+FORMAT_RETRY_SUFFIX = """
+
+OUTPUT FORMAT RETRY:
+Your previous response did not contain a complete parseable JSON object.
+Return the final verdict again as ONE compact JSON object.
+The FIRST character must be { and the LAST character must be }.
+Do not include analysis, markdown, or prose outside the JSON.
+Keep the rationale under 25 words and keep element names concise.
+"""
+
 def load_questions(path: Path) -> list[MCQQuestion]:
     return [MCQQuestion(**row) for row in read_jsonl(path)]
 
@@ -358,18 +368,36 @@ def run_stage(
         )
 
         rows = []
-        for (pair_id, q, rec), output in zip(batch, outputs):
+        for (pair_id, q, rec), prompt, output in zip(batch, prompts, outputs):
             parse_error: Optional[str] = None
+            retry_used = False
+            initial_output = output
+
             try:
                 verdict = parse_verdict(output)
-            except Exception as exc:  # noqa: BLE001
-                parse_error = str(exc)
-                verdict = {
-                    "label": "NO_MATCH",
-                    "element_checks": [],
-                    "rationale": "Unparseable verifier output.",
-                    "confidence": 0.0,
-                }
+            except Exception as first_exc:  # noqa: BLE001
+                retry_used = True
+                retry_prompt = prompt + FORMAT_RETRY_SUFFIX
+                retry_output = backend.generate_one(
+                    retry_prompt,
+                    system_prompt=system_prompt,
+                    temperature=0.0,
+                    max_tokens=1024,
+                )
+                output = retry_output
+                try:
+                    verdict = parse_verdict(output)
+                except Exception as second_exc:  # noqa: BLE001
+                    parse_error = (
+                        f"initial parse failed: {first_exc}; "
+                        f"retry parse failed: {second_exc}"
+                    )
+                    verdict = {
+                        "label": "NO_MATCH",
+                        "element_checks": [],
+                        "rationale": "Verifier output remained unparseable after one format retry.",
+                        "confidence": 0.0,
+                    }
 
             validated = validate_verdict(verdict, record_source_text(rec))
             row = {
@@ -391,6 +419,12 @@ def run_stage(
                 "rationale": validated["rationale"],
                 "confidence": validated["confidence"],
                 "parse_error": parse_error,
+                "retry_used": retry_used,
+                "initial_raw_output": (
+                    truncate(initial_output, 4000)
+                    if retry_used
+                    else None
+                ),
                 "raw_output": truncate(output, 4000),
             }
             rows.append(row)
