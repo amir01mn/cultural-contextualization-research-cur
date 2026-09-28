@@ -223,3 +223,75 @@ def test_run_stage_retries_unparseable_output(tmp_path):
     assert row["retry_used"] is True
     assert row["parse_error"] is None
     assert row["initial_raw_output"] == "analysis only, no json"
+
+
+def test_parse_stage2_review_accepts_compact_audit():
+    review = gm.parse_stage2_review(
+        '{"decision":"ACCEPT","unsupported_prior_element_indices":[],'
+        '"missing_material_elements":[],"rationale":"all good","confidence":1.0}'
+    )
+    assert review["decision"] == "ACCEPT"
+    assert review["unsupported_prior_element_indices"] == []
+    assert review["missing_material_elements"] == []
+
+
+def test_validate_stage2_review_accepts_existing_stage1_elements():
+    prior = {
+        "accepted": True,
+        "element_checks": [
+            {
+                "element": "customary shoe removal",
+                "supported": True,
+                "quote": "remove shoes and wear slippers",
+            },
+            {
+                "element": "respect and cleanliness",
+                "supported": True,
+                "quote": "as a sign of respect and cleanliness",
+            },
+        ],
+    }
+    review = {
+        "decision": "ACCEPT",
+        "unsupported_prior_element_indices": [],
+        "missing_material_elements": [],
+        "rationale": "all material facts covered",
+        "confidence": 1.0,
+    }
+    out = gm.validate_stage2_review(review, prior)
+
+    assert out["accepted"] is True
+    assert out["label"] == "MATCH"
+    assert out["element_checks"] == prior["element_checks"]
+    assert out["validation_problems"] == []
+
+
+def test_validate_stage2_review_rejects_missing_material_qualifier():
+    prior = {
+        "accepted": True,
+        "element_checks": [
+            {
+                "element": "Spanish people take afternoon naps",
+                "supported": True,
+                "quote": "take regular naps",
+            }
+        ],
+    }
+    review = {
+        "decision": "REJECT",
+        "unsupported_prior_element_indices": [],
+        "missing_material_elements": ["beneficial for health"],
+        "rationale": "health qualifier missing",
+        "confidence": 0.95,
+    }
+    out = gm.validate_stage2_review(review, prior)
+
+    assert out["accepted"] is False
+    assert out["label"] == "NO_MATCH"
+    assert "missing material elements: beneficial for health" in out["validation_problems"]
+
+
+def test_stage2_schema_does_not_request_new_element_checks():
+    assert "unsupported_prior_element_indices" in gm.STAGE2_SYSTEM
+    assert "missing_material_elements" in gm.STAGE2_SYSTEM
+    assert '"element_checks"' not in gm.STAGE2_SYSTEM.split("Return exactly:", 1)[1]
