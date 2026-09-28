@@ -76,13 +76,13 @@ class OllamaBackend:
                      *,
                      temperature: Optional[float] = None,
                      max_tokens: Optional[int] = None) -> str:
-        # max_tokens is honored globally via config.OLLAMA_NUM_PREDICT.
         return local_llm.generate_text(
             prompt,
             system_prompt=system_prompt,
             model=self.model,
             base_url=self.base_url,
             temperature=temperature,
+            num_predict=max_tokens,
         )
 
     def generate(self,
