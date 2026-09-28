@@ -28,10 +28,12 @@ from src.llm_backend import get_backend  # noqa: E402
 from src.mcq_evaluator import save_outputs, summarize  # noqa: E402
 from src.mcq_systems import (  # noqa: E402
     ALL_SYSTEMS,
+    DEFAULT_SYSTEMS,
     S4_SYSTEMS,
     SYSTEM_S2,
     SYSTEM_S3,
     SYSTEM_S4,
+    SYSTEM_S4_CATEGORY,
     SYSTEM_S4_TRIPLE,
     RetrievalContext,
     run_system,
@@ -153,8 +155,17 @@ def main(argv=None) -> None:
     p.add_argument("--top_k", type=int, default=config.RETRIEVAL_TOP_K)
     p.add_argument(
         "--systems",
-        default=",".join(ALL_SYSTEMS),
+        default=",".join(DEFAULT_SYSTEMS),
         help="Comma-separated subset of: " + ",".join(ALL_SYSTEMS),
+    )
+    p.add_argument(
+        "--category_topics",
+        default="",
+        help=(
+            "Semicolon-separated CultureBank topic labels used by "
+            "S4_category_filtered. This is a controlled category-filter "
+            "diagnostic, not an LLM category router."
+        ),
     )
     p.add_argument("--seed", type=int, default=config.RANDOM_SEED)
     p.add_argument("--n_boot", type=int, default=10000)
@@ -170,6 +181,18 @@ def main(argv=None) -> None:
     invalid = [s for s in systems if s not in ALL_SYSTEMS]
     if invalid:
         LOGGER.error("Unknown systems: %s. Valid: %s", invalid, ALL_SYSTEMS)
+        sys.exit(2)
+
+    category_topics = [
+        topic.strip()
+        for topic in args.category_topics.split(";")
+        if topic.strip()
+    ]
+    if SYSTEM_S4_CATEGORY in systems and not category_topics:
+        LOGGER.error(
+            "S4_category_filtered requires --category_topics with at least one "
+            "CultureBank topic label."
+        )
         sys.exit(2)
 
     variants = tuple(v.strip() for v in args.variants.split(",") if v.strip())
@@ -191,7 +214,10 @@ def main(argv=None) -> None:
         LOGGER.error("No CulturalBench questions loaded. Check --variants, --limit, and --questions_jsonl.")
         sys.exit(2)
 
-    need_passages = "S1_raw_text_rag" in systems
+    need_passages = (
+        "S1_raw_text_rag" in systems
+        or SYSTEM_S4_CATEGORY in systems
+    )
     # S2 and S3 intentionally share the raw triple corpus. Refined triples
     # are loaded only for the S4 triple-retrieval ablation; pathway systems
     # use their already-built pathway index.
@@ -214,6 +240,7 @@ def main(argv=None) -> None:
         triples=triples,
         refined_triples=refined,
         pathway_retriever=pathway_retriever,
+        category_topics=category_topics,
     )
 
     backend = get_backend(args.provider, model=args.model)
@@ -245,6 +272,7 @@ def main(argv=None) -> None:
         "limit": args.limit,
         "questions_jsonl": args.questions_jsonl,
         "systems": systems,
+        "category_filter_topics": category_topics,
         "corpus_passages": len(passages) if passages else 0,
         "corpus_triples": len(triples) if triples else 0,
         "corpus_triples_refined": len(refined) if refined else 0,
