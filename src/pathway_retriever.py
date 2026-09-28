@@ -73,19 +73,52 @@ class PathwayRetriever:
         LOGGER.info("Loaded pathway index: %d pathways from %s",
                     len(self.pathways), self.index_dir)
 
+    @staticmethod
+    def _pathway_instance_ids(pathway: CulturalPathway) -> set[str]:
+        return {edge.instance_id for edge in pathway.edges if edge.instance_id}
+
+    def _eligible_indices(
+        self,
+        *,
+        exclude_shared: bool = False,
+        allowed_instance_ids: Optional[set[str]] = None,
+    ) -> list[int]:
+        eligible = []
+        for i, pathway in enumerate(self.pathways):
+            if exclude_shared and pathway.has_shared_pivot:
+                continue
+            if allowed_instance_ids is not None:
+                if not self._pathway_instance_ids(pathway).intersection(allowed_instance_ids):
+                    continue
+            eligible.append(i)
+        return eligible
+
+    def count_eligible(
+        self,
+        *,
+        exclude_shared: bool = False,
+        allowed_instance_ids: Optional[set[str]] = None,
+    ) -> int:
+        """Count pathways eligible before semantic candidate selection."""
+        return len(self._eligible_indices(
+            exclude_shared=exclude_shared,
+            allowed_instance_ids=allowed_instance_ids,
+        ))
+
     def retrieve(self,
                  query: str,
                  top_k: int = 5,
                  *,
                  question_culture: Optional[str] = None,
-                 exclude_shared: bool = False) -> list[tuple[CulturalPathway, float]]:
+                 exclude_shared: bool = False,
+                 allowed_instance_ids: Optional[set[str]] = None) -> list[tuple[CulturalPathway, float]]:
         if not self.pathways or self.embeddings is None:
             return []
 
-        eligible_indices = [
-            i for i, pathway in enumerate(self.pathways)
-            if not (exclude_shared and pathway.has_shared_pivot)
-        ]
+        eligible_indices = self._eligible_indices(
+            exclude_shared=exclude_shared,
+            allowed_instance_ids=allowed_instance_ids,
+        )
         if not eligible_indices:
             return []
 
