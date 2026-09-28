@@ -85,46 +85,39 @@ STAGE2_SYSTEM = """You are the final adversarial reviewer for a source-grounded
 benchmark match.
 
 A previous verifier proposed that ONE CultureBank record supports a CulturalBench
-gold target. You will receive that verifier's element checks. Review the proposed
-match critically, but do not mechanically re-decompose the question into
-grammatical fragments.
+gold target. You will receive the verifier's existing element checks. Your job is
+to audit that proposal, not to create a new decomposition.
 
-Use these rules:
-1. First confirm that the previous element list covers every MATERIAL factual
-   requirement of the gold target.
-2. Review each previous element against SOURCE_TEXT.
-3. You may add a missing element only when it represents a genuinely missing
-   MATERIAL fact or qualifier that changes the claim, such as:
+Rules:
+1. Review the PREVIOUS VERIFIER ELEMENT CHECKS exactly as given.
+2. If one of those prior elements is not actually supported by SOURCE_TEXT,
+   list its ZERO-BASED index in unsupported_prior_element_indices.
+3. If the prior verifier omitted a genuinely MATERIAL factual requirement from
+   the gold target, list that missing requirement in missing_material_elements.
+4. Material omissions include facts/qualifiers that change the claim, such as:
    - "beneficial for health";
    - a causal/reason relation such as "to show respect";
    - one clause of a multi-clause answer such as "elders pay for the meal";
    - a named practice/event/ritual;
-   - a definition needed to connect the source phrase to the gold answer.
-4. Do NOT create standalone elements for grammatical/question words such as
-   "why", "what", or "how".
-5. Do NOT duplicate the same proposition in multiple phrasings.
-6. A normalized CultureBank record that asserts a cultural-group behavior in a
-   stated context may support wording such as "common", "customary", or
-   "typically" when the behavior itself is directly stated. Do not require those
-   exact adjectives to appear verbatim.
-7. For a hard FALSE item, MATCH still requires direct contradiction/refutation;
+   - a definition required to connect the source phrase to the gold answer.
+5. Do NOT treat grammatical/question words such as "why", "what", or "how" as
+   missing material elements.
+6. Do NOT require exact adjectives such as "common", "customary", or "typically"
+   when a normalized CultureBank record directly asserts that cultural-group
+   behavior in the relevant context.
+7. Do NOT add duplicate rephrasings of prior elements.
+8. For hard FALSE items, direct contradiction/refutation is still required;
    absence is never enough.
-8. Do not use outside cultural knowledge or definitions. Similarity,
-   plausibility, or related topic is not support.
-9. For every element marked supported, provide an exact contiguous quote copied
-   from SOURCE_TEXT.
-10. If any material factual element is unsupported, output NO_MATCH.
+9. Do not use outside cultural knowledge or definitions.
+10. ACCEPT only if every prior element is supported and there are no missing
+    material elements. Otherwise REJECT.
+11. Return JSON only.
 
-Return JSON only:
+Return exactly:
 {
-  "label": "MATCH | NO_MATCH",
-  "element_checks": [
-    {
-      "element": "one essential factual element",
-      "supported": true,
-      "quote": "exact contiguous text copied from SOURCE_TEXT, or empty string"
-    }
-  ],
+  "decision": "ACCEPT | REJECT",
+  "unsupported_prior_element_indices": [],
+  "missing_material_elements": [],
   "rationale": "brief explanation",
   "confidence": 0.0
 }
@@ -262,6 +255,97 @@ def parse_verdict(text: str) -> dict:
     }
 
 
+def parse_stage2_review(text: str) -> dict:
+    cleaned = (text or "").strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.replace("```json", "", 1).replace("```", "", 1).strip()
+    start, end = cleaned.find("{"), cleaned.rfind("}")
+    if start < 0 or end < start:
+        raise ValueError("No JSON object found")
+    obj = json.loads(cleaned[start:end + 1])
+
+    decision = str(obj.get("decision", "")).strip().upper()
+    if decision not in {"ACCEPT", "REJECT"}:
+        raise ValueError(f"Invalid stage-2 decision: {decision!r}")
+
+    raw_indices = obj.get("unsupported_prior_element_indices") or []
+    if not isinstance(raw_indices, list):
+        raw_indices = []
+    indices = []
+    for value in raw_indices:
+        try:
+            indices.append(int(value))
+        except (TypeError, ValueError):
+            continue
+    indices = sorted(set(indices))
+
+    missing = obj.get("missing_material_elements") or []
+    if not isinstance(missing, list):
+        missing = []
+    missing = [normalize_text(x) for x in missing if normalize_text(x)]
+
+    try:
+        confidence = float(obj.get("confidence", 0.0))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    confidence = max(0.0, min(1.0, confidence))
+
+    return {
+        "decision": decision,
+        "unsupported_prior_element_indices": indices,
+        "missing_material_elements": missing,
+        "rationale": normalize_text(obj.get("rationale")),
+        "confidence": confidence,
+    }
+
+
+def validate_stage2_review(review: dict, prior_verdict: Optional[dict]) -> dict:
+    prior = prior_verdict or {}
+    prior_checks = prior.get("element_checks") or []
+    problems: list[str] = []
+
+    if not prior.get("accepted"):
+        problems.append("prior stage-1 verdict was not accepted")
+
+    valid_indices = []
+    for idx in review.get("unsupported_prior_element_indices") or []:
+        if 0 <= idx < len(prior_checks):
+            valid_indices.append(idx)
+        else:
+            problems.append(f"invalid prior element index {idx}")
+
+    missing = review.get("missing_material_elements") or []
+    if valid_indices:
+        problems.append(
+            "unsupported prior elements: " + ", ".join(str(i) for i in valid_indices)
+        )
+    if missing:
+        problems.append("missing material elements: " + "; ".join(missing))
+    if review.get("decision") != "ACCEPT":
+        problems.append("stage-2 reviewer decision was REJECT")
+
+    accepted = (
+        review.get("decision") == "ACCEPT"
+        and not valid_indices
+        and not missing
+        and not problems
+    )
+
+    return {
+        "label": "MATCH" if accepted else "NO_MATCH",
+        "element_checks": prior_checks,
+        "accepted": accepted,
+        "validation_problems": problems,
+        "rationale": review.get("rationale", ""),
+        "confidence": float(review.get("confidence", 0.0)),
+        "stage2_review": {
+            "decision": review.get("decision"),
+            "unsupported_prior_element_indices": valid_indices,
+            "missing_material_elements": missing,
+        },
+    }
+
+
 def quote_is_in_source(quote: str, source_text: str) -> bool:
     q = normalize_text(quote).casefold()
     s = normalize_text(source_text).casefold()
@@ -373,8 +457,21 @@ def run_stage(
             retry_used = False
             initial_output = output
 
+            prior_verdict = (
+                (prior_state or {}).get(pair_id)
+                if stage == 2
+                else None
+            )
+
+            def _parse_current(raw: str) -> dict:
+                return (
+                    parse_stage2_review(raw)
+                    if stage == 2
+                    else parse_verdict(raw)
+                )
+
             try:
-                verdict = parse_verdict(output)
+                verdict = _parse_current(output)
             except Exception as first_exc:  # noqa: BLE001
                 retry_used = True
                 retry_prompt = prompt + FORMAT_RETRY_SUFFIX
@@ -386,20 +483,38 @@ def run_stage(
                 )
                 output = retry_output
                 try:
-                    verdict = parse_verdict(output)
+                    verdict = _parse_current(output)
                 except Exception as second_exc:  # noqa: BLE001
                     parse_error = (
                         f"initial parse failed: {first_exc}; "
                         f"retry parse failed: {second_exc}"
                     )
-                    verdict = {
-                        "label": "NO_MATCH",
-                        "element_checks": [],
-                        "rationale": "Verifier output remained unparseable after one format retry.",
-                        "confidence": 0.0,
-                    }
+                    verdict = (
+                        {
+                            "decision": "REJECT",
+                            "unsupported_prior_element_indices": [],
+                            "missing_material_elements": [],
+                            "rationale": (
+                                "Stage-2 review remained unparseable after one format retry."
+                            ),
+                            "confidence": 0.0,
+                        }
+                        if stage == 2
+                        else {
+                            "label": "NO_MATCH",
+                            "element_checks": [],
+                            "rationale": (
+                                "Verifier output remained unparseable after one format retry."
+                            ),
+                            "confidence": 0.0,
+                        }
+                    )
 
-            validated = validate_verdict(verdict, record_source_text(rec))
+            validated = (
+                validate_stage2_review(verdict, prior_verdict)
+                if stage == 2
+                else validate_verdict(verdict, record_source_text(rec))
+            )
             row = {
                 "pair_id": pair_id,
                 "stage": stage,
@@ -418,6 +533,7 @@ def run_stage(
                 "validation_problems": validated["validation_problems"],
                 "rationale": validated["rationale"],
                 "confidence": validated["confidence"],
+                "stage2_review": validated.get("stage2_review"),
                 "parse_error": parse_error,
                 "retry_used": retry_used,
                 "initial_raw_output": (
