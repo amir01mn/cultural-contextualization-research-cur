@@ -233,10 +233,9 @@ def test_run_stage_retries_unparseable_output(tmp_path):
 
 def test_parse_stage2_review_accepts_compact_audit():
     review = gm.parse_stage2_review(
-        '{"decision":"ACCEPT","unsupported_prior_element_indices":[],'
+        '{"unsupported_prior_element_indices":[],'
         '"missing_material_elements":[],"rationale":"all good","confidence":1.0}'
     )
-    assert review["decision"] == "ACCEPT"
     assert review["unsupported_prior_element_indices"] == []
     assert review["missing_material_elements"] == []
 
@@ -258,7 +257,6 @@ def test_validate_stage2_review_accepts_existing_stage1_elements():
         ],
     }
     review = {
-        "decision": "ACCEPT",
         "unsupported_prior_element_indices": [],
         "missing_material_elements": [],
         "rationale": "all material facts covered",
@@ -284,7 +282,6 @@ def test_validate_stage2_review_rejects_missing_material_qualifier():
         ],
     }
     review = {
-        "decision": "REJECT",
         "unsupported_prior_element_indices": [],
         "missing_material_elements": ["beneficial for health"],
         "rationale": "health qualifier missing",
@@ -315,7 +312,6 @@ def test_validate_stage2_review_ignores_question_grammar_and_norm_words():
         ],
     }
     review = {
-        "decision": "ACCEPT",
         "unsupported_prior_element_indices": [],
         "missing_material_elements": ["why", "customary", "common practice"],
         "rationale": "no material omission",
@@ -370,8 +366,7 @@ def test_run_stage_stage2_uses_prior_element_audit(tmp_path):
     class FakeBackend:
         def generate(self, prompts, system_prompt=None, **kwargs):
             return [
-                '{"decision":"ACCEPT",'
-                '"unsupported_prior_element_indices":[],'
+                '{"unsupported_prior_element_indices":[],'
                 '"missing_material_elements":[],'
                 '"rationale":"all covered","confidence":1.0}'
             ]
@@ -391,4 +386,41 @@ def test_run_stage_stage2_uses_prior_element_audit(tmp_path):
     assert row["accepted"] is True
     assert row["label"] == "MATCH"
     assert row["element_checks"] == prior[pair_id]["element_checks"]
-    assert row["stage2_review"]["decision"] == "ACCEPT"
+    assert row["stage2_review"]["diagnostic_unsupported_prior_element_indices"] == []
+
+
+def test_stage2_current_japanese_false_rejection_is_diagnostic_only():
+    prior = {
+        "accepted": True,
+        "element_checks": [
+            {
+                "element": "Japanese culture",
+                "supported": True,
+                "quote": "Japanese",
+            },
+            {
+                "element": "customary to remove one's shoes before entering a person's home",
+                "supported": True,
+                "quote": "remove shoes and wear slippers as a sign of respect and cleanliness",
+            },
+            {
+                "element": "show respect and cleanliness",
+                "supported": True,
+                "quote": "as a sign of respect and cleanliness",
+            },
+        ],
+    }
+    review = {
+        "unsupported_prior_element_indices": [1],
+        "missing_material_elements": ["why", "to show respect"],
+        "rationale": "over-literal reviewer complaint",
+        "confidence": 0.0,
+    }
+
+    out = gm.validate_stage2_review(review, prior)
+
+    assert out["accepted"] is True
+    assert out["label"] == "MATCH"
+    assert out["validation_problems"] == []
+    assert out["stage2_review"]["missing_material_elements"] == []
+    assert out["stage2_review"]["diagnostic_unsupported_prior_element_indices"] == [1]
