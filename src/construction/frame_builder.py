@@ -147,12 +147,15 @@ def label_prompt(f: CulturalFrame) -> str:
 _JSON = re.compile(r"\{.*\}", re.DOTALL)
 
 
+def _squash(text: str) -> str:
+    """Lowercase letters only: 'Self-Direction – (Action)' -> 'selfdirectionaction'."""
+    return re.sub(r"[^a-z]", "", normalize_text(text).lower())
+
+
 def _match_value(name: str) -> Optional[str]:
-    key = normalize_text(name).lower().replace("–", "-").replace("—", "-")
-    key = re.sub(r"\s*-\s*", " ", key)
+    key = normalize_text(name).lower()
     for v in VALUE_NAMES:
-        flat = v.replace("(", "").replace(")", "")
-        if key in (v, flat) or key.replace(" ", "") == flat.replace(" ", ""):
+        if _squash(key) == _squash(v):
             return v
     # A bare family name ("benevolence") is ambiguous for split values; only
     # accept it when it names exactly one value.
@@ -235,7 +238,13 @@ def label_frames(backend, frames: list[CulturalFrame], cache_path: Path, *,
 def apply_labels(frames: list[CulturalFrame], labels: dict[str, dict]) -> dict:
     stats = Counter()
     for f in frames:
-        lab = (labels.get(f.frame_id) or {}).get("label")
+        entry = labels.get(f.frame_id) or {}
+        lab = entry.get("label")
+        if lab is None and entry.get("raw"):
+            # Re-parse stored replies (a parser fix must not need new LLM calls).
+            lab = parse_label(entry["raw"])
+            if lab:
+                stats["reparsed"] += 1
         if lab:
             f.norm, f.norm_type_label, f.values = lab["norm"], lab["norm_type"], list(lab["values"])
             f.label_status = "ok"
