@@ -58,6 +58,17 @@ def _stage_culturalbench() -> None:
             LOGGER.warning("  could not cache config '%s'.", cfg)
 
 
+def _stage_normad() -> None:
+    from datasets import load_dataset
+
+    LOGGER.info("Staging NormAd (akhilayerukola/NormAd) for eval v2...")
+    try:
+        ds = load_dataset("akhilayerukola/NormAd", split="train")
+        LOGGER.info("  cached NormAd split 'train' (%d rows).", len(ds))
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.warning("  failed to cache NormAd: %s", exc)
+
+
 def _stage_model(model: str) -> None:
     LOGGER.info("Pre-downloading model weights: %s", model)
     try:
@@ -78,6 +89,7 @@ def main(argv=None) -> None:
     p = argparse.ArgumentParser(description="Stage data/models for offline runs.")
     p.add_argument("--skip_culturebank", action="store_true", default=False)
     p.add_argument("--skip_culturalbench", action="store_true", default=False)
+    p.add_argument("--skip_normad", action="store_true", default=False)
     p.add_argument("--model", default=None,
                    help="Optional HF model id to pre-download (e.g. the vLLM model).")
     args = p.parse_args(argv)
@@ -89,6 +101,8 @@ def main(argv=None) -> None:
         _stage_culturebank()
     if not args.skip_culturalbench:
         _stage_culturalbench()
+    if not args.skip_normad:
+        _stage_normad()
     if args.model:
         _stage_model(args.model)
     LOGGER.info("Offline staging complete. Compute nodes can now run with "

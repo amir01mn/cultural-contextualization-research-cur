@@ -1,0 +1,1162 @@
+{
+  "source_results": "/lustre06/project/6113454/amir01mn/cultural-contextualization-research-cur/cultural-contextualization-research-cur/data/outputs/culturalbench_results.json",
+  "strata_rule": "CultureBank descriptors per canonical culture: <20, 20-99, >=100",
+  "countries_per_stratum": {
+    ">=100": 22,
+    "20-99": 17,
+    "<20": 6
+  },
+  "countries": {
+    "Netherlands": {
+      "canonical": "netherlands",
+      "n_descriptors": 438,
+      "stratum": ">=100"
+    },
+    "South Korea": {
+      "canonical": "korea",
+      "n_descriptors": 481,
+      "stratum": ">=100"
+    },
+    "Nigeria": {
+      "canonical": "nigeria",
+      "n_descriptors": 67,
+      "stratum": "20-99"
+    },
+    "Spain": {
+      "canonical": "spain",
+      "n_descriptors": 400,
+      "stratum": ">=100"
+    },
+    "Morocco": {
+      "canonical": "morocco",
+      "n_descriptors": 21,
+      "stratum": "20-99"
+    },
+    "India": {
+      "canonical": "india",
+      "n_descriptors": 207,
+      "stratum": ">=100"
+    },
+    "United Kingdom": {
+      "canonical": "united kingdom",
+      "n_descriptors": 1008,
+      "stratum": ">=100"
+    },
+    "Vietnam": {
+      "canonical": "vietnam",
+      "n_descriptors": 69,
+      "stratum": "20-99"
+    },
+    "Malaysia": {
+      "canonical": "malaysia",
+      "n_descriptors": 132,
+      "stratum": ">=100"
+    },
+    "Chile": {
+      "canonical": "chile",
+      "n_descriptors": 24,
+      "stratum": "20-99"
+    },
+    "Zimbabwe": {
+      "canonical": "zimbabwe",
+      "n_descriptors": 5,
+      "stratum": "<20"
+    },
+    "Egypt": {
+      "canonical": "egypt",
+      "n_descriptors": 63,
+      "stratum": "20-99"
+    },
+    "Japan": {
+      "canonical": "japan",
+      "n_descriptors": 415,
+      "stratum": ">=100"
+    },
+    "Iran": {
+      "canonical": "iran",
+      "n_descriptors": 24,
+      "stratum": "20-99"
+    },
+    "Philippines": {
+      "canonical": "philippines",
+      "n_descriptors": 320,
+      "stratum": ">=100"
+    },
+    "Israel": {
+      "canonical": "israel",
+      "n_descriptors": 44,
+      "stratum": "20-99"
+    },
+    "Bangladesh": {
+      "canonical": "bangladesh",
+      "n_descriptors": 4,
+      "stratum": "<20"
+    },
+    "Lebanon": {
+      "canonical": "lebanon",
+      "n_descriptors": 16,
+      "stratum": "<20"
+    },
+    "Ukraine": {
+      "canonical": "ukraine",
+      "n_descriptors": 58,
+      "stratum": "20-99"
+    },
+    "United States": {
+      "canonical": "united states",
+      "n_descriptors": 6170,
+      "stratum": ">=100"
+    },
+    "Czech Republic": {
+      "canonical": "czech republic",
+      "n_descriptors": 53,
+      "stratum": "20-99"
+    },
+    "Italy": {
+      "canonical": "italy",
+      "n_descriptors": 601,
+      "stratum": ">=100"
+    },
+    "Indonesia": {
+      "canonical": "indonesia",
+      "n_descriptors": 249,
+      "stratum": ">=100"
+    },
+    "France": {
+      "canonical": "france",
+      "n_descriptors": 589,
+      "stratum": ">=100"
+    },
+    "Mexico": {
+      "canonical": "mexico",
+      "n_descriptors": 194,
+      "stratum": ">=100"
+    },
+    "Saudi Arabia": {
+      "canonical": "saudi arabia",
+      "n_descriptors": 26,
+      "stratum": "20-99"
+    },
+    "Nepal": {
+      "canonical": "nepal",
+      "n_descriptors": 8,
+      "stratum": "<20"
+    },
+    "Romania": {
+      "canonical": "romania",
+      "n_descriptors": 58,
+      "stratum": "20-99"
+    },
+    "Germany": {
+      "canonical": "germany",
+      "n_descriptors": 1017,
+      "stratum": ">=100"
+    },
+    "Pakistan": {
+      "canonical": "pakistan",
+      "n_descriptors": 27,
+      "stratum": "20-99"
+    },
+    "Brazil": {
+      "canonical": "brazil",
+      "n_descriptors": 186,
+      "stratum": ">=100"
+    },
+    "Russia": {
+      "canonical": "russia",
+      "n_descriptors": 219,
+      "stratum": ">=100"
+    },
+    "Taiwan": {
+      "canonical": "taiwan",
+      "n_descriptors": 25,
+      "stratum": "20-99"
+    },
+    "Hong Kong": {
+      "canonical": "hong kong",
+      "n_descriptors": 9,
+      "stratum": "<20"
+    },
+    "Peru": {
+      "canonical": "peru",
+      "n_descriptors": 15,
+      "stratum": "<20"
+    },
+    "Singapore": {
+      "canonical": "singapore",
+      "n_descriptors": 93,
+      "stratum": "20-99"
+    },
+    "Turkey": {
+      "canonical": "turkey",
+      "n_descriptors": 101,
+      "stratum": ">=100"
+    },
+    "New Zealand": {
+      "canonical": "new zealand",
+      "n_descriptors": 150,
+      "stratum": ">=100"
+    },
+    "Poland": {
+      "canonical": "poland",
+      "n_descriptors": 124,
+      "stratum": ">=100"
+    },
+    "Argentina": {
+      "canonical": "argentina",
+      "n_descriptors": 80,
+      "stratum": "20-99"
+    },
+    "China": {
+      "canonical": "china",
+      "n_descriptors": 308,
+      "stratum": ">=100"
+    },
+    "South Africa": {
+      "canonical": "south africa",
+      "n_descriptors": 79,
+      "stratum": "20-99"
+    },
+    "Thailand": {
+      "canonical": "thailand",
+      "n_descriptors": 64,
+      "stratum": "20-99"
+    },
+    "Australia": {
+      "canonical": "australia",
+      "n_descriptors": 612,
+      "stratum": ">=100"
+    },
+    "Canada": {
+      "canonical": "canada",
+      "n_descriptors": 448,
+      "stratum": ">=100"
+    }
+  },
+  "table": {
+    "combined|20-99": {
+      "n_units": 830,
+      "n_countries": 17,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.488,
+          "ci_low": 0.4542,
+          "ci_high": 0.5217
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.3723,
+          "ci_low": 0.3398,
+          "ci_high": 0.406,
+          "vs_S0": {
+            "delta": -0.1157,
+            "b_sys_only": 39,
+            "c_s0_only": 135,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.3952,
+          "ci_low": 0.3614,
+          "ci_high": 0.4289,
+          "vs_S0": {
+            "delta": -0.0928,
+            "b_sys_only": 49,
+            "c_s0_only": 126,
+            "p_value": 0.0
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.3952,
+          "ci_low": 0.3627,
+          "ci_high": 0.4289,
+          "vs_S0": {
+            "delta": -0.0928,
+            "b_sys_only": 46,
+            "c_s0_only": 123,
+            "p_value": 0.0
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.3518,
+          "ci_low": 0.3193,
+          "ci_high": 0.3843,
+          "vs_S0": {
+            "delta": -0.1361,
+            "b_sys_only": 30,
+            "c_s0_only": 143,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.3506,
+          "ci_low": 0.3181,
+          "ci_high": 0.3843,
+          "vs_S0": {
+            "delta": -0.1373,
+            "b_sys_only": 33,
+            "c_s0_only": 147,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.3964,
+          "ci_low": 0.3639,
+          "ci_high": 0.4301,
+          "vs_S0": {
+            "delta": -0.0916,
+            "b_sys_only": 46,
+            "c_s0_only": 122,
+            "p_value": 0.0
+          }
+        }
+      }
+    },
+    "combined|<20": {
+      "n_units": 280,
+      "n_countries": 6,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.5536,
+          "ci_low": 0.4964,
+          "ci_high": 0.6107
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.3643,
+          "ci_low": 0.3071,
+          "ci_high": 0.4214,
+          "vs_S0": {
+            "delta": -0.1893,
+            "b_sys_only": 5,
+            "c_s0_only": 58,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.4214,
+          "ci_low": 0.3643,
+          "ci_high": 0.4786,
+          "vs_S0": {
+            "delta": -0.1321,
+            "b_sys_only": 9,
+            "c_s0_only": 46,
+            "p_value": 0.0
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.4036,
+          "ci_low": 0.3464,
+          "ci_high": 0.4607,
+          "vs_S0": {
+            "delta": -0.15,
+            "b_sys_only": 9,
+            "c_s0_only": 51,
+            "p_value": 0.0
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.3679,
+          "ci_low": 0.3107,
+          "ci_high": 0.425,
+          "vs_S0": {
+            "delta": -0.1857,
+            "b_sys_only": 4,
+            "c_s0_only": 56,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.3679,
+          "ci_low": 0.3107,
+          "ci_high": 0.425,
+          "vs_S0": {
+            "delta": -0.1857,
+            "b_sys_only": 3,
+            "c_s0_only": 55,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.3857,
+          "ci_low": 0.3286,
+          "ci_high": 0.4429,
+          "vs_S0": {
+            "delta": -0.1679,
+            "b_sys_only": 6,
+            "c_s0_only": 53,
+            "p_value": 0.0
+          }
+        }
+      }
+    },
+    "combined|>=100": {
+      "n_units": 1344,
+      "n_countries": 22,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.5365,
+          "ci_low": 0.5089,
+          "ci_high": 0.5632
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.4501,
+          "ci_low": 0.4234,
+          "ci_high": 0.4762,
+          "vs_S0": {
+            "delta": -0.0863,
+            "b_sys_only": 90,
+            "c_s0_only": 206,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.4375,
+          "ci_low": 0.4114,
+          "ci_high": 0.4643,
+          "vs_S0": {
+            "delta": -0.099,
+            "b_sys_only": 80,
+            "c_s0_only": 213,
+            "p_value": 0.0
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.4479,
+          "ci_low": 0.4211,
+          "ci_high": 0.4754,
+          "vs_S0": {
+            "delta": -0.0885,
+            "b_sys_only": 80,
+            "c_s0_only": 199,
+            "p_value": 0.0
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.4077,
+          "ci_low": 0.381,
+          "ci_high": 0.4338,
+          "vs_S0": {
+            "delta": -0.1287,
+            "b_sys_only": 62,
+            "c_s0_only": 235,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.4048,
+          "ci_low": 0.378,
+          "ci_high": 0.4308,
+          "vs_S0": {
+            "delta": -0.1317,
+            "b_sys_only": 64,
+            "c_s0_only": 241,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.4479,
+          "ci_low": 0.4204,
+          "ci_high": 0.4747,
+          "vs_S0": {
+            "delta": -0.0885,
+            "b_sys_only": 78,
+            "c_s0_only": 197,
+            "p_value": 0.0
+          }
+        }
+      }
+    },
+    "combined|all": {
+      "n_units": 2454,
+      "n_countries": 45,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.522,
+          "ci_low": 0.502,
+          "ci_high": 0.542
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.414,
+          "ci_low": 0.3945,
+          "ci_high": 0.4336,
+          "vs_S0": {
+            "delta": -0.108,
+            "b_sys_only": 134,
+            "c_s0_only": 399,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.4214,
+          "ci_low": 0.4014,
+          "ci_high": 0.4409,
+          "vs_S0": {
+            "delta": -0.1007,
+            "b_sys_only": 138,
+            "c_s0_only": 385,
+            "p_value": 0.0
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.425,
+          "ci_low": 0.4051,
+          "ci_high": 0.4442,
+          "vs_S0": {
+            "delta": -0.097,
+            "b_sys_only": 135,
+            "c_s0_only": 373,
+            "p_value": 0.0
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.3843,
+          "ci_low": 0.3647,
+          "ci_high": 0.4034,
+          "vs_S0": {
+            "delta": -0.1377,
+            "b_sys_only": 96,
+            "c_s0_only": 434,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.3822,
+          "ci_low": 0.3623,
+          "ci_high": 0.4014,
+          "vs_S0": {
+            "delta": -0.1398,
+            "b_sys_only": 100,
+            "c_s0_only": 443,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.4234,
+          "ci_low": 0.4038,
+          "ci_high": 0.4425,
+          "vs_S0": {
+            "delta": -0.0986,
+            "b_sys_only": 130,
+            "c_s0_only": 372,
+            "p_value": 0.0
+          }
+        }
+      }
+    },
+    "easy|20-99": {
+      "n_units": 415,
+      "n_countries": 17,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.6916,
+          "ci_low": 0.6458,
+          "ci_high": 0.7349
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.641,
+          "ci_low": 0.5928,
+          "ci_high": 0.6867,
+          "vs_S0": {
+            "delta": -0.0506,
+            "b_sys_only": 29,
+            "c_s0_only": 50,
+            "p_value": 0.02382
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.653,
+          "ci_low": 0.6072,
+          "ci_high": 0.6988,
+          "vs_S0": {
+            "delta": -0.0386,
+            "b_sys_only": 32,
+            "c_s0_only": 48,
+            "p_value": 0.092912
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.653,
+          "ci_low": 0.6072,
+          "ci_high": 0.6988,
+          "vs_S0": {
+            "delta": -0.0386,
+            "b_sys_only": 26,
+            "c_s0_only": 42,
+            "p_value": 0.068119
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.6169,
+          "ci_low": 0.5711,
+          "ci_high": 0.6627,
+          "vs_S0": {
+            "delta": -0.0747,
+            "b_sys_only": 18,
+            "c_s0_only": 49,
+            "p_value": 0.000194
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.6145,
+          "ci_low": 0.5663,
+          "ci_high": 0.6602,
+          "vs_S0": {
+            "delta": -0.0771,
+            "b_sys_only": 20,
+            "c_s0_only": 52,
+            "p_value": 0.000208
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.653,
+          "ci_low": 0.6072,
+          "ci_high": 0.6988,
+          "vs_S0": {
+            "delta": -0.0386,
+            "b_sys_only": 26,
+            "c_s0_only": 42,
+            "p_value": 0.068119
+          }
+        }
+      }
+    },
+    "easy|<20": {
+      "n_units": 140,
+      "n_countries": 6,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.8,
+          "ci_low": 0.7286,
+          "ci_high": 0.8643
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.6714,
+          "ci_low": 0.5929,
+          "ci_high": 0.75,
+          "vs_S0": {
+            "delta": -0.1286,
+            "b_sys_only": 4,
+            "c_s0_only": 22,
+            "p_value": 0.000534
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.7214,
+          "ci_low": 0.6429,
+          "ci_high": 0.7929,
+          "vs_S0": {
+            "delta": -0.0786,
+            "b_sys_only": 5,
+            "c_s0_only": 16,
+            "p_value": 0.026604
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.7071,
+          "ci_low": 0.6286,
+          "ci_high": 0.7786,
+          "vs_S0": {
+            "delta": -0.0929,
+            "b_sys_only": 3,
+            "c_s0_only": 16,
+            "p_value": 0.004425
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.6786,
+          "ci_low": 0.6,
+          "ci_high": 0.7571,
+          "vs_S0": {
+            "delta": -0.1214,
+            "b_sys_only": 4,
+            "c_s0_only": 21,
+            "p_value": 0.000911
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.6857,
+          "ci_low": 0.6071,
+          "ci_high": 0.7643,
+          "vs_S0": {
+            "delta": -0.1143,
+            "b_sys_only": 3,
+            "c_s0_only": 19,
+            "p_value": 0.000855
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.6857,
+          "ci_low": 0.6071,
+          "ci_high": 0.7643,
+          "vs_S0": {
+            "delta": -0.1143,
+            "b_sys_only": 2,
+            "c_s0_only": 18,
+            "p_value": 0.000402
+          }
+        }
+      }
+    },
+    "easy|>=100": {
+      "n_units": 672,
+      "n_countries": 22,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.7143,
+          "ci_low": 0.6801,
+          "ci_high": 0.7485
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.6935,
+          "ci_low": 0.6592,
+          "ci_high": 0.7292,
+          "vs_S0": {
+            "delta": -0.0208,
+            "b_sys_only": 46,
+            "c_s0_only": 60,
+            "p_value": 0.206498
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.6696,
+          "ci_low": 0.6339,
+          "ci_high": 0.7054,
+          "vs_S0": {
+            "delta": -0.0446,
+            "b_sys_only": 38,
+            "c_s0_only": 68,
+            "p_value": 0.004619
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.6786,
+          "ci_low": 0.6429,
+          "ci_high": 0.7128,
+          "vs_S0": {
+            "delta": -0.0357,
+            "b_sys_only": 38,
+            "c_s0_only": 62,
+            "p_value": 0.020979
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.683,
+          "ci_low": 0.6488,
+          "ci_high": 0.7188,
+          "vs_S0": {
+            "delta": -0.0312,
+            "b_sys_only": 36,
+            "c_s0_only": 57,
+            "p_value": 0.037514
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.689,
+          "ci_low": 0.6548,
+          "ci_high": 0.7247,
+          "vs_S0": {
+            "delta": -0.0253,
+            "b_sys_only": 39,
+            "c_s0_only": 56,
+            "p_value": 0.100173
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.6801,
+          "ci_low": 0.6458,
+          "ci_high": 0.7158,
+          "vs_S0": {
+            "delta": -0.0342,
+            "b_sys_only": 36,
+            "c_s0_only": 59,
+            "p_value": 0.023488
+          }
+        }
+      }
+    },
+    "easy|all": {
+      "n_units": 1227,
+      "n_countries": 45,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.7164,
+          "ci_low": 0.6911,
+          "ci_high": 0.7416
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.6732,
+          "ci_low": 0.6463,
+          "ci_high": 0.6993,
+          "vs_S0": {
+            "delta": -0.0432,
+            "b_sys_only": 79,
+            "c_s0_only": 132,
+            "p_value": 0.000322
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.6699,
+          "ci_low": 0.6438,
+          "ci_high": 0.696,
+          "vs_S0": {
+            "delta": -0.0465,
+            "b_sys_only": 75,
+            "c_s0_only": 132,
+            "p_value": 9e-05
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.6732,
+          "ci_low": 0.6471,
+          "ci_high": 0.7001,
+          "vs_S0": {
+            "delta": -0.0432,
+            "b_sys_only": 67,
+            "c_s0_only": 120,
+            "p_value": 0.00013
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.6601,
+          "ci_low": 0.634,
+          "ci_high": 0.6862,
+          "vs_S0": {
+            "delta": -0.0562,
+            "b_sys_only": 58,
+            "c_s0_only": 127,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.6634,
+          "ci_low": 0.6373,
+          "ci_high": 0.6895,
+          "vs_S0": {
+            "delta": -0.053,
+            "b_sys_only": 62,
+            "c_s0_only": 127,
+            "p_value": 3e-06
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.6716,
+          "ci_low": 0.6455,
+          "ci_high": 0.6985,
+          "vs_S0": {
+            "delta": -0.0448,
+            "b_sys_only": 64,
+            "c_s0_only": 119,
+            "p_value": 5.8e-05
+          }
+        }
+      }
+    },
+    "hard|20-99": {
+      "n_units": 415,
+      "n_countries": 17,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.2843,
+          "ci_low": 0.241,
+          "ci_high": 0.3277
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.1036,
+          "ci_low": 0.0747,
+          "ci_high": 0.1349,
+          "vs_S0": {
+            "delta": -0.1807,
+            "b_sys_only": 10,
+            "c_s0_only": 85,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.1373,
+          "ci_low": 0.106,
+          "ci_high": 0.1711,
+          "vs_S0": {
+            "delta": -0.147,
+            "b_sys_only": 17,
+            "c_s0_only": 78,
+            "p_value": 0.0
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.1373,
+          "ci_low": 0.106,
+          "ci_high": 0.1711,
+          "vs_S0": {
+            "delta": -0.147,
+            "b_sys_only": 20,
+            "c_s0_only": 81,
+            "p_value": 0.0
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.0867,
+          "ci_low": 0.0602,
+          "ci_high": 0.1157,
+          "vs_S0": {
+            "delta": -0.1976,
+            "b_sys_only": 12,
+            "c_s0_only": 94,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.0867,
+          "ci_low": 0.0602,
+          "ci_high": 0.1157,
+          "vs_S0": {
+            "delta": -0.1976,
+            "b_sys_only": 13,
+            "c_s0_only": 95,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.1398,
+          "ci_low": 0.106,
+          "ci_high": 0.1735,
+          "vs_S0": {
+            "delta": -0.1446,
+            "b_sys_only": 20,
+            "c_s0_only": 80,
+            "p_value": 0.0
+          }
+        }
+      }
+    },
+    "hard|<20": {
+      "n_units": 140,
+      "n_countries": 6,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.3071,
+          "ci_low": 0.2357,
+          "ci_high": 0.3857
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.0571,
+          "ci_low": 0.0214,
+          "ci_high": 0.1,
+          "vs_S0": {
+            "delta": -0.25,
+            "b_sys_only": 1,
+            "c_s0_only": 36,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.1214,
+          "ci_low": 0.0714,
+          "ci_high": 0.1786,
+          "vs_S0": {
+            "delta": -0.1857,
+            "b_sys_only": 4,
+            "c_s0_only": 30,
+            "p_value": 6e-06
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.1,
+          "ci_low": 0.0571,
+          "ci_high": 0.15,
+          "vs_S0": {
+            "delta": -0.2071,
+            "b_sys_only": 6,
+            "c_s0_only": 35,
+            "p_value": 5e-06
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.0571,
+          "ci_low": 0.0214,
+          "ci_high": 0.1,
+          "vs_S0": {
+            "delta": -0.25,
+            "b_sys_only": 0,
+            "c_s0_only": 35,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.05,
+          "ci_low": 0.0143,
+          "ci_high": 0.0857,
+          "vs_S0": {
+            "delta": -0.2571,
+            "b_sys_only": 0,
+            "c_s0_only": 36,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.0857,
+          "ci_low": 0.0429,
+          "ci_high": 0.1357,
+          "vs_S0": {
+            "delta": -0.2214,
+            "b_sys_only": 4,
+            "c_s0_only": 35,
+            "p_value": 0.0
+          }
+        }
+      }
+    },
+    "hard|>=100": {
+      "n_units": 672,
+      "n_countries": 22,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.3586,
+          "ci_low": 0.3229,
+          "ci_high": 0.3958
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.2068,
+          "ci_low": 0.1771,
+          "ci_high": 0.2381,
+          "vs_S0": {
+            "delta": -0.1518,
+            "b_sys_only": 44,
+            "c_s0_only": 146,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.2054,
+          "ci_low": 0.1756,
+          "ci_high": 0.2366,
+          "vs_S0": {
+            "delta": -0.1533,
+            "b_sys_only": 42,
+            "c_s0_only": 145,
+            "p_value": 0.0
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.2173,
+          "ci_low": 0.186,
+          "ci_high": 0.2485,
+          "vs_S0": {
+            "delta": -0.1414,
+            "b_sys_only": 42,
+            "c_s0_only": 137,
+            "p_value": 0.0
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.1324,
+          "ci_low": 0.1071,
+          "ci_high": 0.1592,
+          "vs_S0": {
+            "delta": -0.2262,
+            "b_sys_only": 26,
+            "c_s0_only": 178,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.1205,
+          "ci_low": 0.0967,
+          "ci_high": 0.1458,
+          "vs_S0": {
+            "delta": -0.2381,
+            "b_sys_only": 25,
+            "c_s0_only": 185,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.2158,
+          "ci_low": 0.1845,
+          "ci_high": 0.247,
+          "vs_S0": {
+            "delta": -0.1429,
+            "b_sys_only": 42,
+            "c_s0_only": 138,
+            "p_value": 0.0
+          }
+        }
+      }
+    },
+    "hard|all": {
+      "n_units": 1227,
+      "n_countries": 45,
+      "systems": {
+        "S0_no_kg": {
+          "accuracy": 0.3276,
+          "ci_low": 0.3015,
+          "ci_high": 0.3553
+        },
+        "S1_raw_text_rag": {
+          "accuracy": 0.1548,
+          "ci_low": 0.1353,
+          "ci_high": 0.1752,
+          "vs_S0": {
+            "delta": -0.1728,
+            "b_sys_only": 55,
+            "c_s0_only": 267,
+            "p_value": 0.0
+          }
+        },
+        "S2_flat_kg": {
+          "accuracy": 0.1728,
+          "ci_low": 0.1516,
+          "ci_high": 0.194,
+          "vs_S0": {
+            "delta": -0.1548,
+            "b_sys_only": 63,
+            "c_s0_only": 253,
+            "p_value": 0.0
+          }
+        },
+        "S3_layered_kg": {
+          "accuracy": 0.1769,
+          "ci_low": 0.1565,
+          "ci_high": 0.1981,
+          "vs_S0": {
+            "delta": -0.1508,
+            "b_sys_only": 68,
+            "c_s0_only": 253,
+            "p_value": 0.0
+          }
+        },
+        "S4_abstraction_refinement_kg": {
+          "accuracy": 0.1084,
+          "ci_low": 0.0913,
+          "ci_high": 0.1263,
+          "vs_S0": {
+            "delta": -0.2192,
+            "b_sys_only": 38,
+            "c_s0_only": 307,
+            "p_value": 0.0
+          }
+        },
+        "S4_no_shared_pivot": {
+          "accuracy": 0.1011,
+          "ci_low": 0.0839,
+          "ci_high": 0.1182,
+          "vs_S0": {
+            "delta": -0.2266,
+            "b_sys_only": 38,
+            "c_s0_only": 316,
+            "p_value": 0.0
+          }
+        },
+        "S4_triple_retrieval": {
+          "accuracy": 0.1752,
+          "ci_low": 0.154,
+          "ci_high": 0.1964,
+          "vs_S0": {
+            "delta": -0.1524,
+            "b_sys_only": 66,
+            "c_s0_only": 253,
+            "p_value": 0.0
+          }
+        }
+      }
+    }
+  }
+}

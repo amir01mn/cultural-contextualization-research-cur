@@ -75,6 +75,8 @@ def rerank_hits(
         gen = 1.0 if not get_generated(item) else config.RETRIEVAL_GENERATED_PENALTY
         if cm < 0.9 and allow_cross_culture_shared(item):
             cm = max(cm, config.RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE)
+        elif cm < 0.9 and question_culture and config.RETRIEVAL_STRICT_CULTURE:
+            continue
         final = float(base) * cm * gen
         scored.append((item, final, cm))
 

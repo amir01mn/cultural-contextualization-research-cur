@@ -89,6 +89,74 @@ class RetrievalContext:
             self.refined_triple_retriever.backend if self.refined_triple_retriever else "none",
             len(pathway_retriever.pathways) if pathway_retriever else 0,
         )
+        # Optional evidence masking (eval v2 held-out). None = no masking, i.e.
+        # the original behaviour. Set via ``set_mask``.
+        self.masked_instance_ids: Optional[frozenset] = None
+        self.passage_mask = None
+        self.triple_mask = None
+        self.refined_triple_mask = None
+        self.pathway_mask = None
+        self._triple_to_instance: Optional[dict[str, str]] = None
+
+    def triple_to_instance(self) -> dict[str, str]:
+        """triple_id -> instance_id over the raw and refined triple indexes."""
+        if self._triple_to_instance is None:
+            m: dict[str, str] = {}
+            for r in (self.triple_retriever, self.refined_triple_retriever):
+                if r is not None:
+                    for t in r.triples:
+                        m.setdefault(t.triple_id, t.instance_id)
+            self._triple_to_instance = m
+        return self._triple_to_instance
+
+    def set_mask(self, instance_ids=None) -> None:
+        """Exclude every item derived from these CultureBank ``instance_id``s
+        from all evidence (passages, raw/refined triples, and any pathway with
+        a masked triple). ``None`` or empty clears the mask."""
+        if not instance_ids:
+            self.masked_instance_ids = None
+            self.passage_mask = self.triple_mask = None
+            self.refined_triple_mask = self.pathway_mask = None
+            return
+        ids = frozenset(instance_ids)
+        self.masked_instance_ids = ids
+        self.passage_mask = (self.passage_retriever.mask_for_instance_ids(ids)
+                             if self.passage_retriever else None)
+        self.triple_mask = (self.triple_retriever.mask_for_instance_ids(ids)
+                            if self.triple_retriever else None)
+        self.refined_triple_mask = (
+            self.refined_triple_retriever.mask_for_instance_ids(ids)
+            if self.refined_triple_retriever else None)
+        self.pathway_mask = (
+            self.pathway_retriever.mask_for_instance_ids(ids, self.triple_to_instance())
+            if self.pathway_retriever and self.pathway_retriever.pathways else None)
+        LOGGER.info(
+            "Evidence mask set: %d instance_ids -> passages=%s triples=%s refined=%s pathways=%s",
+            len(ids),
+            *(int(m.sum()) if m is not None else 0 for m in (
+                self.passage_mask, self.triple_mask,
+                self.refined_triple_mask, self.pathway_mask)),
+        )
+
+    def mask_for_retriever(self, retriever):
+        """The active exclude mask for ``retriever`` (None when unmasked)."""
+        if self.masked_instance_ids is None or retriever is None:
+            return None
+        if retriever is self.passage_retriever:
+            return self.passage_mask
+        if retriever is self.triple_retriever:
+            return self.triple_mask
+        if retriever is self.refined_triple_retriever:
+            return self.refined_triple_mask
+        if retriever is self.pathway_retriever:
+            return self.pathway_mask
+        return None
+
+
+def _mask_kw(ctx: "RetrievalContext", retriever) -> dict:
+    """``exclude_mask`` kwarg only when a mask is active (keeps old call shape)."""
+    mask = getattr(ctx, "mask_for_retriever", lambda _r: None)(retriever)
+    return {} if mask is None else {"exclude_mask": mask}
 
 
 def _query_for(q: MCQQuestion) -> str:
@@ -121,6 +189,8 @@ def _rank_pathways(hits: list[tuple[CulturalPathway, float]],
         cm = culture_match_score(pw.culture, question_culture)
         if pw.has_shared_pivot and cm < 0.9:
             cm = max(cm, config.RETRIEVAL_SHARED_PIVOT_CULTURE_SCORE)
+        elif cm < 0.9 and question_culture and config.RETRIEVAL_STRICT_CULTURE:
+            continue
         bonus = 1.1 if pw.has_shared_pivot else 1.0
         ranked.append((pw, score * w * cm * bonus, cm))
     ranked.sort(key=lambda x: x[1], reverse=True)
@@ -238,7 +308,8 @@ def _passage_evidence(ctx: RetrievalContext, query: str, top_k: int,
     if not ctx.passage_retriever:
         return "", [], {}
     hits = ctx.passage_retriever.retrieve(
-        query, top_k=top_k, question_culture=q.cultural_group)
+        query, top_k=top_k, question_culture=q.cultural_group,
+        **_mask_kw(ctx, ctx.passage_retriever))
     lines, ids = [], []
     for i, (doc, _score) in enumerate(hits, 1):
         text = truncate(doc.get("text", ""), 300)
@@ -260,7 +331,8 @@ def _flat_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
     if not retriever:
         return "", [], {}
     hits = retriever.retrieve(
-        query, top_k=top_k, question_culture=q.cultural_group)
+        query, top_k=top_k, question_culture=q.cultural_group,
+        **_mask_kw(ctx, retriever))
     triples = [t for t, _ in hits]
     lines, ids = [], []
     for i, (t, _score) in enumerate(hits, 1):
@@ -278,7 +350,8 @@ def _layered_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
     if not retriever:
         return "", [], {}
     hits = retriever.retrieve(
-        query, top_k=top_k, question_culture=q.cultural_group)
+        query, top_k=top_k, question_culture=q.cultural_group,
+        **_mask_kw(ctx, retriever))
     triples = [t for t, _ in hits]
     lines, ids = [], []
     for i, (t, _score) in enumerate(hits, 1):
@@ -304,7 +377,8 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
         }
     hits = ctx.pathway_retriever.retrieve(
         query, top_k=max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k),
-        question_culture=q.cultural_group)
+        question_culture=q.cultural_group,
+        **_mask_kw(ctx, ctx.pathway_retriever))
     ranked = _rank_pathways(hits, q.cultural_group, exclude_shared=exclude_shared)[:top_k]
     lines, ids, pathways = [], [], []
     for i, (pw, _score) in enumerate(ranked, 1):
@@ -347,22 +421,33 @@ def _evidence_for(system: str, ctx: Optional[RetrievalContext],
     return f"{header}\n{body}\n\n", ids, meta
 
 
+def evidence_for(system: str, ctx: Optional[RetrievalContext],
+                 q: MCQQuestion, top_k: int) -> tuple[str, list[str], dict]:
+    """Public: (evidence_block, retrieved_ids, meta) exactly as ``run_system`` uses."""
+    return _evidence_for(system, ctx, q, top_k)
+
+
 def build_prompt(system: str, q: MCQQuestion,
                  ctx: Optional[RetrievalContext], top_k: int) -> tuple[str, str, list[str], dict]:
     evidence_block, ids, meta = _evidence_for(system, ctx, q, top_k)
+    sp, up = _prompt_from_evidence(q, evidence_block)
+    return sp, up, ids, meta
+
+
+def _prompt_from_evidence(q: MCQQuestion, evidence_block: str) -> tuple[str, str]:
     if q.variant == MCQVariant.EASY:
         user = prompts.MCQ_EASY_USER.format(
             evidence_block=evidence_block,
             question=q.question,
             options_block=_options_block(q),
         )
-        return prompts.MCQ_SYSTEM, user, ids, meta
+        return prompts.MCQ_SYSTEM, user
     user = prompts.MCQ_HARD_USER.format(
         evidence_block=evidence_block,
         question=q.question,
         option_text=q.option_text or "",
     )
-    return prompts.MCQ_HARD_SYSTEM, user, ids, meta
+    return prompts.MCQ_HARD_SYSTEM, user
 
 
 _ANSWER_LINE = re.compile(r"ANSWER\s*[:\-]?\s*([A-Za-z]+)", re.IGNORECASE)
@@ -416,12 +501,27 @@ def run_system(system: str,
                backend,
                ctx: Optional[RetrievalContext] = None,
                *,
-               top_k: int = 8) -> list[MCQSystemAnswer]:
+               top_k: int = 8,
+               evidence: Optional[list[tuple[str, list[str], dict]]] = None,
+               max_tokens: Optional[int] = None) -> list[MCQSystemAnswer]:
+    """Answer ``questions`` with one system.
+
+    Optional (default-off) extras for eval v2: ``evidence`` supplies
+    precomputed ``evidence_for`` results aligned with ``questions`` (so the
+    same retrieval can be reused across option-order seeds), and
+    ``max_tokens`` is passed explicitly to the backend when given.
+    """
     if not questions:
         return []
+    if evidence is not None and len(evidence) != len(questions):
+        raise ValueError("evidence must align with questions")
     sys_prompts, user_prompts, ids_list, meta_list = [], [], [], []
-    for q in questions:
-        sp, up, ids, meta = build_prompt(system, q, ctx, top_k)
+    for qi, q in enumerate(questions):
+        if evidence is None:
+            sp, up, ids, meta = build_prompt(system, q, ctx, top_k)
+        else:
+            block, ids, meta = evidence[qi]
+            sp, up = _prompt_from_evidence(q, block)
         sys_prompts.append(sp)
         user_prompts.append(up)
         ids_list.append(ids)
@@ -431,7 +531,11 @@ def run_system(system: str,
     for sp in set(sys_prompts):
         idxs = [i for i, s in enumerate(sys_prompts) if s == sp]
         batch_prompts = [user_prompts[i] for i in idxs]
-        outputs = backend.generate(batch_prompts, system_prompt=sp)
+        if max_tokens is None:
+            outputs = backend.generate(batch_prompts, system_prompt=sp)
+        else:
+            outputs = backend.generate(batch_prompts, system_prompt=sp,
+                                       max_tokens=max_tokens)
         for i, out in zip(idxs, outputs):
             q = questions[i]
             meta = meta_list[i]

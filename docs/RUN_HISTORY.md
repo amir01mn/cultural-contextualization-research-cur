@@ -60,6 +60,33 @@ Every one of these failures now has a guard; see
 - The next lever is precision: culture matching, relevance gating, and
   abstention. Adding more structure is not.
 
+### Eval v2 (2026-09-27, branch `eval-v2`, protocol `docs/EVAL_V2_PLAN.md`)
+
+Same August KG (read-only), Qwen2.5-7B answering, phi-4 judge (not yet
+human-validated). SLURM jobs 4114354 (CultureBank), 4114356 (NormAd), 4114358
+(intrinsic + judge). Outputs: `data/outputs/eval_v2/`.
+
+- **CultureBank MCQ** (n=1,500, 3 option-order seeds): S0 78.6%, S1 91.4%
+  (+12.8), S2 +4.2, S3 +3.6, S3g +6.7, S4 −0.2 (n.s.), S4g −0.1 (n.s.).
+  Leakage guard: 0. Retrieval R@8 of the gold record: passages 0.875,
+  triples 0.82, pathways 0.47, which explains S4.
+- **CultureBank open-ended** (n=500, phi-4 entailment): S0 78.8%, S1 +10.6,
+  S3 +7.4, S4 +4.0, S4g +3.8 (all significant after Holm).
+- **Held-out** (n=300, gold records masked): S0 80.0%; every system 75.7–79.3%.
+  No generalization benefit from abstraction in this KG.
+- **NormAd** (n=2,315; 5.8% covered): ungated S1/S4 −2 pts vs country-only;
+  gated systems equal C1 (gating removes the harm). Covered subset (n=134):
+  S4 +7.5 pts (11/1 discordant, raw p=0.006, Holm p=0.07), the best system.
+- **Intrinsic**: fact retention raw/refined triples 92.8%/92.7%, pathways 28.7%;
+  FULL-pathway audit coherent 22.5%, culture-consistent 19%; triple audit
+  faithful 71.8%, layers correct 88.8%, stereotyping flag 26.6% (needs human check).
+- **CulturalBench by coverage** (re-scored August results): losses shrink with
+  coverage (S1 −18.9 → −8.6) but stay negative.
+
+Reading: the KG's triples help when the benchmark asks about knowledge they
+contain; the pathway builder is the bottleneck (low reachability, low
+coherence), not the layered representation.
+
 ## 2. Artifact lineage warnings
 
 - `data/processed/` and `data/outputs/` hold artifacts from **several runs at once**.
