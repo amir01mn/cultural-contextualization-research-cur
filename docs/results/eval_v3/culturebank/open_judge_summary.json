@@ -1,0 +1,113 @@
+{
+  "per_system": {
+    "S0": {
+      "mean_entailment": 0.792,
+      "n": 500
+    },
+    "S1": {
+      "mean_entailment": 0.888,
+      "n": 500
+    },
+    "S3g": {
+      "mean_entailment": 0.888,
+      "n": 500
+    },
+    "S4": {
+      "mean_entailment": 0.826,
+      "n": 500
+    },
+    "S4L": {
+      "mean_entailment": 0.884,
+      "n": 500
+    },
+    "S4R": {
+      "mean_entailment": 0.926,
+      "n": 500
+    }
+  },
+  "comparisons": {
+    "S4R vs S0": {
+      "system_a": "S4R",
+      "system_b": "S0",
+      "b_a_only": 76,
+      "c_b_only": 9,
+      "n_discordant": 85,
+      "delta_accuracy": 0.134,
+      "p_value": 0.0,
+      "method": "exact_binomial",
+      "n_paired": 500,
+      "delta_ci95": [
+        0.098,
+        0.17
+      ],
+      "p_holm": 0.0
+    },
+    "S4R vs S1": {
+      "system_a": "S4R",
+      "system_b": "S1",
+      "b_a_only": 30,
+      "c_b_only": 11,
+      "n_discordant": 41,
+      "delta_accuracy": 0.038,
+      "p_value": 0.004324,
+      "method": "exact_binomial",
+      "n_paired": 500,
+      "delta_ci95": [
+        0.014,
+        0.064
+      ],
+      "p_holm": 0.008648
+    },
+    "S4R vs S3g": {
+      "system_a": "S4R",
+      "system_b": "S3g",
+      "b_a_only": 30,
+      "c_b_only": 11,
+      "n_discordant": 41,
+      "delta_accuracy": 0.038,
+      "p_value": 0.004324,
+      "method": "exact_binomial",
+      "n_paired": 500,
+      "delta_ci95": [
+        0.014,
+        0.064
+      ],
+      "p_holm": 0.008648
+    },
+    "S4R vs S4": {
+      "system_a": "S4R",
+      "system_b": "S4",
+      "b_a_only": 59,
+      "c_b_only": 9,
+      "n_discordant": 68,
+      "delta_accuracy": 0.1,
+      "p_value": 0.0,
+      "method": "exact_binomial",
+      "n_paired": 500,
+      "delta_ci95": [
+        0.068,
+        0.132
+      ],
+      "p_holm": 0.0
+    },
+    "S4L vs S4": {
+      "system_a": "S4L",
+      "system_b": "S4",
+      "b_a_only": 37,
+      "c_b_only": 8,
+      "n_discordant": 45,
+      "delta_accuracy": 0.058,
+      "p_value": 1.5e-05,
+      "method": "exact_binomial",
+      "n_paired": 500,
+      "delta_ci95": [
+        0.032,
+        0.084
+      ],
+      "p_holm": 4.5e-05
+    }
+  },
+  "n_answers": 3000,
+  "n_unparsed_by_system": {},
+  "protocol": "CultureBank §6 knowledge entailment; judge yes=1/no=0; unparseable counted as 0; McNemar + paired bootstrap; Holm over the primary family"
+}
