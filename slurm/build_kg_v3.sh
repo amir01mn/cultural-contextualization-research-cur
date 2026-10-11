@@ -21,6 +21,9 @@ set -uo pipefail
 PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
 source "${PROJECT_DIR}/slurm/load_modules.sh"
 load_gpu_modules
+# vLLM cannot parse a MIG UUID in CUDA_VISIBLE_DEVICES; the job's cgroup exposes
+# only its own slice, so index 0 addresses it.
+if [[ "${CUDA_VISIBLE_DEVICES:-}" == MIG-* ]]; then export CUDA_VISIBLE_DEVICES=0; fi
 cd "$PROJECT_DIR"
 mkdir -p slurm/logs data/kg_v3 data/eval_v3
 
