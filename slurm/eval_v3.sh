@@ -43,7 +43,7 @@ export LLM_PROVIDER=vllm
 export EMBEDDING_BACKEND=sentence-transformers
 
 READY_FLAG="data/kg_v3/READY"
-[[ "$EVAL" == "culturebank_hard" ]] && READY_FLAG="data/eval_v3/culturebank_hard/READY"
+# culturebank_hard also needs data/eval_v3/culturebank_hard/READY (prep, written by the build job)
 if [[ ! -f "$READY_FLAG" ]]; then
   echo "Waiting for $READY_FLAG (warming imports) $(date)"
   python -c "import torch, vllm, transformers, sentence_transformers; print('imports warm')" &
