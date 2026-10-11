@@ -4,7 +4,7 @@ This page records what was run, which artifacts came from which run, where
 unmerged work lives, and which issues are still open. Update it whenever a run
 finishes or a branch changes state. The code cannot tell you any of this.
 
-Last updated: 2026-09-26.
+Last updated: 2026-10-10.
 
 ## 1. Runs, oldest first
 
@@ -87,6 +87,22 @@ Reading: the KG's triples help when the benchmark asks about knowledge they
 contain; the pathway builder is the bottleneck (low reachability, low
 coherence), not the layered representation.
 
+**Caveat found 2026-10-10 (eval-text leakage).** The August extraction prompt
+serialized the whole CultureBank row, including `eval_whole_desc` (the open-ended
+judge's reference). 30,273 of 186,691 refined triples (16%, 14,242 records) carry
+at least two content words found only in the eval columns (`src/core/leakage.py`,
+lexical proxy). The v2 leak guard checked verbatim containment only. Treat the v2
+CultureBank numbers for S2/S3/A3/S4 (most of all open-ended) and the 93% triple fact
+retention as upper bounds. S1 and NormAd are unaffected.
+
+### Eval v3 / KG v3 (2026-10-10, branch `kg-v3`, protocol `docs/EVAL_V3_PLAN.md`)
+
+In progress. Frame KG with abstraction routing (S4R), record-local pathways over
+the August triples (S4L), S3 switched to raw triples, eval-text triples dropped from
+all triple systems, build-time held-out KGs, hard-distractor MCQ, OLMo-2-7B as second
+answering model. Build job `slurm/build_kg_v3.sh`; evals `slurm/eval_v3.sh`.
+Outputs: `data/kg_v3/`, `data/outputs/eval_v3/`.
+
 ## 2. Artifact lineage warnings
 
 - `data/processed/` and `data/outputs/` hold artifacts from **several runs at once**.
@@ -138,11 +154,11 @@ split and the script renames.
 
 ## 4. Open issues
 
-1. **S3 does not match the design.** `RESEARCH_DESIGN.md` defines S3 as the raw
-   layered KG, but the code has fed it refined triples since `033425a`.
-   Consequences: S3 and the A3 ablation (`S4_triple_retrieval`) receive identical
-   evidence, and the refinement ablation A2 (S3 vs S4) is confounded. Decide
-   which one is intended, then fix either the code or the design.
+1. ~~**S3 does not match the design.**~~ **Resolved 2026-10-10:** S3 uses the raw
+   layered triples, as `RESEARCH_DESIGN.md` defines (fixed in `mcq_systems.py`).
+   S2 -> S3 now isolates layer labels, S3 -> A3 isolates critique-refinement and
+   A3 -> S4 isolates the retrieval unit. Runs before 2026-10-10 (August CulturalBench,
+   eval v2) used refined triples for S3, so their S3 equals A3.
 2. **Prompt-wording noise is about 3%.** S3 and A3 differ only in a one-line
    evidence header, yet they disagreed on 70 of 2,454 units. Treat smaller
    differences between systems with suspicion.
