@@ -48,6 +48,17 @@ RETRIEVAL_SYSTEMS = [
 ]
 GATED_SYSTEMS = {"S1g": ms.SYSTEM_S1, "S3g": ms.SYSTEM_S3, "S4g": ms.SYSTEM_S4}
 ALL_CONDITIONS = CONTEXT_CONDITIONS + RETRIEVAL_SYSTEMS + list(GATED_SYSTEMS)
+# KG v3 (docs/EVAL_V3_PLAN.md). S4R* "tau" is (tau_ref, tau_abs), tuned on dev.
+V3_RETRIEVAL = {"S4L": ms.SYSTEM_S4_LOCAL, "S4F": ms.SYSTEM_S4F}
+FRAME_TUNED = {"S4R": ms.SYSTEM_S4R, "S4R_noabs": ms.SYSTEM_S4R_NOABS}
+FRAME_GRID = tuple((r, a) for r in (0.3, 0.4, 0.5, 0.6) for a in (0.3, 0.4, 0.5))
+FRAME_GRID_NOABS = tuple((r, 1.01) for r in (0.3, 0.4, 0.5, 0.6))
+V3_CONDITIONS = (CONTEXT_CONDITIONS + [ms.SYSTEM_S1, ms.SYSTEM_S2, ms.SYSTEM_S3, ms.SYSTEM_S4,
+                                       ms.SYSTEM_S4_TRIPLE, "S1g", "S3g"]
+                 + list(V3_RETRIEVAL) + list(FRAME_TUNED))
+V3_PRIMARY = [("S4R", C1), ("S4R", ms.SYSTEM_S1), ("S4R", "S3g"), ("S4R", ms.SYSTEM_S4),
+              ("S4R", "S4R_noabs"), ("S4F", ms.SYSTEM_S4), ("S4L", ms.SYSTEM_S4)]
+KNOWN_CONDITIONS = list(dict.fromkeys(ALL_CONDITIONS + V3_CONDITIONS))
 DESCRIPTOR_BINS = ("<20", "20-99", ">=100")
 
 
@@ -192,6 +203,21 @@ def primary_comparisons(present: Iterable[str]) -> list[tuple[str, str]]:
     return pairs
 
 
+def _tests(vecs: dict, pairs: list) -> dict:
+    tests = {}
+    for a, b in pairs:
+        if not vecs.get(a) or len(vecs[a]) != len(vecs.get(b, [])):
+            continue
+        t = mcnemar(vecs[a], vecs[b])
+        t.update({f"boot_{k}": v for k, v in paired_bootstrap_delta(vecs[a], vecs[b]).items()
+                  if k != "delta"})
+        tests[f"{a} vs {b}"] = t
+    adj = holm({k: t["p_value"] for k, t in tests.items()})
+    for k in tests:
+        tests[k]["p_holm"] = round(adj[k], 6)
+    return tests
+
+
 def subset_metrics(records_by_cond: dict[str, list[dict]], keep) -> dict:
     """Metrics for every condition over the items where ``keep(record)`` holds."""
     out: dict = {"conditions": {}}
@@ -212,6 +238,8 @@ def subset_metrics(records_by_cond: dict[str, list[dict]], keep) -> dict:
         for cond, m in conds.items():
             g = gap_closed(accuracy(vecs[cond]), accuracy(vecs[C1]), accuracy(vecs[C3]))
             m["gap_closed"] = None if g is None else round(g, 4)
+    out["tests_v3_primary_holm"] = _tests(vecs, [(a, b) for a, b in V3_PRIMARY
+                                                 if a in conds and b in conds])
     tests = {}
     for a, b in primary_comparisons(conds):
         if not vecs.get(a) or len(vecs[a]) != len(vecs.get(b, [])):
@@ -238,6 +266,17 @@ def subset_metrics(records_by_cond: dict[str, list[dict]], keep) -> dict:
 # ---------------------------------------------------------------------------
 
 @contextmanager
+def frame_routing(tau):
+    """Temporarily set the S4R routing thresholds (tau_ref, tau_abs)."""
+    old = (config.FRAME_TAU_REF, config.FRAME_TAU_ABS)
+    config.FRAME_TAU_REF, config.FRAME_TAU_ABS = (float(x) for x in tau)
+    try:
+        yield
+    finally:
+        config.FRAME_TAU_REF, config.FRAME_TAU_ABS = old
+
+
+@contextmanager
 def gated_retrieval(tau: float):
     """Temporarily enable the relevance gate; config is always restored."""
     old = (config.RETRIEVAL_STRICT_CULTURE, config.RETRIEVAL_MIN_SCORE)
@@ -262,8 +301,9 @@ def run_condition(condition: str, backend, ctx, stories: list[dict], *,
     Returns (per-item records, timing dict).
     """
     t0 = time.time()
-    base_system = GATED_SYSTEMS.get(condition, condition)
-    is_retrieval = base_system in RETRIEVAL_SYSTEMS
+    base_system = (GATED_SYSTEMS.get(condition) or V3_RETRIEVAL.get(condition)
+                   or FRAME_TUNED.get(condition) or condition)
+    is_retrieval = base_system in RETRIEVAL_SYSTEMS or base_system in ms.V3_SYSTEMS
     evid: list[tuple[str, list[str]]] = []
     if is_retrieval:
         def _retrieve():
@@ -273,6 +313,11 @@ def run_condition(condition: str, backend, ctx, stories: list[dict], *,
             if tau is None:
                 raise ValueError(f"{condition} needs a tau")
             with gated_retrieval(tau):
+                evid = _retrieve()
+        elif condition in FRAME_TUNED:
+            if tau is None:
+                raise ValueError(f"{condition} needs (tau_ref, tau_abs)")
+            with frame_routing(tau):
                 evid = _retrieve()
         else:
             evid = _retrieve()
@@ -307,13 +352,17 @@ def tune_taus(backend, ctx, dev_stories: list[dict], *, top_k: int = 8,
     result = {}
     for g in gated:
         scores = {}
-        for tau in grid:
+        g_grid = (FRAME_GRID if g == "S4R" else FRAME_GRID_NOABS) if g in FRAME_TUNED else grid
+        for tau in g_grid:
             recs, _ = run_condition(g, backend, ctx, dev_stories, top_k=top_k, tau=tau,
                                     max_tokens=max_tokens)
             scores[tau] = accuracy([int(r["correct"]) for r in recs])
-        best = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        if g in FRAME_TUNED:  # ties -> stricter refinement gate (as CultureBank)
+            best = sorted(scores.items(), key=lambda kv: (-kv[1], -kv[0][0], -kv[0][1]))[0][0]
+        else:
+            best = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
         result[g] = {"tau": best, "dev_accuracy": {str(k): round(v, 4) for k, v in scores.items()}}
-        LOGGER.info("NormAd tau for %s: %.2f  (dev %s)", g, best, result[g]["dev_accuracy"])
+        LOGGER.info("NormAd tau for %s: %s  (dev %s)", g, best, result[g]["dev_accuracy"])
     return result
 
 
@@ -330,7 +379,7 @@ def run_normad(backend, ctx, test_stories: list[dict], out_dir: Path, *,
     conditions = conditions or list(ALL_CONDITIONS)
     timings: dict[str, dict] = {}
     tau_info: dict = {}
-    gated_needed = [c for c in conditions if c in GATED_SYSTEMS]
+    gated_needed = [c for c in conditions if c in GATED_SYSTEMS or c in FRAME_TUNED]
     taus = dict(taus or {})
     missing = [g for g in gated_needed if g not in taus]
     if missing:
@@ -385,7 +434,7 @@ def _fmt(x) -> str:
 
 
 def render_summary_md(summary: dict) -> str:
-    lines = ["# NormAd (eval v2, Evaluation 2)", "",
+    lines = [f"# {summary.get('run_meta', {}).get('title') or 'NormAd (eval v2, Evaluation 2)'}", "",
              f"Test stories: {summary['n_test']} (covered: {summary['n_covered']}). "
              f"top_k={summary['top_k']}, max_tokens={summary['max_tokens']}, "
              f"temperature={summary['temperature']}.",
@@ -397,6 +446,14 @@ def render_summary_md(summary: dict) -> str:
         for cond, m in sub["conditions"].items():
             lines.append(f"| {cond} | {m['n']} | {_fmt(m['accuracy'])} | {_fmt(m['macro_f1'])} | "
                          f"{_fmt(m.get('gap_closed'))} | {m['unparsed']} | {m['evidence_nonempty']} |")
+        if sub.get("tests_v3_primary_holm"):
+            lines += ["", "KG v3 primary family (pre-registered, Holm over these only):", "",
+                      "| comparison | delta | a-only/b-only | McNemar p | Holm p | bootstrap 95% CI |",
+                      "|---|---|---|---|---|---|"]
+            for k, t in sub["tests_v3_primary_holm"].items():
+                lines.append(f"| {k} | {t['delta_accuracy']:+.4f} | {t['b_a_only']}/{t['c_b_only']} | "
+                             f"{t['p_value']:.4g} | {t['p_holm']:.4g} | "
+                             f"[{t['boot_ci_low']:+.4f}, {t['boot_ci_high']:+.4f}] |")
         if sub["tests_primary_holm"]:
             lines += ["", "| comparison | delta | a-only/b-only | McNemar p | Holm p | bootstrap 95% CI |",
                       "|---|---|---|---|---|---|"]

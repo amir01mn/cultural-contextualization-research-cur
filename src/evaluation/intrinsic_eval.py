@@ -436,6 +436,8 @@ _CANONICAL_SYSTEMS = {"S0": "S0_no_kg", "S1": "S1_raw_text_rag", "S2": "S2_flat_
                       "S3": "S3_layered_kg", "S4": "S4_abstraction_refinement_kg"}
 PRIMARY_COMPARISONS = [("S1", "S0"), ("S3", "S0"), ("S4", "S0"), ("S4g", "S0"),
                        ("S4", "S1"), ("S4g", "S4")]
+# KG v3 open-ended family (docs/EVAL_V3_PLAN.md)
+V3_COMPARISONS = [("S4R", "S0"), ("S4R", "S1"), ("S4R", "S3g"), ("S4R", "S4"), ("S4L", "S4")]
 
 
 def resolve_system(label: str, systems: Iterable[str]) -> Optional[str]:
@@ -502,7 +504,7 @@ def compare_systems(scores: dict[str, dict[str, int]], *, n_boot: int = 10000,
 
 def run_open_judge(backend, answers: list[dict], out_dir: Path, *,
                    max_tokens: Optional[int] = None, limit: Optional[int] = None,
-                   n_boot: int = 10000, **_: Any) -> dict:
+                   n_boot: int = 10000, comparisons=PRIMARY_COMPARISONS, **_: Any) -> dict:
     if limit:  # cap by question (all systems of the first ``limit`` qids) to keep pairs
         keep = list(dict.fromkeys(str(a["qid"]) for a in answers))[:limit]
         answers = [a for a in answers if str(a["qid"]) in set(keep)]
@@ -525,7 +527,7 @@ def run_open_judge(backend, answers: list[dict], out_dir: Path, *,
                      "entails": verdict, "score": score, "raw_output": raw})
     out_dir = ensure_dir(out_dir)
     write_jsonl(out_dir / "open_judge.jsonl", rows)
-    summary = compare_systems(dict(scores), n_boot=n_boot)
+    summary = compare_systems(dict(scores), n_boot=n_boot, comparisons=comparisons)
     summary.update({"n_answers": len(rows), "n_unparsed_by_system": dict(n_unparsed),
                     "protocol": "CultureBank §6 knowledge entailment; judge yes=1/no=0; "
                                 "unparseable counted as 0; McNemar + paired bootstrap; "

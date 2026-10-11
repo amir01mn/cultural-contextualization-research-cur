@@ -73,6 +73,9 @@ def main(argv=None) -> None:
     p.add_argument("--max_tokens", type=int, default=None)
     p.add_argument("--data_dir", default=str(DATA_DIR))
     p.add_argument("--out_dir", default=None)
+    p.add_argument("--kg_v3", default=None, help="KG v3 dir (frames + local pathways)")
+    p.add_argument("--drop_eval_leak_triples", action="store_true")
+    p.add_argument("--title", default=None)
     args = p.parse_args(argv)
 
     if args.smoke:
@@ -100,14 +103,15 @@ def main(argv=None) -> None:
     assert not ({s["id"] for s in test} & {s["id"] for s in dev}), "dev/test overlap"
     conditions = ([c.strip() for c in args.conditions.split(",") if c.strip()]
                   if args.conditions else list(ne.ALL_CONDITIONS))
-    bad = [c for c in conditions if c not in ne.ALL_CONDITIONS]
+    bad = [c for c in conditions if c not in ne.KNOWN_CONDITIONS]
     if bad:
-        LOGGER.error("Unknown conditions %s; valid: %s", bad, ne.ALL_CONDITIONS)
+        LOGGER.error("Unknown conditions %s; valid: %s", bad, ne.KNOWN_CONDITIONS)
         sys.exit(2)
     LOGGER.info("NormAd: %d test, %d dev stories; conditions=%s", len(test), len(dev), conditions)
 
     t0 = time.time()
-    ctx = build_retrieval_context()
+    ctx = build_retrieval_context(kg_v3_dir=Path(args.kg_v3) if args.kg_v3 else None,
+                                  drop_eval_leak_triples=args.drop_eval_leak_triples)
     stage_times["retrieval_context_s"] = round(time.time() - t0, 1)
 
     t0 = time.time()
@@ -134,6 +138,8 @@ def main(argv=None) -> None:
         "data_dir": str(data_dir),
         "prep_meta": json.loads((data_dir / "prep_meta.json").read_text()).get("embedding_method")
         if (data_dir / "prep_meta.json").exists() else None,
+        "kg_v3": args.kg_v3, "drop_eval_leak_triples": args.drop_eval_leak_triples,
+        "title": args.title,
     }
     kwargs = {"max_tokens": args.max_tokens} if args.max_tokens else {}
     summary = ne.run_normad(backend, ctx, test, out_dir, dev_stories=dev, conditions=conditions,

@@ -88,6 +88,14 @@ def main(argv=None) -> int:
                    help="Fake backend + TF-IDF + tiny subset, output to culturebank_smoke/.")
     p.add_argument("--limit", type=int, default=None,
                    help="Items per group (dev / heldout / open / other test). Smoke default 6.")
+    # KG v3 (docs/EVAL_V3_PLAN.md)
+    p.add_argument("--systems", default=None, help="MCQ/held-out/retrieval systems (comma list)")
+    p.add_argument("--open_systems", default=None, help="open-ended systems (comma list)")
+    p.add_argument("--kg_v3", default=None, help="KG v3 dir (loads frames + local pathways)")
+    p.add_argument("--drop_eval_leak_triples", action="store_true",
+                   help="drop August triples carrying CultureBank eval-column wording")
+    p.add_argument("--para_cache", default=None, help="paraphrase cache (default: data_dir)")
+    p.add_argument("--title", default=None)
     args = p.parse_args(argv)
 
     if args.smoke:
@@ -119,7 +127,8 @@ def main(argv=None) -> int:
         for f in out_dir.iterdir():
             if f.is_file():
                 f.unlink()
-    para_cache = (out_dir if args.smoke else data_dir) / "mcq_paraphrased.jsonl"
+    para_cache = Path(args.para_cache) if args.para_cache else (
+        (out_dir if args.smoke else data_dir) / "mcq_paraphrased.jsonl")
 
     data = {
         "dev": read_jsonl_items(data_dir / "dev.jsonl"),
@@ -137,7 +146,9 @@ def main(argv=None) -> int:
 
     timings: dict = {}
     t0 = time.time()
-    ctx = build_retrieval_context()
+    ctx = build_retrieval_context(
+        kg_v3_dir=Path(args.kg_v3) if args.kg_v3 else None,
+        drop_eval_leak_triples=args.drop_eval_leak_triples)
     timings["load_context"] = round(time.time() - t0, 1)
     log.info("RetrievalContext ready in %.0fs", timings["load_context"])
 
@@ -159,6 +170,16 @@ def main(argv=None) -> int:
     cache: dict = {}
     leak_log: dict = {}
     common = dict(top_k=top_k, cache=cache, leak_log=leak_log)
+    sys_kw, open_kw, retr_kw = {}, {}, {}
+    if args.systems:
+        sys_kw["systems"] = [x.strip() for x in args.systems.split(",") if x.strip()]
+        retr_kw["systems"] = [x for x in sys_kw["systems"] if x != "S0"]
+        bad = [x for x in sys_kw["systems"] if x not in cg.SYSTEM_IDS]
+        if bad:
+            log.error("Unknown systems %s", bad)
+            return 2
+    if args.open_systems:
+        open_kw["systems"] = [x.strip() for x in args.open_systems.split(",") if x.strip()]
     results = {}
     for stage in stages:
         t0 = time.time()
@@ -168,15 +189,16 @@ def main(argv=None) -> int:
             results[stage] = cg.run_paraphrase(backend, ctx, data, out_dir, cache_path=para_cache)
         elif stage == "open_gen":
             results[stage] = cg.run_open_gen(backend, ctx, data, out_dir,
-                                             paraphrases=paraphrases, **common)
+                                             paraphrases=paraphrases, **common, **open_kw)
         elif stage == "mcq":
             results[stage] = cg.run_mcq(backend, ctx, data, out_dir,
-                                        paraphrases=paraphrases, **common)
+                                        paraphrases=paraphrases, **common, **sys_kw)
         elif stage == "heldout":
             results[stage] = cg.run_heldout(backend, ctx, data, out_dir,
-                                            paraphrases=paraphrases, **common)
+                                            paraphrases=paraphrases, **common, **sys_kw)
         elif stage == "retrieval_metrics":
-            results[stage] = cg.run_retrieval_metrics(backend, ctx, data, out_dir, **common)
+            results[stage] = cg.run_retrieval_metrics(backend, ctx, data, out_dir, **common,
+                                                      **retr_kw)
         timings[stage] = round(time.time() - t0, 1)
         log.info("stage %s done in %.0fs", stage, timings[stage])
 
@@ -198,7 +220,12 @@ def main(argv=None) -> int:
         "max_tokens": {"paraphrase": cg.PARAPHRASE_MAX_TOKENS, "mcq": cg.MCQ_MAX_TOKENS,
                        "open": cg.OPEN_MAX_TOKENS},
         "data_dir": str(data_dir),
+        "kg_v3": args.kg_v3, "drop_eval_leak_triples": args.drop_eval_leak_triples,
+        "systems": sys_kw.get("systems"), "open_systems": open_kw.get("systems"),
+        "para_cache": str(para_cache),
     }
+    if args.title:
+        run_meta["title"] = args.title
     (out_dir / "run_meta.json").write_text(json.dumps(run_meta, indent=2), encoding="utf-8")
     cg.write_summary(out_dir, run_meta=run_meta, n_boot=200 if args.smoke else args.n_boot)
     log.info("Stage wall times (s): %s", timings)

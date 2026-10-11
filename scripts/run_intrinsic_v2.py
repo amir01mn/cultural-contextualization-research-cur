@@ -123,6 +123,10 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=None, help="per-stage item cap")
     ap.add_argument("--n_boot", type=int, default=10000)
     ap.add_argument("--smoke", action="store_true")
+    # KG v3: audit other pathway files; v3 open-ended comparison family.
+    ap.add_argument("--pathway_files", default=None,
+                    help="comma list of name=path JSONL files to audit (one pathway_audit each)")
+    ap.add_argument("--v3_comparisons", action="store_true")
     args = ap.parse_args()
 
     stages = [s.strip() for s in args.stages.split(",") if s.strip()]
@@ -139,9 +143,11 @@ def main() -> int:
     out_dir = ensure_dir(args.out_dir or OUT_DIR)
     open_out_dir = args.open_out_dir or CB_OUT_DIR
 
-    records = list(read_jsonl(args.data_dir / "records.jsonl"))
-    triples = list(read_jsonl(args.data_dir / "triples.jsonl"))
-    pathways = list(read_jsonl(args.data_dir / "pathways.jsonl"))
+    def _maybe(name):
+        f = args.data_dir / name
+        return list(read_jsonl(f)) if f.exists() else []
+    records, triples, pathways = (_maybe("records.jsonl"), _maybe("triples.jsonl"),
+                                  _maybe("pathways.jsonl"))
     LOGGER.info("Prep: %d records, %d triples, %d pathways", len(records), len(triples),
                 len(pathways))
 
@@ -190,7 +196,14 @@ def main() -> int:
                                                        out_dir, **cfg))
     if "triple_audit" in stages:
         _run("triple_audit", lambda: ie.run_triple_audit(backend, triples, out_dir, **cfg))
-    if "pathway_audit" in stages:
+    if "pathway_audit" in stages and args.pathway_files:
+        for spec in args.pathway_files.split(","):
+            name, path = spec.split("=", 1)
+            pws = list(read_jsonl(Path(path)))
+            sub = ensure_dir(out_dir / f"pathway_audit_{name}")
+            _run(f"pathway_audit_{name}",
+                 lambda pws=pws, sub=sub: ie.run_pathway_audit(backend, pws, sub, **cfg))
+    elif "pathway_audit" in stages:
         _run("pathway_audit", lambda: ie.run_pathway_audit(backend, pathways, out_dir, **cfg))
 
     if "open_judge" in stages:
@@ -203,8 +216,9 @@ def main() -> int:
         else:
             answers = list(read_jsonl(args.open_answers))
             LOGGER.info("open_judge: %d answers from %s", len(answers), args.open_answers)
+            comps = ie.V3_COMPARISONS if args.v3_comparisons else ie.PRIMARY_COMPARISONS
             _run("open_judge", lambda: ie.run_open_judge(
-                backend, answers, open_out_dir, n_boot=args.n_boot, **cfg))
+                backend, answers, open_out_dir, n_boot=args.n_boot, comparisons=comps, **cfg))
 
     n_prompts = sum(c["n"] for c in getattr(backend, "calls", []))
     LOGGER.info("Stage wall times (s): %s", timings)

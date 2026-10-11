@@ -8,7 +8,7 @@ evidence/structure:
     S0 No-KG          : question + options only (closed-book).
     S1 Raw-text RAG   : retrieved raw CultureBank passages.
     S2 Flat KG        : retrieved triples as a bag, layer labels stripped.
-    S3 Layered KG     : retrieved triples WITH abstraction-layer labels.
+    S3 Layered KG     : retrieved raw triples WITH abstraction-layer labels.
     S4 Pathway KG     : retrieved abstraction→refinement pathways (Phase 3).
     S4 ablations      : triple-retrieval on refined corpus; no shared pivots.
 
@@ -23,6 +23,12 @@ from typing import Optional
 
 from ..core import config
 from ..llm import prompts
+from ..retrieval.frame_retriever import (
+    FrameRetriever,
+    render_frames,
+    render_route,
+    route_ids,
+)
 from ..retrieval.pathway_retriever import PathwayRetriever
 from ..retrieval.retrieval_ranking import culture_match_score
 from ..retrieval.retriever import TextRetriever, TripleRetriever
@@ -46,6 +52,12 @@ SYSTEM_S3 = "S3_layered_kg"
 SYSTEM_S4 = "S4_abstraction_refinement_kg"
 SYSTEM_S4_TRIPLE = "S4_triple_retrieval"
 SYSTEM_S4_NO_SHARED = "S4_no_shared_pivot"
+# KG v3 (docs/EVAL_V3_PLAN.md)
+SYSTEM_S4_LOCAL = "S4_local_pathways"        # record-local pathways, August triples
+SYSTEM_S4F = "S4F_frame_kg"                  # frame KG, always inject
+SYSTEM_S4R = "S4R_routed_frame_kg"           # frame KG, refine / abstract / none
+SYSTEM_S4R_NOABS = "S4R_no_abstraction"      # ablation: refine / none
+V3_SYSTEMS = [SYSTEM_S4_LOCAL, SYSTEM_S4F, SYSTEM_S4R, SYSTEM_S4R_NOABS]
 
 ALL_SYSTEMS = [
     SYSTEM_S0, SYSTEM_S1, SYSTEM_S2, SYSTEM_S3,
@@ -75,13 +87,17 @@ class RetrievalContext:
                  passages: Optional[list[dict]] = None,
                  triples: Optional[list[CulturalTriple]] = None,
                  refined_triples: Optional[list[CulturalTriple]] = None,
-                 pathway_retriever: Optional[PathwayRetriever] = None):
+                 pathway_retriever: Optional[PathwayRetriever] = None,
+                 local_pathway_retriever: Optional[PathwayRetriever] = None,
+                 frame_retriever: Optional[FrameRetriever] = None):
         self.passage_retriever = TextRetriever(passages or []) if passages else None
         self.triple_retriever = TripleRetriever(triples or []) if triples else None
         self.refined_triple_retriever = (
             TripleRetriever(refined_triples or []) if refined_triples else None
         )
         self.pathway_retriever = pathway_retriever
+        self.local_pathway_retriever = local_pathway_retriever
+        self.frame_retriever = frame_retriever
         LOGGER.info(
             "RetrievalContext: passages=%s raw_triples=%s refined_triples=%s pathways=%d",
             self.passage_retriever.backend if self.passage_retriever else "none",
@@ -96,6 +112,8 @@ class RetrievalContext:
         self.triple_mask = None
         self.refined_triple_mask = None
         self.pathway_mask = None
+        self.local_pathway_mask = None
+        self.frame_mask = None
         self._triple_to_instance: Optional[dict[str, str]] = None
 
     def triple_to_instance(self) -> dict[str, str]:
@@ -117,6 +135,7 @@ class RetrievalContext:
             self.masked_instance_ids = None
             self.passage_mask = self.triple_mask = None
             self.refined_triple_mask = self.pathway_mask = None
+            self.local_pathway_mask = self.frame_mask = None
             return
         ids = frozenset(instance_ids)
         self.masked_instance_ids = ids
@@ -130,6 +149,11 @@ class RetrievalContext:
         self.pathway_mask = (
             self.pathway_retriever.mask_for_instance_ids(ids, self.triple_to_instance())
             if self.pathway_retriever and self.pathway_retriever.pathways else None)
+        self.local_pathway_mask = (
+            self.local_pathway_retriever.mask_for_instance_ids(ids, self.triple_to_instance())
+            if self.local_pathway_retriever and self.local_pathway_retriever.pathways else None)
+        self.frame_mask = (self.frame_retriever.mask_for_instance_ids(ids)
+                           if self.frame_retriever else None)
         LOGGER.info(
             "Evidence mask set: %d instance_ids -> passages=%s triples=%s refined=%s pathways=%s",
             len(ids),
@@ -150,6 +174,10 @@ class RetrievalContext:
             return self.refined_triple_mask
         if retriever is self.pathway_retriever:
             return self.pathway_mask
+        if retriever is self.local_pathway_retriever:
+            return self.local_pathway_mask
+        if retriever is self.frame_retriever:
+            return self.frame_mask
         return None
 
 
@@ -296,6 +324,8 @@ def _format_pathway(pw: CulturalPathway, index: int) -> str:
         lines.append("  [shared abstraction pivot across cultures]")
     if pw.generated:
         lines.append("  [inferred - treat as uncertain]")
+    if pw.source_text:
+        lines.append(f"  source description: {pw.source_text}")
     return "\n".join(lines)
 
 
@@ -368,17 +398,19 @@ def _layered_triple_evidence(ctx: RetrievalContext, query: str, top_k: int,
 
 def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
                       q: MCQQuestion, *,
-                      exclude_shared: bool = False) -> tuple[str, list[str], dict]:
-    if not ctx.pathway_retriever:
+                      exclude_shared: bool = False,
+                      retriever: Optional[PathwayRetriever] = None) -> tuple[str, list[str], dict]:
+    retriever = retriever or ctx.pathway_retriever
+    if not retriever:
         return "", [], {
             "completeness": PathwayCompleteness.NONE.value,
             "completeness_score": 0.0,
             "shared_node_available": False,
         }
-    hits = ctx.pathway_retriever.retrieve(
+    hits = retriever.retrieve(
         query, top_k=max(top_k * config.RETRIEVAL_CANDIDATE_MULTIPLIER, top_k),
         question_culture=q.cultural_group,
-        **_mask_kw(ctx, ctx.pathway_retriever))
+        **_mask_kw(ctx, retriever))
     ranked = _rank_pathways(hits, q.cultural_group, exclude_shared=exclude_shared)[:top_k]
     lines, ids, pathways = [], [], []
     for i, (pw, _score) in enumerate(ranked, 1):
@@ -388,6 +420,41 @@ def _pathway_evidence(ctx: RetrievalContext, query: str, top_k: int,
     bucket, score, shared = _completeness_from_pathways(pathways)
     meta = {"completeness": bucket, "completeness_score": score, "shared_node_available": shared}
     return "\n".join(lines), ids, meta
+
+
+def _frame_evidence(ctx: RetrievalContext, query: str, top_k: int,
+                    q: MCQQuestion) -> tuple[str, list[str], dict]:
+    fr = ctx.frame_retriever
+    if not fr:
+        return "", [], {"completeness": PathwayCompleteness.NONE.value,
+                        "completeness_score": 0.0, "shared_node_available": False}
+    hits = fr.retrieve(query, top_k=top_k, question_culture=q.cultural_group,
+                       **_mask_kw(ctx, fr))
+    frames = [f for f, _ in hits]
+    meta = {"completeness": PathwayCompleteness.FULL.value if frames else
+            PathwayCompleteness.NONE.value, "completeness_score": 1.0 if frames else 0.0,
+            "shared_node_available": any(f.norm_type_id for f in frames)}
+    return render_frames(frames, fr.nt_by_id), [f.frame_id for f in frames], meta
+
+
+def _routed_evidence(ctx: RetrievalContext, query: str, top_k: int, q: MCQQuestion, *,
+                     allow_abstraction: bool) -> tuple[str, list[str], dict]:
+    fr = ctx.frame_retriever
+    if not fr:
+        return "", [], {"completeness": PathwayCompleteness.NONE.value,
+                        "completeness_score": 0.0, "shared_node_available": False,
+                        "route": "none"}
+    r = fr.route(query, q.cultural_group, top_k=top_k, tau_ref=config.FRAME_TAU_REF,
+                 tau_abs=config.FRAME_TAU_ABS, allow_abstraction=allow_abstraction,
+                 **_mask_kw(ctx, fr))
+    body = render_route(r, fr.profiles, fr.nt_by_id, q.cultural_group or "this group")
+    meta = {"completeness": PathwayCompleteness.FULL.value if r["mode"] != "none" else
+            PathwayCompleteness.NONE.value,
+            "completeness_score": 1.0 if r["mode"] != "none" else 0.0,
+            "shared_node_available": r["mode"] == "abstract",
+            "route": r["mode"], "best_same_culture": r["best_same_culture"],
+            "best_norm_type": r["best_norm_type"]}
+    return body, route_ids(r), meta
 
 
 def _evidence_for(system: str, ctx: Optional[RetrievalContext],
@@ -405,7 +472,11 @@ def _evidence_for(system: str, ctx: Optional[RetrievalContext],
     elif system == SYSTEM_S2:
         body, ids, meta = _flat_triple_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S3:
-        body, ids, meta = _layered_triple_evidence(ctx, query, top_k, q)
+        # Raw layered triples, as RESEARCH_DESIGN.md defines S3. Refined triples
+        # are the A3 ablation (S4_triple_retrieval), so S3 -> A3 isolates the
+        # effect of critique-refinement.
+        retriever = ctx.triple_retriever or ctx.refined_triple_retriever
+        body, ids, meta = _layered_triple_evidence(ctx, query, top_k, q, retriever=retriever)
     elif system == SYSTEM_S4:
         body, ids, meta = _pathway_evidence(ctx, query, top_k, q)
     elif system == SYSTEM_S4_NO_SHARED:
@@ -413,6 +484,15 @@ def _evidence_for(system: str, ctx: Optional[RetrievalContext],
     elif system == SYSTEM_S4_TRIPLE:
         retriever = ctx.refined_triple_retriever or ctx.triple_retriever
         body, ids, meta = _layered_triple_evidence(ctx, query, top_k, q, retriever=retriever)
+    elif system == SYSTEM_S4_LOCAL:
+        body, ids, meta = _pathway_evidence(ctx, query, top_k, q,
+                                            retriever=ctx.local_pathway_retriever)
+    elif system == SYSTEM_S4F:
+        body, ids, meta = _frame_evidence(ctx, query, top_k, q)
+    elif system == SYSTEM_S4R:
+        body, ids, meta = _routed_evidence(ctx, query, top_k, q, allow_abstraction=True)
+    elif system == SYSTEM_S4R_NOABS:
+        body, ids, meta = _routed_evidence(ctx, query, top_k, q, allow_abstraction=False)
     else:
         return "", [], empty_meta
     if not body:

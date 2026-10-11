@@ -176,6 +176,14 @@ RETRIEVAL_MAX_PER_CULTURE = int(os.getenv("RETRIEVAL_MAX_PER_CULTURE", "3"))
 # question culture is dropped rather than ranked last, so a question with no
 # same-culture evidence above RETRIEVAL_MIN_SCORE is answered closed-book.
 RETRIEVAL_STRICT_CULTURE = _get_bool("RETRIEVAL_STRICT_CULTURE", False)
+
+# KG v3 routing thresholds (S4R; docs/EVAL_V3_PLAN.md). tau_ref: a same-culture
+# frame must score at least this to take the refinement route. tau_abs: a norm
+# type must score at least this to take the abstraction route. Tuned on each
+# evaluation's dev split, then frozen.
+FRAME_TAU_REF = float(os.getenv("FRAME_TAU_REF", "0.45"))
+FRAME_TAU_ABS = float(os.getenv("FRAME_TAU_ABS", "0.35"))
+KG_V3_DIR = Path(os.getenv("KG_V3_DIR", str(DATA_DIR / "kg_v3")))
 # Include answer options in the retrieval query. Off by default: distractor text
 # pulls in evidence supporting wrong options.
 RETRIEVAL_QUERY_INCLUDES_OPTIONS = _get_bool("RETRIEVAL_QUERY_INCLUDES_OPTIONS", False)
