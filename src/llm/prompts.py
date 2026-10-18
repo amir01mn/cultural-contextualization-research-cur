@@ -120,7 +120,7 @@ Remember:
 - Do not add unsupported cultural claims."""
 
 
-# --- Critique --------------------------------------------------------------
+# --- Critique -------------------------------------------------------------
 
 CRITIQUE_SYSTEM = """You are a cultural knowledge graph critique agent.
 
