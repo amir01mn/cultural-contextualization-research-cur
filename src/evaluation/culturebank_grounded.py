@@ -44,8 +44,24 @@ SYSTEM_IDS = {
     "S1g": ms.SYSTEM_S1,
     "S3g": ms.SYSTEM_S3,
     "S4g": ms.SYSTEM_S4,
+    # KG v3 (docs/EVAL_V3_PLAN.md)
+    "S4L": ms.SYSTEM_S4_LOCAL,
+    "S4F": ms.SYSTEM_S4F,
+    "S4R": ms.SYSTEM_S4R,
+    "S4R_noabs": ms.SYSTEM_S4R_NOABS,
 }
 GATED = ("S1g", "S3g", "S4g")
+# Routed frame systems: "tau" is (tau_ref, tau_abs), tuned on dev like GATED.
+FRAME_TUNED = ("S4R", "S4R_noabs")
+TUNED = GATED + FRAME_TUNED
+FRAME_GRID = tuple((r, a) for r in (0.3, 0.4, 0.5, 0.6) for a in (0.3, 0.4, 0.5))
+FRAME_GRID_NOABS = tuple((r, 1.01) for r in (0.3, 0.4, 0.5, 0.6))
+V3_MCQ_SYSTEMS = ["S0", "S1", "S1g", "S2", "S3", "S3g", "S4_triple_retrieval", "S4",
+                  "S4L", "S4F", "S4R", "S4R_noabs"]
+V3_OPEN_SYSTEMS = ["S0", "S1", "S3g", "S4", "S4L", "S4R"]
+# Pre-registered v3 primary family (docs/EVAL_V3_PLAN.md), Holm over these only.
+V3_PRIMARY = [("S4R", "S0"), ("S4R", "S1"), ("S4R", "S3g"), ("S4R", "S4"),
+              ("S4R", "S4R_noabs"), ("S4F", "S4"), ("S4L", "S4")]
 MCQ_SYSTEMS = ["S0", "S1", "S2", "S3", "S4", "S4_triple_retrieval",
                "S4_no_shared_pivot", "S1g", "S3g", "S4g"]
 OPEN_SYSTEMS = ["S0", "S1", "S3", "S4", "S4g"]
@@ -88,16 +104,22 @@ def _write_json(path: Path, obj) -> None:
 @contextlib.contextmanager
 def gated_config(label: str, tau: Optional[float]):
     """Apply the relevance gate for ``*g`` labels; always restore config."""
-    old = (config.RETRIEVAL_STRICT_CULTURE, config.RETRIEVAL_MIN_SCORE)
+    old = (config.RETRIEVAL_STRICT_CULTURE, config.RETRIEVAL_MIN_SCORE,
+           config.FRAME_TAU_REF, config.FRAME_TAU_ABS)
     try:
         if label in GATED:
             if tau is None:
                 raise ValueError(f"{label} needs a tau")
             config.RETRIEVAL_STRICT_CULTURE = True
             config.RETRIEVAL_MIN_SCORE = float(tau)
+        elif label in FRAME_TUNED:
+            if tau is None:
+                raise ValueError(f"{label} needs (tau_ref, tau_abs)")
+            config.FRAME_TAU_REF, config.FRAME_TAU_ABS = (float(x) for x in tau)
         yield
     finally:
-        config.RETRIEVAL_STRICT_CULTURE, config.RETRIEVAL_MIN_SCORE = old
+        (config.RETRIEVAL_STRICT_CULTURE, config.RETRIEVAL_MIN_SCORE,
+         config.FRAME_TAU_REF, config.FRAME_TAU_ABS) = old
 
 
 @contextlib.contextmanager
@@ -184,7 +206,8 @@ def compute_evidence(label: str, questions: list[MCQQuestion], ctx, top_k: int, 
     out: list = []
     with gated_config(label, tau):
         for q in questions:
-            key = (label, tau if label in GATED else None, cache_tag, q.group_id, q.question)
+            key = (label, tuple(tau) if isinstance(tau, (list, tuple)) else
+                   (tau if label in TUNED else None), cache_tag, q.group_id, q.question)
             if cache is not None and key in cache:
                 out.append(cache[key])
                 continue
@@ -197,7 +220,14 @@ def compute_evidence(label: str, questions: list[MCQQuestion], ctx, top_k: int, 
 
 def _mask_tag(ctx) -> str:
     ids = getattr(ctx, "masked_instance_ids", None)
-    return "" if not ids else f"mask{len(ids)}_{zlib.crc32(','.join(sorted(ids)).encode())}"
+    fr = getattr(ctx, "frame_retriever", None)
+    kg = f"_kg{fr.kg_dir.name}" if fr is not None else ""
+    return "" if not ids else f"mask{len(ids)}_{zlib.crc32(','.join(sorted(ids)).encode())}{kg}"
+
+
+def _tau_value(label: str, v):
+    """tau.json value -> the form gated_config expects."""
+    return tuple(v) if label in FRAME_TUNED and v is not None else v
 
 
 def answer_mcq(label: str, items: list[dict], seed: int, backend, ctx, top_k: int, *,
@@ -216,7 +246,8 @@ def answer_mcq(label: str, items: list[dict], seed: int, backend, ctx, top_k: in
         rows.append({
             "qid": it["qid"], "system": label, "seed": seed, "tau": tau,
             "answer_key": q.answer_key, "predicted": a.predicted, "correct": int(a.correct),
-            "n_evidence": len(e[1]), "retrieved_ids": e[1], "raw_output": a.raw_output[-300:],
+            "n_evidence": len(e[1]), "retrieved_ids": e[1], "route": e[2].get("route"),
+            "raw_output": a.raw_output[-300:],
         })
     return rows
 
@@ -298,7 +329,10 @@ def tune_tau(label: str, backend, ctx, data: dict, out_dir: Path, *, top_k: int,
     tau_path = out_dir / "tau.json"
     taus = json.loads(tau_path.read_text()) if tau_path.exists() else {}
     if label in taus:
-        return float(taus[label]["tau"])
+        return _tau_value(label, taus[label]["tau"]) if label in FRAME_TUNED \
+            else float(taus[label]["tau"])
+    if label in FRAME_TUNED:
+        tau_grid = FRAME_GRID if label == "S4R" else FRAME_GRID_NOABS
     dev_rows, grid = [], {}
     for tau in tau_grid:
         rows = answer_mcq(label, data["dev"], 42, backend, ctx, top_k, paraphrases=paraphrases,
@@ -306,12 +340,17 @@ def tune_tau(label: str, backend, ctx, data: dict, out_dir: Path, *, top_k: int,
                           leak_key=f"dev_tau:{label}")
         grid[str(tau)] = round(_acc(rows), 4)
         dev_rows.extend(rows)
-    best = max(tau_grid, key=lambda t: (grid[str(t)], -t))
+    # Ties -> the stricter (higher) refinement gate for frame systems, the lower
+    # tau for the v2 gated systems (unchanged).
+    if label in FRAME_TUNED:
+        best = max(tau_grid, key=lambda t: (grid[str(t)], t[0], t[1]))
+    else:
+        best = max(tau_grid, key=lambda t: (grid[str(t)], -t))
     taus[label] = {"tau": best, "dev_accuracy_by_tau": grid, "n_dev": len(data["dev"])}
     _write_json(tau_path, taus)
     _write_jsonl(out_dir / f"dev_tau_{label}.jsonl", dev_rows)
     LOGGER.info("tau(%s) = %s  dev grid=%s", label, best, grid)
-    return float(best)
+    return tuple(best) if label in FRAME_TUNED else float(best)
 
 
 # ===========================================================================
@@ -325,7 +364,7 @@ def run_open_gen(backend, ctx, data: dict, out_dir: Path, *, top_k: int = 8,
     rows, per_sys = [], {}
     for label in systems:
         tau = None
-        if label in GATED:
+        if label in TUNED:
             tau = tune_tau(label, backend, ctx, data, out_dir, top_k=top_k,
                            paraphrases=paraphrases or {}, cache=cache, leak_log=leak_log)
         qs = [open_question(it) for it in items]
@@ -361,7 +400,7 @@ def run_mcq(backend, ctx, data: dict, out_dir: Path, *, top_k: int = 8,
     paraphrases = paraphrases or {}
     taus = {}
     for label in systems:
-        if label in GATED:
+        if label in TUNED:
             taus[label] = tune_tau(label, backend, ctx, data, out_dir, top_k=top_k,
                                    paraphrases=paraphrases, cache=cache, leak_log=leak_log)
     test_leaks: dict = {}
@@ -413,38 +452,47 @@ def run_heldout(backend, ctx, data: dict, out_dir: Path, *, top_k: int = 8,
     items = [it for it in data["test"] if it.get("heldout")]
     taus = {}
     for label in systems:
-        if label in GATED:
+        if label in TUNED:
             taus[label] = tune_tau(label, backend, ctx, data, out_dir, top_k=top_k,
                                    paraphrases=paraphrases or {}, cache=cache, leak_log=leak_log)
     lookup = build_lookup(ctx)
     table, all_rows, gold_hits = {}, [], {}
     s0_rows = None
+    full_frames = getattr(ctx, "frame_retriever", None)
+    heldout_frames = getattr(ctx, "heldout_frame_retrievers", None) or {}
     for mask_name in ("near", "far"):
         ids = data["masks"][mask_name]
-        with masked(ctx, ids):
-            for label in systems:
-                if label == "S0" and s0_rows is not None:
-                    rows = [dict(r, mask=mask_name) for r in s0_rows]
-                else:
-                    rows = answer_mcq(label, items, 42, backend, ctx, top_k,
-                                      paraphrases=paraphrases, tau=taus.get(label), cache=cache,
-                                      leak_log=leak_log, leak_key=f"heldout_{mask_name}:{label}")
-                    for r in rows:
-                        r["mask"] = mask_name
-                    if label == "S0":
-                        s0_rows = rows
-                # Sanity: no masked instance may appear in evidence.
-                if label != "S0":
-                    masked_ids = set(ids)
-                    hits = 0
-                    for r in rows:
-                        for rid in r["retrieved_ids"]:
-                            if lookup["instances"](label, rid) & masked_ids:
-                                hits += 1
-                                break
-                    gold_hits[f"{mask_name}:{label}"] = hits
-                table.setdefault(label, {})[mask_name] = round(_acc(rows), 4)
-                all_rows.extend(rows)
+        # Frame systems use a KG *built* without the masked records (norm types
+        # and culture profiles never saw them); other systems mask at query time.
+        if mask_name in heldout_frames:
+            ctx.frame_retriever = heldout_frames[mask_name]
+        try:
+            with masked(ctx, ids):
+                for label in systems:
+                    if label == "S0" and s0_rows is not None:
+                        rows = [dict(r, mask=mask_name) for r in s0_rows]
+                    else:
+                        rows = answer_mcq(label, items, 42, backend, ctx, top_k,
+                                          paraphrases=paraphrases, tau=taus.get(label), cache=cache,
+                                          leak_log=leak_log, leak_key=f"heldout_{mask_name}:{label}")
+                        for r in rows:
+                            r["mask"] = mask_name
+                        if label == "S0":
+                            s0_rows = rows
+                    # Sanity: no masked instance may appear in evidence.
+                    if label != "S0":
+                        masked_ids = set(ids)
+                        hits = 0
+                        for r in rows:
+                            for rid in r["retrieved_ids"]:
+                                if lookup["instances"](label, rid) & masked_ids:
+                                    hits += 1
+                                    break
+                        gold_hits[f"{mask_name}:{label}"] = hits
+                    table.setdefault(label, {})[mask_name] = round(_acc(rows), 4)
+                    all_rows.extend(rows)
+        finally:
+            ctx.frame_retriever = full_frames
     bad = {k: v for k, v in gold_hits.items() if v}
     if bad:
         LOGGER.error("HELD-OUT MASK VIOLATION (masked evidence retrieved): %s", bad)
@@ -485,12 +533,25 @@ def build_lookup(ctx) -> dict:
             pw_inst[pw.pathway_id] = {t2i[t] for t in pw.triple_ids if t in t2i}
             pw_cult[pw.pathway_id] = pw.culture
 
+    lpw_inst, lpw_cult = {}, {}
+    if getattr(ctx, "local_pathway_retriever", None):
+        for pw in ctx.local_pathway_retriever.pathways:
+            lpw_inst[pw.pathway_id] = set(pw.instance_ids)
+            lpw_cult[pw.pathway_id] = pw.culture
+    frame_cult = {}
+    if getattr(ctx, "frame_retriever", None):
+        frame_cult = {f.frame_id: f.culture_label for f in ctx.frame_retriever.frames}
+
     def kind(label: str) -> str:
         sid = SYSTEM_IDS[label]
         if sid == ms.SYSTEM_S1:
             return "passage"
         if sid in (ms.SYSTEM_S4, ms.SYSTEM_S4_NO_SHARED):
             return "pathway"
+        if sid == ms.SYSTEM_S4_LOCAL:
+            return "local_pathway"
+        if sid in (ms.SYSTEM_S4F, ms.SYSTEM_S4R, ms.SYSTEM_S4R_NOABS):
+            return "frame"
         return "triple"
 
     def instances(label: str, rid: str) -> set:
@@ -499,6 +560,10 @@ def build_lookup(ctx) -> dict:
             return {passage_inst.get(rid, rid)}
         if k == "pathway":
             return pw_inst.get(rid, set())
+        if k == "local_pathway":
+            return lpw_inst.get(rid, set())
+        if k == "frame":
+            return {rid}
         return {t2i[rid]} if rid in t2i else set()
 
     def culture(label: str, rid: str) -> str:
@@ -507,6 +572,10 @@ def build_lookup(ctx) -> dict:
             return passage_cult.get(rid, "")
         if k == "pathway":
             return pw_cult.get(rid, "")
+        if k == "local_pathway":
+            return lpw_cult.get(rid, "")
+        if k == "frame":
+            return frame_cult.get(rid, "")
         return triple_cult.get(rid, "")
 
     lk = {"instances": instances, "culture": culture}
@@ -564,13 +633,17 @@ def run_retrieval_metrics(backend, ctx, data: dict, out_dir: Path, *, top_k: int
         items = data[split]
         qs = [build_mcq(it, 42) for it in items]
         for label in systems:
-            tau = taus.get(label, {}).get("tau") if label in GATED else None
-            if label in GATED and tau is None:
+            tau = _tau_value(label, taus.get(label, {}).get("tau")) if label in TUNED else None
+            if label in TUNED and tau is None:
                 LOGGER.warning("retrieval_metrics: no frozen tau for %s; skipped", label)
                 continue
             ev = compute_evidence(label, qs, ctx, top_k, tau=tau, cache=cache)
             sc = retrieval_scores(label, items, ev, lookup)
             sc["leaks"] = leak_count([e[0] for e in ev], items)
+            routes = [e[2].get("route") for e in ev if e[2].get("route")]
+            if routes:
+                sc["routes"] = {m: round(routes.count(m) / len(ev), 4)
+                                for m in ("refine", "abstract", "none")}
             sc["tau"] = tau
             if leak_log is not None:
                 leak_log[f"retrieval_{split}:{label}"] = sc["leaks"]
@@ -611,7 +684,8 @@ def paired_delta_bootstrap(a: list[float], b: list[float], n_boot: int = 10000,
             "ci_high": round(float(np.percentile(d, 97.5)), 4), "p_value": round(min(1.0, p), 6)}
 
 
-def comparisons(rows: list[dict], systems, seeds, n_boot: int = 10000) -> dict:
+def comparisons(rows: list[dict], systems, seeds, n_boot: int = 10000,
+                pairs: Optional[list] = None) -> dict:
     """McNemar (seed 42 + per seed) and paired bootstrap on the per-item
     seed-averaged correctness; Holm-Bonferroni over the primary family
     (each system vs S0, S4 vs S1, S4g vs S4) using the seed-42 McNemar p."""
@@ -619,7 +693,8 @@ def comparisons(rows: list[dict], systems, seeds, n_boot: int = 10000) -> dict:
     for r in rows:
         by.setdefault((r["system"], r["seed"]), {})[r["qid"]] = r["correct"]
     qids = sorted(by.get(("S0", seeds[0]), {}))
-    pairs = [(s, "S0") for s in systems if s != "S0"] + [("S4", "S1"), ("S4g", "S4")]
+    if pairs is None:
+        pairs = [(s, "S0") for s in systems if s != "S0"] + [("S4", "S1"), ("S4g", "S4")]
     out = {}
     for a, b in pairs:
         if (a, seeds[0]) not in by or (b, seeds[0]) not in by:
@@ -650,23 +725,27 @@ def write_summary(out_dir: Path, *, run_meta: dict, n_boot: int = 10000) -> dict
     opn = load("open_gen_summary.json")
     para = load("paraphrase_summary.json")
     leaks = load("leakage_guard.json")
-    comps, ci = None, None
+    comps, comps_v3, ci = None, None, None
     if mcq:
         rows = _read_jsonl(out_dir / "mcq_test_answers.jsonl")
-        systems = [s for s in MCQ_SYSTEMS if s in mcq["accuracy"]]
+        systems = [s for s in dict.fromkeys(MCQ_SYSTEMS + V3_MCQ_SYSTEMS) if s in mcq["accuracy"]]
         seeds = mcq["seeds"]
         comps = comparisons(rows, systems, seeds, n_boot=n_boot)
+        if any(s in mcq["accuracy"] for s in ("S4L", "S4F", "S4R")):
+            comps_v3 = comparisons(rows, systems, seeds, n_boot=n_boot, pairs=[
+                (a, b) for a, b in V3_PRIMARY if a in systems and b in systems])
         s42 = {}
         for r in rows:
             if r["seed"] == seeds[0]:
                 s42.setdefault(r["system"], []).append(r["correct"])
         ci = paired_bootstrap(s42, n_boot=min(n_boot, 2000)) if s42 else None
     summary = {"run_meta": run_meta, "paraphrase": para, "tau": taus, "mcq": mcq,
-               "mcq_ci_seed42": ci, "comparisons": comps, "heldout": held,
+               "mcq_ci_seed42": ci, "comparisons": comps,
+               "comparisons_v3_primary": comps_v3, "heldout": held,
                "retrieval": retr, "open_gen": opn, "leakage_guard": leaks}
     _write_json(out_dir / "summary.json", summary)
 
-    L = ["# Eval v2 - Evaluation 1: CultureBank grounded QA", "",
+    L = [f"# {run_meta.get('title', 'Eval v2 - Evaluation 1: CultureBank grounded QA')}", "",
          f"Model: {run_meta.get('model')}  provider: {run_meta.get('provider')}  "
          f"top_k: {run_meta.get('top_k')}  smoke: {run_meta.get('smoke')}", ""]
     if leaks:
@@ -692,6 +771,17 @@ def write_summary(out_dir: Path, *, run_meta: dict, n_boot: int = 10000) -> dict
             L.append(f"| {k.replace('__vs__', ' vs ')} | {b['delta']*100:+.1f} | "
                      f"[{b['ci_low']*100:+.1f}, {b['ci_high']*100:+.1f}] | {p42} | {v['p_holm']} |")
         L.append("")
+        if comps_v3:
+            L += ["## KG v3 primary family (pre-registered; Holm over these 7 only)", "",
+                  "| comparison | delta | boot 95% CI | McNemar p | Holm p |",
+                  "|---|---|---|---|---|"]
+            for k, v in comps_v3.items():
+                b = v["bootstrap"]
+                p42 = next(iter(v["mcnemar"].values()))["p_value"]
+                L.append(f"| {k.replace('__vs__', ' vs ')} | {b['delta']*100:+.1f} | "
+                         f"[{b['ci_low']*100:+.1f}, {b['ci_high']*100:+.1f}] | {p42} | "
+                         f"{v['p_holm']} |")
+            L.append("")
     if held:
         L += [f"## Held-out (n={held['n']}, seed 42; mask sizes {held['mask_sizes']})", "",
               "| system | near | far |", "|---|---|---|"]
@@ -710,6 +800,10 @@ def write_summary(out_dir: Path, *, run_meta: dict, n_boot: int = 10000) -> dict
                          f"{v['mrr']:.3f} | {v['same_culture_precision']:.3f} | "
                          f"{v['no_evidence_rate']:.3f} | {v['evidence_tokens_per_q_approx']} | {v['leaks']} |")
             L.append("")
+            routed = {s_: v["routes"] for s_, v in tab.items() if v.get("routes")}
+            if routed:
+                L += [f"Routes ({split}): " + "; ".join(
+                    f"{s_} {r}" for s_, r in routed.items()), ""]
     if opn:
         L += [f"## Open-ended generation: {opn['n_rows']} answers "
               f"({opn['n_questions']} questions); judged by a separate job.", ""]

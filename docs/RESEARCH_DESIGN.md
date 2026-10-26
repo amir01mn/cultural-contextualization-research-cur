@@ -216,11 +216,11 @@ CulturalBench (no second benchmark needed).
 | **S3** | Layered KG (raw) | triples with layers; pathways **not** completed by critique |
 | **S4** | Abstraction→Refinement KG (ours, refined) | completed pathways + cross-cultural shared nodes; pathway retrieval |
 
-> **Implementation note (2026-09-25).** The code currently feeds S3 the
-> *refined* triple store, not the raw one defined here. S3 therefore matches
-> the A3 triple-retrieval ablation, and A2 (S3 vs S4) does not isolate
-> refinement. See open issue 1 in [`RUN_HISTORY.md`](RUN_HISTORY.md) before
-> interpreting A1/A2.
+> **Implementation note (updated 2026-10-10).** S3 now uses the raw layered
+> triples as defined here. Runs before 2026-10-10 fed S3 the refined store, so in
+> those results S3 equals the A3 triple-retrieval ablation. KG v3 adds frame-based
+> systems (S4F, S4R) and record-local pathways (S4L); see
+> [`EVAL_V3_PLAN.md`](EVAL_V3_PLAN.md).
 
 All systems share the same base LLM, retriever budget (top-k), and prompt
 scaffold except for the injected evidence. Accuracy is exact-match on the MCQ

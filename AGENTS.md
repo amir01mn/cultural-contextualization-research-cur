@@ -42,6 +42,7 @@ diagnosis and consolidation stage, not tuning for a paper. Read
 | Coding and research-integrity rules | `docs/CONVENTIONS.md` |
 | Past runs, artifact lineage, branches, stash, open issues | `docs/RUN_HISTORY.md` |
 | Hypotheses H1–H3, ablations, statistics protocol | `docs/RESEARCH_DESIGN.md` |
+| Eval v2 / KG v3 protocols (pre-registered) | `docs/EVAL_V2_PLAN.md`, `docs/EVAL_V3_PLAN.md` |
 | Narval setup, SLURM jobs, offline staging, **where models/caches live** | `docs/NARVAL_SETUP.md` (§0 storage layout) |
 | Plain-language overview and results | `README.md`, `docs/PROJECT_OVERVIEW.md` |
 
@@ -99,9 +100,12 @@ if the login node's Lustre client stalls.
 - **Pilot samples must span cultures.** The first N CultureBank records are
   about 99.8% United States, so a sequential pilot cannot test cross-cultural
   alignment.
-- **Treat S3 and A3 as identical evidence for now.** Both use refined triples,
-  which contradicts the design. This is open issue #1 in `RUN_HISTORY.md`.
-  Do not "fix" it without asking; it is a research decision.
+- **S3 = raw layered triples, A3 = refined triples** (decided 2026-10-10). Runs
+  before that date fed S3 refined triples, so their S3 equals A3.
+- **CultureBank's `eval_*` columns must never reach construction.** They are the
+  eval v2/v3 test targets. The August triples were extracted with them in the
+  prompt (16% carry eval wording); `src/core/leakage.py` detects those, and KG v3
+  builds only from descriptor fields.
 - **Respect subpackage layering.** `tests/test_architecture.py` enforces it.
   New modules go in a subpackage, never at the top level of `src/`.
 - **Every prompt lives in `src/llm/prompts.py`.** Changing a prompt changes the

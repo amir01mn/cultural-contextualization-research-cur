@@ -27,6 +27,8 @@ def pathway_document(pathway: CulturalPathway) -> str:
         parts.append(f"{node.layer.value}: {node.label}")
     if pathway.has_shared_pivot:
         parts.append("shared_pivot: true")
+    if pathway.source_text:
+        parts.append(f"source: {pathway.source_text}")
     return " | ".join(parts)
 
 
@@ -106,7 +108,8 @@ class PathwayRetriever:
         """True for pathways built from ANY triple whose instance_id is masked."""
         ids = set(instance_ids or ())
         return np.array(
-            [any(triple_to_instance.get(tid) in ids for tid in pw.triple_ids)
+            [bool(ids.intersection(pw.instance_ids))
+             or any(triple_to_instance.get(tid) in ids for tid in pw.triple_ids)
              for pw in self.pathways], dtype=bool)
 
     def retrieve(self,

@@ -367,6 +367,16 @@ MCQ_EVIDENCE_HEADERS = {
     "S4_no_shared_pivot": (
         "Retrieved abstraction→refinement pathways (without cross-cultural pivots):"
     ),
+    # KG v3 (docs/EVAL_V3_PLAN.md)
+    "S4_local_pathways": (
+        "Retrieved abstraction→refinement pathways (value → norm → practice), "
+        "each with the description it was extracted from:"
+    ),
+    "S4F_frame_kg": (
+        "Retrieved cultural frames (value → norm type → this group's norm → practice):"
+    ),
+    "S4R_routed_frame_kg": "Cultural knowledge graph evidence:",
+    "S4R_no_abstraction": "Cultural knowledge graph evidence:",
 }
 
 MCQ_EASY_USER = """{evidence_block}Question:
@@ -570,3 +580,34 @@ Answer to evaluate:
 Does the answer entail the cultural descriptor, i.e. is it consistent with and does it
 reflect the cultural knowledge in the descriptor? Answer with exactly one word: yes or no."""
 # === END EVAL_V2: INTRINSIC + JUDGE ==========================================
+
+
+
+# === KG_V3: FRAME LABELING (construction) ====================================
+# One call per CultureBank descriptor. The prompt sees descriptor fields only,
+# never CultureBank's eval_* columns (src/core/leakage.py). The LLM names the
+# norm and picks values from a fixed list; it does not extract triples.
+
+FRAME_LABEL_SYSTEM = """You annotate cultural descriptors for a knowledge graph.
+Reply with one JSON object and nothing else."""
+
+FRAME_LABEL_USER = """Cultural descriptor (from CultureBank):
+{descriptor}
+
+Fill in three fields:
+- "norm": one sentence stating the social norm or expectation this practice follows
+  among {culture}. Keep the group's specific stance (what is expected, avoided or
+  valued), but state it so it would also cover similar situations. At most 30 words.
+- "norm_type": a short culture-neutral name for the kind of norm, 2-6 words, that
+  would fit any group's version of it (e.g. "tipping service staff",
+  "removing shoes indoors", "greeting elders"). Do not name the group.
+- "values": one or two values the norm expresses, copied exactly from this list:
+{value_list}
+
+Return exactly: {{"norm": "...", "norm_type": "...", "values": ["..."]}}"""
+
+FRAME_LABEL_RETRY_SUFFIX = """
+
+Your previous reply was not valid. Return ONLY the JSON object, with "values" chosen
+from the list above."""
+# === END KG_V3: FRAME LABELING ===============================================

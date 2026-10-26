@@ -1,0 +1,13 @@
+{
+  "n_frames": 22990,
+  "n_excluded": 0,
+  "label_status": {
+    "ok": 22969,
+    "failed": 21
+  },
+  "n_norm_types": 3077,
+  "n_norm_types_multi_culture": 1358,
+  "n_cultures": 2159,
+  "norm_type_threshold": 0.75,
+  "value_taxonomy": "Schwartz et al. 2012 (19 refined values)"
+}

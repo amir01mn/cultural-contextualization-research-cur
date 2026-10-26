@@ -141,19 +141,20 @@ scripts/compare_runs.py ──► outputs/before_after_comparison.md
 | S0 | `S0_no_kg` | none | — |
 | S1 | `S1_raw_text_rag` | `corpus_passages.jsonl` | passages |
 | S2 | `S2_flat_kg` | `corpus_triples` (raw) | triples, layer labels stripped |
-| S3 | `S3_layered_kg` | `corpus_triples_refined` (falls back to raw) | triples with layer labels |
+| S3 | `S3_layered_kg` | `corpus_triples` (raw; falls back to refined) | triples with layer labels |
 | S4 | `S4_abstraction_refinement_kg` | `pathway_index/` | pathways |
-| A3 | `S4_triple_retrieval` | `corpus_triples_refined` | **same as S3** |
+| A3 | `S4_triple_retrieval` | `corpus_triples_refined` | triples with layer labels |
 | A4 | `S4_no_shared_pivot` | `pathway_index/`, shared-pivot pathways removed | pathways |
+| S4L | `S4_local_pathways` | `data/kg_v3/local_pathways_index/` (record-local, eval-text triples dropped) | pathways + source description |
+| S4F | `S4F_frame_kg` | `data/kg_v3/full/` frames | value → norm type → norm → practice |
+| S4R | `S4R_routed_frame_kg` | `data/kg_v3/full/` frames, norm types, culture profiles | routed: refine / abstract / none (`retrieval/frame_retriever.py`) |
+| — | `S4R_no_abstraction` | as S4R without the abstract route | |
 
-> **Known design/code mismatch.** `RESEARCH_DESIGN.md` §7 defines S3 as the
-> *raw* layered KG, so that S3 vs S4 isolates the effect of refinement (ablation
-> A2). Since commit `033425a` the code feeds S3 the *refined* triples. As a result:
-> (1) S3 and A3 receive identical evidence and differ only in the one-line
-> evidence header; (2) S2 vs S3 now changes both layering *and* refinement.
-> In the full run S3 and A3 still disagreed on 70 of 2,454 units, a useful
-> estimate of prompt-wording noise. Whether to restore raw triples for S3 is a
-> research decision; it is listed in `RUN_HISTORY.md` under open issues.
+S3 used the refined triples from commit `033425a` until 2026-10-10, which made it
+identical to A3; it now uses the raw store as `RESEARCH_DESIGN.md` §7 defines.
+KG v3 (`construction/frame_builder.py`, `construction/record_pathways.py`,
+`scripts/build_kg_v3.py`) is described in `docs/EVAL_V3_PLAN.md`; it is built only
+from descriptor fields (`core/leakage.py` keeps CultureBank's `eval_*` columns out).
 
 The answering prompt, model, decoding, and `top_k` are shared by all systems.
 Only the evidence block and its header (`llm.prompts.MCQ_EVIDENCE_HEADERS`)

@@ -1,0 +1,14 @@
+{
+  "triples_in": 186691,
+  "triples_dropped": {
+    "eval_text": 30130
+  },
+  "records_with_usable_triples": 22957,
+  "pathways": 22957,
+  "completeness": {
+    "SURFACE": 11856,
+    "SOCIAL": 8505,
+    "FULL": 2596
+  },
+  "shared_pivot": 5392
+}

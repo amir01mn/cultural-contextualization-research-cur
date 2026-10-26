@@ -1,0 +1,20 @@
+{
+  "n": 200,
+  "overall": {
+    "coherent": {
+      "rate": 0.885,
+      "n": 200,
+      "n_unparsed": 0
+    },
+    "culture_consistent": {
+      "rate": 0.925,
+      "n": 200,
+      "n_unparsed": 0
+    },
+    "correct": {
+      "rate": 0.885,
+      "n": 200,
+      "n_unparsed": 0
+    }
+  }
+}

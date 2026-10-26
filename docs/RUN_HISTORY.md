@@ -4,7 +4,7 @@ This page records what was run, which artifacts came from which run, where
 unmerged work lives, and which issues are still open. Update it whenever a run
 finishes or a branch changes state. The code cannot tell you any of this.
 
-Last updated: 2026-09-26.
+Last updated: 2026-10-10.
 
 ## 1. Runs, oldest first
 
@@ -87,6 +87,40 @@ Reading: the KG's triples help when the benchmark asks about knowledge they
 contain; the pathway builder is the bottleneck (low reachability, low
 coherence), not the layered representation.
 
+**Caveat found 2026-10-10 (eval-text leakage).** The August extraction prompt
+serialized the whole CultureBank row, including `eval_whole_desc` (the open-ended
+judge's reference). 30,273 of 186,691 refined triples (16%, 14,242 records) carry
+at least two content words found only in the eval columns (`src/core/leakage.py`,
+lexical proxy). The v2 leak guard checked verbatim containment only. Treat the v2
+CultureBank numbers for S2/S3/A3/S4 (most of all open-ended) and the 93% triple fact
+retention as upper bounds. S1 and NormAd are unaffected.
+
+### Eval v3 / KG v3 (2026-10-10, branch `kg-v3`, protocol `docs/EVAL_V3_PLAN.md`)
+
+Frame KG with abstraction routing (S4R), record-local pathways over the August
+triples (S4L), S3 switched to raw triples, eval-text triples dropped from all triple
+systems, build-time held-out KGs, hard-distractor MCQ, OLMo-2-7B as second answering
+model. Jobs: label 5205594 (GPU, MIG), KG stages 5206046 (CPU), CultureBank 5205118,
+hard 5205602, NormAd 5205597, OLMo 5205599, judge 5205216. Outputs `data/kg_v3/`,
+`data/outputs/eval_v3/`; tables and write-up `docs/results/eval_v3/RESULTS.md`.
+
+- **KG v3:** 22,990 frames (21 unlabeled), 3,077 norm types (1,358 multi-culture);
+  100% of records reachable; test R@8 0.947 (August pathways 0.412, passages 0.875);
+  frame chains judged coherent 88.5% (August 22.5%).
+- **CultureBank (Qwen):** S4R MCQ 92.9% vs S1 91.4% (+1.5, Holm 0.015); hard MCQ
+  79.6% vs 76.5% (+3.2, p<0.001; S0 48.5%); open-ended 92.6% vs 88.8% (+3.8, Holm
+  0.009). S4L and S4F also beat S4 by ~14 points. S4R = S4R_noabs in-corpus (refine
+  route 99.8%).
+- **OLMo-2-7B:** MCQ S4R 93.4% vs S1 90.0% (+3.4, p<0.001). NormAd S4R 54.4% vs
+  country-only 44.1% (+10.3) and vs S4R_noabs 47.5% (+6.9), both Holm p<0.001.
+- **NormAd (Qwen):** S4R 57.8% vs country-only 57.2% (n.s.), vs S1 +2.5 (Holm 0.004);
+  abstraction ablation +0.3 (n.s.).
+- **Held-out:** still negative; S4R 75.0% vs S0 80.0%. Thresholds tuned in-corpus
+  send held-out questions to refinement with other records (233/300).
+- Bugs fixed during the run: vLLM cannot parse MIG UUIDs (scripts now map to device
+  0); value-name parser rejected "self-direction" (1,080 labels re-parsed from stored
+  replies, no LLM rerun).
+
 ## 2. Artifact lineage warnings
 
 - `data/processed/` and `data/outputs/` hold artifacts from **several runs at once**.
@@ -138,11 +172,11 @@ split and the script renames.
 
 ## 4. Open issues
 
-1. **S3 does not match the design.** `RESEARCH_DESIGN.md` defines S3 as the raw
-   layered KG, but the code has fed it refined triples since `033425a`.
-   Consequences: S3 and the A3 ablation (`S4_triple_retrieval`) receive identical
-   evidence, and the refinement ablation A2 (S3 vs S4) is confounded. Decide
-   which one is intended, then fix either the code or the design.
+1. ~~**S3 does not match the design.**~~ **Resolved 2026-10-10:** S3 uses the raw
+   layered triples, as `RESEARCH_DESIGN.md` defines (fixed in `mcq_systems.py`).
+   S2 -> S3 now isolates layer labels, S3 -> A3 isolates critique-refinement and
+   A3 -> S4 isolates the retrieval unit. Runs before 2026-10-10 (August CulturalBench,
+   eval v2) used refined triples for S3, so their S3 equals A3.
 2. **Prompt-wording noise is about 3%.** S3 and A3 differ only in a one-line
    evidence header, yet they disagreed on 70 of 2,454 units. Treat smaller
    differences between systems with suspicion.

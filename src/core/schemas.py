@@ -349,6 +349,11 @@ class CulturalPathway(BaseModel):
     predicates: list[str] = Field(default_factory=list)
     # Whether any contributing triple was inferred rather than dataset-grounded.
     generated: bool = False
+    # Record-local pathways (kg v3, S4L) carry their CultureBank record and its
+    # descriptor text, so the rendered evidence keeps the detail that bare node
+    # labels lose. Empty for the August cross-record pathways.
+    instance_ids: list[str] = Field(default_factory=list)
+    source_text: Optional[str] = None
 
     @field_validator("completeness", mode="before")
     @classmethod
@@ -373,3 +378,44 @@ class CorpusBuildState(BaseModel):
     # failure as success.
     extraction_failed: list[str] = Field(default_factory=list)
     critique_failed: list[str] = Field(default_factory=list)
+
+
+class CulturalFrame(BaseModel):
+    """KG v3: one CultureBank descriptor as an abstraction->refinement frame.
+
+    L1 practice = the descriptor itself (``text``); L2c = ``norm`` (this culture's
+    norm); L2 = ``norm_type_id`` (culture-neutral, shared across cultures);
+    L3 = ``values`` (fixed Schwartz taxonomy). Built only from descriptor fields:
+    CultureBank's ``eval_*`` columns never enter a frame or a labeling prompt.
+    """
+
+    frame_id: str                      # = CultureBank instance_id
+    culture: str                       # canonical culture key
+    culture_label: str = ""            # original cultural-group string
+    topic: str = ""
+    context: Optional[str] = None
+    actor: Optional[str] = None
+    actor_behavior: Optional[str] = None
+    recipient: Optional[str] = None
+    recipient_behavior: Optional[str] = None
+    relation: Optional[str] = None
+    goal: Optional[str] = None
+    other_descriptions: Optional[str] = None
+    agreement: Optional[float] = None
+    text: str = ""                     # descriptor text (no eval fields)
+    norm: Optional[str] = None
+    norm_type_label: Optional[str] = None
+    norm_type_id: Optional[str] = None
+    values: list[str] = Field(default_factory=list)
+    label_status: str = "unlabeled"    # unlabeled | ok | failed
+
+
+class NormType(BaseModel):
+    """KG v3 L2 node: a culture-neutral norm type clustered from frame labels."""
+
+    norm_type_id: str
+    label: str
+    member_labels: list[str] = Field(default_factory=list)
+    frame_ids: list[str] = Field(default_factory=list)
+    cultures: list[str] = Field(default_factory=list)
+    values: list[str] = Field(default_factory=list)   # most frequent member values
