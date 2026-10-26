@@ -69,7 +69,7 @@ def main() -> int:
     if existing_meta.exists():
         import hashlib
         expected = hashlib.sha256("".join(
-            json.dumps(u, ensure_ascii=False, sort_keys=True) + "\\n"
+            json.dumps(u, ensure_ascii=False, sort_keys=True) + "\n"
             for u in units
         ).encode("utf-8")).hexdigest()
         stats = json.loads(existing_meta.read_text(encoding="utf-8"))
