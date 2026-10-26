@@ -123,27 +123,79 @@ class MultilingualIndex:
 
     @staticmethod
     def create(out: str | Path, units: list[dict], *, device: str = "cpu",
-               batch_size: int = 16) -> dict:
+               batch_size: int = 16, chunk_size: int = 256) -> dict:
+        """Checkpointed BGE-M3 encoding for 3-hour Narval CPU jobs.
+
+        Each independently persisted shard is validated on resume. A half-built
+        index cannot be used for retrieval until metadata.json is present.
+        """
+        import hashlib
+        import os
         if not units:
             raise ValueError("Cannot build an empty evidence index")
         from sentence_transformers import SentenceTransformer
         out = Path(out)
         if (out / "metadata.json").exists():
-            raise FileExistsError(f"Index already exists: {out}. Use a new versioned output directory.")
+            raise FileExistsError(f"Index already complete: {out}. Use a new output directory.")
         out.mkdir(parents=True, exist_ok=True)
-        model = SentenceTransformer(MODEL_NAME, device=device)
+        units_path = out / "units.jsonl"
+        unit_text = "".join(json.dumps(u, ensure_ascii=False, sort_keys=True) + "\n"
+                            for u in units)
+        unit_digest = hashlib.sha256(unit_text.encode("utf-8")).hexdigest()
+        if units_path.exists():
+            old_digest = hashlib.sha256(units_path.read_bytes()).hexdigest()
+            if old_digest != unit_digest:
+                raise ValueError("Resumed embedding job has different source units")
+        else:
+            units_path.write_text(unit_text, encoding="utf-8")
+
+        plan_path = out / "embedding_plan.json"
+        plan = {"units_sha256": unit_digest, "n_units": len(units),
+                "model": MODEL_NAME, "chunk_size": chunk_size}
+        if plan_path.exists():
+            if json.loads(plan_path.read_text(encoding="utf-8")) != plan:
+                raise ValueError("Embedding checkpoint plan changed")
+        else:
+            plan_path.write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
+
+        chunk_dir = out / "embedding_shards"
+        chunk_dir.mkdir(exist_ok=True)
+        model = None
         docs = [u["text"] for u in units]
-        emb = model.encode(docs, batch_size=batch_size, show_progress_bar=True,
-                           normalize_embeddings=True, convert_to_numpy=True).astype(np.float32)
-        if not np.isfinite(emb).all():
-            raise ValueError("Embedding index contains NaNs")
-        with (out / "units.jsonl").open("w", encoding="utf-8") as stream:
-            for u in units:
-                stream.write(json.dumps(u, ensure_ascii=False) + "\n")
-        np.save(out / "embeddings.npy", emb)
+        shards = []
+        for start in range(0, len(docs), chunk_size):
+            stop = min(start + chunk_size, len(docs))
+            shard = chunk_dir / f"{start:07d}_{stop:07d}.npy"
+            if shard.exists():
+                arr = np.load(shard, mmap_mode="r")
+                if arr.shape[0] != stop - start or arr.ndim != 2:
+                    raise ValueError(f"Invalid embedding shard: {shard}")
+            else:
+                if model is None:
+                    model = SentenceTransformer(MODEL_NAME, device=device)
+                arr = model.encode(
+                    docs[start:stop], batch_size=batch_size, show_progress_bar=False,
+                    normalize_embeddings=True, convert_to_numpy=True
+                ).astype(np.float32)
+                if arr.shape[0] != stop - start or not np.isfinite(arr).all():
+                    raise ValueError(f"Embedding failed for records {start}:{stop}")
+                tmp_path = shard.with_suffix(".tmp")
+                with tmp_path.open("wb") as fh:
+                    np.save(fh, arr)
+                os.replace(tmp_path, shard)
+                print(f"Index encoded {stop}/{len(docs)} units", flush=True)
+            shards.append(shard)
+
+        emb = np.concatenate([np.load(p) for p in shards], axis=0)
+        if len(emb) != len(units) or not np.isfinite(emb).all():
+            raise ValueError("Embedding shards failed final validation")
+        tmp_emb = out / "embeddings.pending"
+        with tmp_emb.open("wb") as fh:
+            np.save(fh, emb)
+        os.replace(tmp_emb, out / "embeddings.npy")
         meta = {
             "embedding_model": MODEL_NAME, "n_units": len(units),
-            "dimension": emb.shape[1],
+            "dimension": emb.shape[1], "units_sha256": unit_digest,
             "system_counts": {s: sum(u["system"] == s for u in units) for s in SYSTEMS},
             "culturebank_units": sum(u["dataset"] == "CultureBank" for u in units),
         }
