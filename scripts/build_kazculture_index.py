@@ -63,8 +63,21 @@ def main() -> int:
             if frame.get("label_status") == "ok" and not frame.get("frame_id"):
                 raise ValueError("Missing CultureBank source frame provenance")
     units = make_units(passages, frames, culturebank)
-    stats = MultilingualIndex.create(args.out, units, device=args.device,
-                                     batch_size=args.batch_size)
+    # Retrying after a walltime must finish graph manifests without re-embedding.
+    # Verify the exact unit payload before reusing any completed index.
+    existing_meta = args.out / "metadata.json"
+    if existing_meta.exists():
+        import hashlib
+        expected = hashlib.sha256("".join(
+            json.dumps(u, ensure_ascii=False, sort_keys=True) + "\\n"
+            for u in units
+        ).encode("utf-8")).hexdigest()
+        stats = json.loads(existing_meta.read_text(encoding="utf-8"))
+        if stats.get("units_sha256") != expected:
+            raise ValueError("Completed index belongs to another corpus; refusing reuse")
+    else:
+        stats = MultilingualIndex.create(args.out, units, device=args.device,
+                                         batch_size=args.batch_size)
     write_jsonl(args.out / "graph_frames.jsonl", frames)
     write_jsonl(args.out / "graph_triples.jsonl", [
         triple for frame in frames for triple in frame["triples"]
