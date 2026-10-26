@@ -5,7 +5,7 @@
 #SBATCH --gres=gpu:a100:2
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
-#SBATCH --time=12:00:00
+#SBATCH --time=03:00:00
 #SBATCH --output=slurm/logs/kazculture_phase1_%j.out
 #SBATCH --error=slurm/logs/kazculture_phase1_%j.err
 #
@@ -34,8 +34,22 @@ if [[ ! -f "$KAZCULTURE_TEST_FILE" ]]; then
   echo "Missing dataset: $KAZCULTURE_TEST_FILE" >&2
   exit 2
 fi
-python scripts/eval_kazculture_phase1.py \
-  --test_file "$KAZCULTURE_TEST_FILE" \
-  --model "${KAZCULTURE_MODEL:-Qwen/Qwen3-32B}" \
-  --output data/outputs/kazculture_phase1 \
+# Pilot and full runs write to separate checkpoints. No test-set leakage between runs.
+# Example pilot: KAZCULTURE_LIMIT=5 sbatch --time=00:45:00 --export=ALL slurm/kazculture_phase1.sh
+ARGS=(
+  --test_file "$KAZCULTURE_TEST_FILE"
+  --model "${KAZCULTURE_MODEL:-Qwen/Qwen3-32B}"
   --resume
+)
+if [[ -n "${KAZCULTURE_LIMIT:-}" ]]; then
+  ARGS+=(--limit "$KAZCULTURE_LIMIT")
+  OUT_DIR="data/outputs/kazculture_phase1_pilot_${KAZCULTURE_LIMIT}"
+else
+  OUT_DIR="data/outputs/kazculture_phase1"
+fi
+if [[ -n "${KAZCULTURE_MODEL_REVISION:-}" ]]; then
+  ARGS+=(--model_revision "$KAZCULTURE_MODEL_REVISION")
+fi
+ARGS+=(--output "$OUT_DIR")
+echo "Evaluating model on ${KAZCULTURE_LIMIT:-all 1334} questions; outputs: $OUT_DIR"
+python scripts/eval_kazculture_phase1.py "${ARGS[@]}"
