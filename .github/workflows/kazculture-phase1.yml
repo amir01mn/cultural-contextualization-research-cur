@@ -26,5 +26,7 @@ jobs:
       - run: python -m pip install pytest pydantic
       - name: Test KazCulture schema, leakage guards and scoring
         run: python -m pytest -q tests/test_kazculture_phase1.py tests/test_kazculture_phase1_v2.py
+      - name: Smoke test V2 CLI parser without dataset or GPU
+        run: python scripts/eval_kazculture_phase1_v2.py --help
       - name: Compile Phase 1 files
         run: python -m compileall -q src/loaders/kazculture_loader.py src/evaluation/kazculture_phase1.py src/evaluation/kazculture_hf_scorer.py src/evaluation/kazculture_hf_scorer_v2.py scripts/eval_kazculture_phase1.py scripts/eval_kazculture_phase1_v2.py scripts/stage_kazculture_phase1.py
