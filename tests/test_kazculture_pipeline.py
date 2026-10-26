@@ -166,3 +166,48 @@ def test_combined_requires_shared_values():
     )
     assert [x["unit_id"] for x in hits] == ["kaz1", "cb2"]
     assert "INDIRECT COMPARISON" in txt
+
+
+def test_index_shard_resume_and_source_filter(tmp_path, monkeypatch):
+    """Fake embedding model verifies checkpoint/resume with zero network/GPU."""
+    import sys
+    import types
+    import numpy as np
+    from src.retrieval.kazculture_index import MultilingualIndex
+    calls = {"n": 0}
+
+    class FakeSentenceTransformer:
+        def __init__(self, model_name, device="cpu"):
+            assert model_name == "BAAI/bge-m3"
+
+        def encode(self, texts, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 2:
+                raise RuntimeError("Simulated compute preemption")
+            vectors = np.array([[len(s) + 1, 1] for s in texts], dtype=np.float32)
+            return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
+
+    fake = types.ModuleType("sentence_transformers")
+    fake.SentenceTransformer = FakeSentenceTransformer
+    monkeypatch.setitem(sys.modules, "sentence_transformers", fake)
+    units = [{
+        "unit_id": f"S1:{i}", "passage_id": f"kzp_{i}",
+        "system": "S1", "dataset": "KazCulture", "culture": "Kazakh",
+        "source": ["Train book"], "indirect": False,
+        "values": [], "text": "Kazakh text " + str(i),
+    } for i in range(5)]
+    folder = tmp_path / "index"
+    with pytest.raises(RuntimeError, match="preemption"):
+        MultilingualIndex.create(folder, units, chunk_size=2, batch_size=2)
+    assert len(list((folder / "embedding_shards").glob("*.npy"))) == 1
+    assert not (folder / "metadata.json").exists()
+    meta = MultilingualIndex.create(folder, units, chunk_size=2, batch_size=2)
+    assert meta["n_units"] == 5
+    assert (folder / "embeddings.npy").exists()
+    ix = MultilingualIndex(folder)
+    hits = ix.search("Kazakh text", system="S1", k=3,
+                     exclude_passage_ids={"kzp_0"})
+    assert len(hits) == 3
+    assert all(h["passage_id"] != "kzp_0" for h in hits)
+    with pytest.raises(FileExistsError):
+        MultilingualIndex.create(folder, units, chunk_size=2)
