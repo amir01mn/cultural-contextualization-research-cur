@@ -147,3 +147,65 @@ majority-class baselines, and A/B/C/D log-probability distributions with
 **no additional GPU inference**. Any follow-up protocol variant must use a
 different output directory and an explicit protocol name, and should be
 reported separately rather than replacing this first run.
+
+## Corrected scoring protocol V2 (requires new evaluation; preserves V1)
+
+The 1,334-example diagnostic from V1 established near-uniform gold label
+frequencies (A=334, B=334, C=333, D=333), but highly biased predictions
+(A=85, B=4, C=502, D=743). V1's mean next-token B log-probability was
+-16.87 vs D -10.95. V1 scored bare uppercase tokens at the beginning of an
+assistant message even though `Answer:` ended the **user** message.
+
+V2 is a **separately versioned**, explicit methodological correction:
+
+- Move the `Answer:` delimiter from the user message to a forced
+  `Answer:` **assistant prefix**.
+- Score the exact context-valid continuations `" A"`, `" B"`,
+  `" C"`, `" D"` by one next-token log-probability each.
+- Verify complete tokenizer prefix invariance for all four letters before
+  each score. Stop if a candidate crosses tokenizer boundaries.
+- Qwen3 remains non-thinking, with the **same model SHA** and the
+  **same 1,334 test questions**, no retrieval or fine-tuning.
+- Write independent pilot/full outputs. Neither code nor experiment
+  touches V1's saved results.
+- This is *not* a claim of exact reproduction of the paper's prompt,
+  and its choice follows diagnosis of V1's evaluation artifact.
+
+On Narval, in the existing clean checkout with `.venv` activated:
+
+```bash
+git pull --ff-only
+python -m pytest -q tests/test_kazculture_phase1_v2.py
+bash -n slurm/kazculture_phase1_v2.sh
+
+# Verify candidate IDs using the real cached tokenizer with CPU only:
+python scripts/eval_kazculture_phase1_v2.py \
+  --test_file data/raw/kazculture_phase1/test.parquet \
+  --model_revision 9216db5781bf21249d130ec9da846c4624c16137 \
+  --output data/outputs/kazculture_phase1_v2_tokenizer_check \
+  --check_tokenization
+
+# Submit a 20-question pilot, using the separate V2 output directory:
+export KAZCULTURE_TEST_FILE="$PWD/data/raw/kazculture_phase1/test.parquet"
+export KAZCULTURE_MODEL_REVISION=9216db5781bf21249d130ec9da846c4624c16137
+export KAZCULTURE_LIMIT=20
+sbatch --time=00:45:00 --export=ALL slurm/kazculture_phase1_v2.sh
+```
+
+After success, read
+`data/outputs/kazculture_phase1_v2_pilot_20/summary.json` and
+`slurm/logs/kazculture_v2_JOBID.{out,err}`. Inspect whether raw
+letter log-probabilities and predicted labels are no longer pathologically
+biased **without optimizing accuracy on the test labels**.
+
+Then submit the frozen V2 protocol on the full test set:
+
+```bash
+unset KAZCULTURE_LIMIT
+sbatch --time=03:00:00 --export=ALL slurm/kazculture_phase1_v2.sh
+```
+
+Full V2 results are written under `data/outputs/kazculture_phase1_v2/`.
+Use `scripts/diagnose_kazculture_phase1.py --predictions
+data/outputs/kazculture_phase1_v2/predictions.jsonl` to compare the
+gold/predicted letter distributions with V1.
