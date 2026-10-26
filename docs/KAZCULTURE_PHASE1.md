@@ -8,8 +8,8 @@ Reproduce the KazCulture paper's Qwen3-32B **39.51%** zero-shot
 non-thinking MCQ accuracy on all **1,334 test questions**. The **64.54%**
 two-stage fine-tuned result is a later KG retrieval target, not Phase 1.
 
-This is a **documented independent reproduction protocol**. The paper's exact
-closed-book prompt template may differ from our prompt. Any resulting difference
+This is a **documented independent reproduction protocol**. The published paper's basic Question/Options/Answer prompt is matched, but
+its exact chat-template formatting may still differ. Any resulting difference
 must be documented; never change the prompt after looking at test labels.
 
 ## Integrity
@@ -30,9 +30,16 @@ must be documented; never change the prompt after looking at test labels.
 
 1. Accept gated terms at https://huggingface.co/datasets/issai/KazCulture
    and configure HF credentials on a network-accessible login node.
-2. Stage a fixed KazCulture **test** split (JSONL/JSON/Parquet) in project space,
-   and stage `Qwen/Qwen3-32B` model weights in the shared HF cache.
-   **Never commit either to Git.** Record their immutable revisions.
+2. On a network-enabled login node, stage the full test split and model weights
+   into the existing Hugging Face cache with the staging helper. It writes
+   a Parquet test file plus a SHA-256 reproducibility manifest:
+
+   ```bash
+   python scripts/stage_kazculture_phase1.py
+   ```
+
+   **Never commit the dataset or model weights to Git.** Pin immutable revisions
+   for final publication-quality runs.
 3. Install dependencies in your existing `.venv` (torch, transformers,
    accelerate, datasets, huggingface_hub, pyarrow). Check Qwen3 requires
    a sufficiently recent transformers version. Full BF16 weights need
@@ -48,7 +55,7 @@ must be documented; never change the prompt after looking at test labels.
 5. Submit:
 
    ```bash
-   export KAZCULTURE_TEST_FILE=/project/path/kazculture_test.parquet
+   export KAZCULTURE_TEST_FILE=data/raw/kazculture_phase1/test.parquet
    sbatch --export=ALL,KAZCULTURE_TEST_FILE="$KAZCULTURE_TEST_FILE" \
      slurm/kazculture_phase1.sh
    ```
