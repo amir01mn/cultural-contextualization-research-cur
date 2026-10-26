@@ -56,19 +56,29 @@ def selected_evidence(index, question: KazCultureQuestion, system: str, *,
                       exclude_passage_ids: set[str] | None = None) -> tuple[str, list[dict]]:
     combined = system == "S4R_combined"
     base_system = "S4R" if combined else system
-    hits = index.search(
+    direct = index.search(
         question.question, system=base_system, k=top_k,
         min_similarity=min_similarity,
-        exclude_passage_ids=exclude_passage_ids, combined=combined
+        exclude_passage_ids=exclude_passage_ids, combined=False
     )
-    if combined:
-        # CultureBank analogs must match an explicitly shared L3 value tag
-        # from a retrieved Kazakh frame; never make cross-culture generalizations.
-        kaz_values = {v for hit in hits if hit["dataset"] == "KazCulture"
-                      for v in hit.get("values", [])}
-        hits = [hit for hit in hits
-                if hit["dataset"] == "KazCulture" or
-                set(hit.get("values", [])) & kaz_values]
+    if not combined:
+        return render_evidence(direct), direct
+    # Shared abstract values are the ONLY allowed alignment pivot. Every
+    # CultureBank analog is explicitly indirect and has its own source ID.
+    kaz_values = {v for hit in direct for v in hit.get("values", [])}
+    if not kaz_values:
+        return render_evidence(direct), direct
+    candidates = index.search(
+        question.question, system="S4R", k=top_k * 6,
+        min_similarity=min_similarity,
+        exclude_passage_ids=exclude_passage_ids, combined=True
+    )
+    analogs = [
+        hit for hit in candidates
+        if hit["dataset"] == "CultureBank"
+        and bool(set(hit.get("values", [])) & kaz_values)
+    ][:min(2, max(0, top_k - 1))]
+    hits = (direct[:max(1, top_k - len(analogs))] + analogs)[:top_k]
     return render_evidence(hits), hits
 
 
