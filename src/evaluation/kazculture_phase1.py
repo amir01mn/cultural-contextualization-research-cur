@@ -16,14 +16,14 @@ from ..loaders.kazculture_loader import CHOICES, KazCultureQuestion
 
 # Fixed prior to seeing test results. Paper's exact open-model prompt template
 # was not released with the dataset; this is a documented reproduction protocol.
-PROMPT_VERSION = "kazculture-closedbook-kz-v1"
+PROMPT_VERSION = "kazculture-paper-english-v1"
 
 
 def question_text(q: KazCultureQuestion) -> str:
-    """Kazakh MCQ, no passage or reference answer included."""
-    return ("Сұрақ: " + q.question + "\n"
+    """Paper-style English scaffold, with original Kazakh question/options."""
+    return ("Question:\n" + q.question + "\n\nOptions:\n"
             + "\n".join(f"{label}. {q.options[label]}" for label in CHOICES)
-            + "\nДұрыс жауаптың тек әрпін таңдаңыз (A, B, C немесе D).")
+            + "\n\nAnswer:")
 
 
 def prompt_hash(q: KazCultureQuestion) -> str:
