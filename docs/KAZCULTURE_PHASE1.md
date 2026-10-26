@@ -55,8 +55,10 @@ must be documented; never change the prompt after looking at test labels.
    **Never commit the dataset or model weights to Git.** Pin immutable revisions
    for final publication-quality runs.
 3. Install dependencies in your existing `.venv` (torch, transformers,
-   accelerate, datasets, huggingface_hub, pyarrow). Check Qwen3 requires
-   a sufficiently recent transformers version. Full BF16 weights need
+   accelerate, datasets, huggingface_hub, pyarrow). Install the cluster lock
+   plus `requirements-kazculture-phase1.txt` (adds Accelerate for multi-GPU
+   `device_map=auto`). Check Qwen3 requires a sufficiently recent
+   transformers version. Full BF16 weights need
    approximately 64 GB plus overhead; Narval's A100 cards are generally 40 GB.
    The default script requests two full A100 GPUs (80 GB combined), which may
    be tight. Verify account/partition/GPU availability and request more GPUs
