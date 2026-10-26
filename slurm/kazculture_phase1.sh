@@ -9,8 +9,10 @@
 #SBATCH --output=slurm/logs/kazculture_phase1_%j.out
 #SBATCH --error=slurm/logs/kazculture_phase1_%j.err
 #
-# Use two full A100 80GB GPUs for the Qwen3-32B BF16 weights plus overhead.
-# Adjust resources to your cluster's actual GPU availability/partitions.
+# Narval generally uses full A100 40GB GPUs. Two 40GB cards offer ~80GB
+# combined VRAM for ~64GB BF16 model weights; actual headroom may be tight.
+# Verify available GPU type, partition and account with sinfo/sacctmgr.
+# If memory allocation or OOM fails, request additional GPUs where permitted.
 # Example:
 #   export KAZCULTURE_TEST_FILE=/project/.../kazculture_test.parquet
 #   sbatch slurm/kazculture_phase1.sh
