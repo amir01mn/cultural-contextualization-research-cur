@@ -30,6 +30,20 @@ must be documented; never change the prompt after looking at test labels.
 
 1. Accept gated terms at https://huggingface.co/datasets/issai/KazCulture
    and configure HF credentials on a network-accessible login node.
+   **Do not store HF access tokens in a group-shared `hf_cache`.** Keep
+   `HF_HOME` unset (personal default token storage), but set the dataset and
+   model cache paths explicitly before staging:
+
+   ```bash
+   unset HF_HOME
+   export HF_HUB_CACHE="$(dirname "$PWD")/hf_cache/hub"
+   export HF_DATASETS_CACHE="$(dirname "$PWD")/hf_cache/datasets"
+   mkdir -p "$HF_HUB_CACHE" "$HF_DATASETS_CACHE"
+   hf auth login
+   ```
+
+   The submitted GPU job uses `slurm/env_hf.sh` to point to the same cached
+   model, without requiring an access token on the compute node.
 2. On a network-enabled login node, stage the full test split and model weights
    into the existing Hugging Face cache with the staging helper. It writes
    a Parquet test file plus a SHA-256 reproducibility manifest:
@@ -43,8 +57,10 @@ must be documented; never change the prompt after looking at test labels.
 3. Install dependencies in your existing `.venv` (torch, transformers,
    accelerate, datasets, huggingface_hub, pyarrow). Check Qwen3 requires
    a sufficiently recent transformers version. Full BF16 weights need
-   approximately 64 GB plus significant overhead; the default SLURM script
-   requests two A100 80GB GPUs. Use `device_map=auto`.
+   approximately 64 GB plus overhead; Narval's A100 cards are generally 40 GB.
+   The default script requests two full A100 GPUs (80 GB combined), which may
+   be tight. Verify account/partition/GPU availability and request more GPUs
+   if needed. Use `device_map=auto`.
 4. Dry run before requesting the GPU:
 
    ```bash
