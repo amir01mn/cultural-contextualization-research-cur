@@ -23,3 +23,7 @@ slurm/watch/
 
 # pyvis writes its JS/CSS bundle into ./lib on every HTML graph export
 lib/
+
+# KazCulture Phase 2-5 immutable corpora, graph checkpoints, audit reviews,
+# embedding indexes and benchmark predictions (never commit data).
+data/kazculture_pipeline/
