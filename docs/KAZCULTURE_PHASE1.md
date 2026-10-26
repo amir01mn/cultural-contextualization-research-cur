@@ -70,13 +70,35 @@ must be documented; never change the prompt after looking at test labels.
      --test_file /project/path/kazculture_test.parquet --dry_run
    ```
 
-5. Submit:
+5. Run a **5-question pilot** first. The B1 partition has a 3-hour maximum,
+   so the job script's default is 03:00:00; for the pilot use 45 minutes:
 
    ```bash
-   export KAZCULTURE_TEST_FILE=data/raw/kazculture_phase1/test.parquet
-   sbatch --export=ALL,KAZCULTURE_TEST_FILE="$KAZCULTURE_TEST_FILE" \
-     slurm/kazculture_phase1.sh
+   git pull --ff-only
+   export KAZCULTURE_TEST_FILE="$PWD/data/raw/kazculture_phase1/test.parquet"
+   export KAZCULTURE_MODEL_REVISION=9216db5781bf21249d130ec9da846c4624c16137
+   export KAZCULTURE_LIMIT=5
+   mkdir -p slurm/logs
+   bash -n slurm/kazculture_phase1.sh
+   sbatch --time=00:45:00 --export=ALL slurm/kazculture_phase1.sh
    ```
+
+   After Slurm reports a completed job, inspect
+   `data/outputs/kazculture_phase1_pilot_5/summary.json` and the corresponding
+   `slurm/logs/kazculture_phase1_JOBID.{out,err}`. A five-question pilot is **not**
+   an accuracy measurement comparable to the paper.
+
+   Submit the **full 1,334-question run** only after the pilot succeeds:
+
+   ```bash
+   unset KAZCULTURE_LIMIT
+   sbatch --time=03:00:00 --export=ALL slurm/kazculture_phase1.sh
+   ```
+
+   The full evaluation writes to `data/outputs/kazculture_phase1/`.
+   With B1's 3-hour limit, an interrupted run can be resubmitted and resumed;
+   use an authorized longer-walltime partition if repeated three-hour runs
+   are unsuitable.
 
 6. Read `data/outputs/kazculture_phase1/summary.json`. If interrupted,
    rerun with `--resume`. Results are unmeasured until a real model run finishes.
