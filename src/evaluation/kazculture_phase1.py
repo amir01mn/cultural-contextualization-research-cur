@@ -14,8 +14,8 @@ from typing import Mapping, Protocol, Sequence
 
 from ..loaders.kazculture_loader import CHOICES, KazCultureQuestion
 
-# Fixed prior to seeing test results. Paper's exact open-model prompt template
-# was not released with the dataset; this is a documented reproduction protocol.
+# The paper publishes Question/Options/Answer formatting; the exact model
+# chat-template formatting remains an independently documented choice.
 PROMPT_VERSION = "kazculture-paper-english-v1"
 
 
