@@ -19,7 +19,7 @@ from src.evaluation.kazculture_hf_scorer_v2 import (
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description=__doc__.splitlines()[1])
+    p = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     p.add_argument("--test_file", required=True)
     p.add_argument("--model", default="Qwen/Qwen3-32B")
     p.add_argument("--model_revision", default=None)
