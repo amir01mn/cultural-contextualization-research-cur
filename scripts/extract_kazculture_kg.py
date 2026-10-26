@@ -121,9 +121,13 @@ def main() -> int:
     if successes / len(frames) < 0.5:
         raise RuntimeError(f"Extraction coverage below 50% gate: {report}")
     if args.audit_csv:
-        sample = audit_rows(frames, args.audit_count)
-        write_audit_csv(args.audit_csv, sample)
-        report["audit_csv_requires_manual_review"] = str(args.audit_csv)
+        # NEVER overwrite annotations a human may already have entered.
+        if args.audit_csv.exists():
+            report["existing_manual_audit_preserved"] = str(args.audit_csv)
+        else:
+            sample = audit_rows(frames, args.audit_count)
+            write_audit_csv(args.audit_csv, sample)
+            report["audit_csv_requires_manual_review"] = str(args.audit_csv)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 
