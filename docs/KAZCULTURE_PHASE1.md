@@ -118,3 +118,32 @@ must be documented; never change the prompt after looking at test labels.
   modified.
 - Phase 2 will add multilingual evidence retrieval and KG construction **only
   after Phase 1's frozen baseline is measured**.
+
+## Scoring audit after the first full run (2026-10-26)
+
+An initial independent closed-book run completed all 1,334 test examples in
+7 minutes 1 second (Slurm 7466192): **333 correct, 24.9625%**. This is below
+the paper's published Qwen3-32B **39.51%** by 14.5475 points. Its predictions
+were strongly concentrated on **C (502) and D (743)**, with A (85) and B (4).
+This is a **diagnostic observation, not a confirmed reproduction**.
+
+The paper documents A/B/C/D next-token probabilities and Qwen3 non-thinking
+mode, but does not fully specify all model prompt serialization details.
+Potential discrepancies in model's next-token distribution, token boundaries,
+chat templating, and next-token scoring should be investigated before adopting
+the 24.96% score as the scientific baseline. Do **not** modify the existing
+predictions or treat changes to prompt format as KG retrieval improvements.
+
+Run an offline diagnosis on existing results:
+
+```bash
+git pull --ff-only
+python scripts/diagnose_kazculture_phase1.py \
+  --predictions data/outputs/kazculture_phase1/predictions.jsonl
+```
+
+This reports gold answer frequencies, the full confusion matrix, the
+majority-class baselines, and A/B/C/D log-probability distributions with
+**no additional GPU inference**. Any follow-up protocol variant must use a
+different output directory and an explicit protocol name, and should be
+reported separately rather than replacing this first run.
