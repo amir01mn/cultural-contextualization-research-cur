@@ -19,7 +19,7 @@ must be documented; never change the prompt after looking at test labels.
 - Gold `answer_label` used only by evaluation reducer.
 - Non-thinking mode: `apply_chat_template(..., enable_thinking=False)`.
 - Score next-token **log probability** of A/B/C/D and take argmax.
-- Fixed Kazakh prompt `kazculture-closedbook-kz-v1`; one order of options.
+- Fixed paper-style English prompt `kazculture-paper-english-v1`; one order of options.
 - No retrieval; no finetuning; no temperature/sample generation.
 - Report full test set (1,334) separately from pilots/subsets.
 - Tokenization is checked; scoring fails loudly if any letter spans multiple tokens.
@@ -63,7 +63,7 @@ must be documented; never change the prompt after looking at test labels.
 - Pin exact dataset and model revisions when possible.
 - HF trust/model download is not performed in tests. This project environment
   may lack access to the gated dataset and GPUs.
-- The current prompt adds the assistant continuation `Жауап: `, and scores
+- The prompt ends in `Answer:` and scores
   A/B/C/D as the *next token*. It must be calibrated against the paper's own
   prompting implementation if made available. Do not claim an exact reproduction
   of 39.51% if this protocol differs.
