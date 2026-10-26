@@ -7,7 +7,7 @@ import pytest
 
 from src.loaders.kazculture_corpus import (
     corpus_from_train, deterministic_pilot, passage_id,
-    test_overlap_report, validate_no_test_content,
+    test_overlap_report as passage_overlap_report, validate_no_test_content,
 )
 from src.construction.kazculture_kg import (
     extract_frame, pathways, audit_rows, write_audit_csv, validate_audit,
@@ -51,7 +51,7 @@ def test_dedupe_and_no_leakage():
     assert stats["duplicate_passage_rows"] == 1
     assert all("answer" not in p and "question" not in p for p in passages)
     assert deterministic_pilot(passages, 1)
-    overlap = test_overlap_report(
+    overlap = passage_overlap_report(
         passages, [{"item_description": "Наурыз көктемде тойланады."},
                    {"item_description": "unrelated"}])
     assert overlap["overlap_test_records"] == 1
