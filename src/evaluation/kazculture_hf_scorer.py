@@ -30,7 +30,7 @@ class HFQwenLetterScorer:
             low_cpu_mem_usage=True).eval()
         self.max_context_tokens = max_context_tokens
         self.token_ids = {}
-        # With the assistant suffix 'Жауап:' these are the allowed next tokens.
+        # These are the allowed next tokens in the assistant continuation.
         # Tokenizer boundaries are explicit; do not silently score a different task.
         for label in CHOICES:
             ids = self.tokenizer.encode(label, add_special_tokens=False)
@@ -48,7 +48,7 @@ class HFQwenLetterScorer:
             messages, tokenize=False, add_generation_prompt=True,
             enable_thinking=False)
         # Force a stable boundary for candidate next-token scoring.
-        rendered += "Жауап: "
+        # The paper uses an Answer: prompt ending; score the first assistant token.
         inputs = self.tokenizer(rendered, return_tensors="pt",
                                 add_special_tokens=False)
         if inputs["input_ids"].shape[-1] > self.max_context_tokens:
