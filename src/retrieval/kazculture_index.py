@@ -33,16 +33,21 @@ def make_units(passages: list[dict], frames: list[dict] | None = None,
         if not frame or frame.get("label_status") != "candidate":
             continue
         for t in frame["triples"]:
+            # For long passages preserve the norm and value labels from the
+            # exact model-visible segment supporting this triple.
+            triple_values = t.get("chunk_values", frame["values"])
+            triple_norm = t.get("chunk_norm", frame["norm"])
+            triple_norm_type = t.get("chunk_norm_type", frame["norm_type"])
             fact = f"{t['subject']} — {t['predicate']} — {t['object']}. Quote: {t['evidence']}"
             units.append({
                 **base, "unit_id": "S2:" + t["triple_id"],
                 "system": "S2", "text": fact,
-                "triple_id": t["triple_id"], "values": frame["values"],
+                "triple_id": t["triple_id"], "values": triple_values,
             })
             layers = (
-                f"L3 (provisional value): {', '.join(frame['values']) or '(unclassified)'}\n"
-                f"L2 (provisional norm type): {frame['norm_type'] or '(unclassified)'}\n"
-                f"L2 (provisional norm): {frame['norm'] or '(unclassified)'}\n"
+                f"L3 (provisional value): {', '.join(triple_values) or '(unclassified)'}\n"
+                f"L2 (provisional norm type): {triple_norm_type or '(unclassified)'}\n"
+                f"L2 (provisional norm): {triple_norm or '(unclassified)'}\n"
                 f"L1 (source-quoted practice): {fact}"
             )
             units.append({
@@ -63,13 +68,13 @@ def make_units(passages: list[dict], frames: list[dict] | None = None,
                     **base, "unit_id": "S4R:" + t["triple_id"],
                     "system": "S4R",
                     "text": (
-                        f"Value (provisional): {', '.join(frame['values'])}. "
-                        f"Norm type: {frame['norm_type']}. "
-                        f"Culture-specific norm: {frame['norm']}. "
+                        f"Value (provisional): {', '.join(triple_values)}. "
+                        f"Norm type: {triple_norm_type}. "
+                        f"Culture-specific norm: {triple_norm}. "
                         f"Source-quoted practice: {t['evidence']}. "
                         f"Relation: {t['subject']} — {t['predicate']} — {t['object']}."
                     ),
-                    "values": frame["values"], "triple_id": t["triple_id"],
+                    "values": triple_values, "triple_id": t["triple_id"],
                 })
 
     # Only source-preserving CultureBank KG v3 frames are eligible to align.
