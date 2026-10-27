@@ -70,6 +70,46 @@ BGE-M3 is recommended as a multilingual candidate, not yet proven best for
 Kazakh cultural texts. A valid Phase 2 includes empirical Kazakh retrieval
 recall/precision diagnostics.
 
+## 2026-10-26 Narval pilot failure and safe resume (Job 7474841)
+
+The first GPU pilot (`7474841`) failed after **264 of 750** passages
+were saved, because one input exceeded vLLM's **4,096-token** context.
+This was not an OOM: Qwen3-32B and tensor-parallel workers initialized.
+
+The extraction runner now validates the *entire rendered chat prompt* with
+the actual tokenizer, reserving **512 output tokens plus 64 safety tokens**.
+Passages that exceed the limit are split into overlapping **verbatim source
+substrings**; every substring is seen by the LLM and each quote is checked
+against the precise substring shown to it. Each triple retains its segment
+source span and its own provisional norm/value labels; source passages and
+question IDs are not changed. A separate `.chunking.json` provenance
+sidecar records the strategy. The original pilot `.manifest.json` is
+intentionally compatible because the model, sampling, extraction instructions,
+and dataset did not change; the original 264 checkpoints remain valid.
+
+**First check the GPU job is no longer running. Do not delete or move the
+checkpoint or its manifest.** On the login node:
+
+```bash
+git pull --ff-only
+python -m pytest -q tests/test_kazculture_pipeline.py
+wc -l data/kazculture_pipeline/kg/pilot_frames.jsonl
+
+# CPU-only check using cached Qwen3 tokenizer: proves no oversized inputs
+# will be sent to the next GPU pilot.
+python scripts/extract_kazculture_kg.py \
+  --passages data/kazculture_pipeline/corpus/pilot_passages.jsonl \
+  --out data/kazculture_pipeline/kg/pilot_frames.jsonl \
+  --preflight_only
+
+# When validation passes and the old job is terminated:
+sbatch --export=ALL,KG_STAGE=pilot slurm/kazculture_kg_extract.sh
+```
+
+The follow-up job skips all checkpointed passages; it will write an audit CSV
+only after all 750 source passages finish. Other infrastructure errors must
+be examined separately rather than interpreted as passage-length problems.
+
 ## Phase 2 — prepare and extract a 750-unique-passage pilot
 
 On the login node:
