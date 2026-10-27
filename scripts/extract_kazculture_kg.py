@@ -16,6 +16,10 @@ from src.construction.kazculture_kg import (
     EXTRACTION_SYSTEM, audit_rows, extract_frame, extraction_user, write_audit_csv,
 )
 from src.loaders.kazculture_corpus import read_rows
+from src.construction.kazculture_chunking import (
+    CHUNKING_VERSION, aggregate_chunks, prompt_tokens, split_passage,
+    render_extraction_prompt,
+)
 
 
 def fingerprint(path: Path) -> str:
@@ -28,11 +32,11 @@ def fingerprint(path: Path) -> str:
 
 def vllm_generate(passages: list[dict], *, model, tokenizer, system, max_tokens: int):
     from vllm import SamplingParams
-    prompts = [tokenizer.apply_chat_template(
-        [{"role": "system", "content": system},
-         {"role": "user", "content": extraction_user(p)}],
-        tokenize=False, add_generation_prompt=True, enable_thinking=False
-    ) for p in passages]
+    # Every segment must have passed the tokenizer budget check before vLLM.
+    prompts = [render_extraction_prompt(tokenizer, p, system=system) for p in passages]
+    if any(len(tokenizer.encode(prompt, add_special_tokens=False)) >
+           (4096 - max_tokens - 64) for prompt in prompts):
+        raise ValueError("Unsafe overlength prompt: refusing vLLM request")
     outputs = model.generate(
         prompts, SamplingParams(temperature=0.0, max_tokens=max_tokens, seed=42)
     )
@@ -52,6 +56,8 @@ def main() -> int:
     p.add_argument("--audit_csv", type=Path)
     p.add_argument("--audit_only", action="store_true",
                    help="Rebuild audit sample from checkpoint without model")
+    p.add_argument("--preflight_only", action="store_true",
+                   help="Check passage prompt lengths and chunk coverage using tokenizer, no GPU")
     args = p.parse_args()
 
     passages = read_rows(args.passages)
@@ -61,6 +67,29 @@ def main() -> int:
     ids = [p["passage_id"] for p in passages]
     if len(set(ids)) != len(ids):
         raise ValueError("Duplicate passage IDs in build input")
+    if args.preflight_only:
+        from transformers import AutoTokenizer
+        tok = AutoTokenizer.from_pretrained(
+            args.model, revision=args.model_revision, trust_remote_code=False,
+        )
+        stats = {"n_passages": len(passages), "max_model_len": 4096,
+                 "reserved_output_tokens": args.max_tokens,
+                 "safety_tokens": 64, "long_passages": 0,
+                 "total_segments": 0, "max_segments_per_passage": 0,
+                 "max_segment_input_tokens": 0}
+        for psg in passages:
+            count = prompt_tokens(tok, psg)
+            parts = split_passage(tok, psg, max_tokens=args.max_tokens)
+            stats["long_passages"] += int(len(parts) > 1)
+            stats["total_segments"] += len(parts)
+            stats["max_segments_per_passage"] = max(
+                stats["max_segments_per_passage"], len(parts))
+            stats["max_segment_input_tokens"] = max(
+                stats["max_segment_input_tokens"],
+                *(prompt_tokens(tok, part) for part in parts),
+            )
+        print(json.dumps({"status": "preflight_passed", **stats}, indent=2))
+        return 0
     args.out.parent.mkdir(parents=True, exist_ok=True)
     metadata_file = args.out.with_suffix(".manifest.json")
     metadata = {
@@ -88,6 +117,26 @@ def main() -> int:
             done[pid] = row
 
     remaining = [p for p in passages if p["passage_id"] not in done]
+    by_id = {p["passage_id"]: p for p in passages}
+    for pid, previous in done.items():
+        if previous.get("text") != by_id[pid]["text"]:
+            raise ValueError("Checkpoint source text changed; refusing unsafe resume")
+    # Existing 264 finished records keep their original model inputs and
+    # outputs. The system prompt and sampling have not changed. Only inputs
+    # that would overflow the 4096-token window are split into verbatim chunks.
+    protocol_path = args.out.with_suffix(".chunking.json")
+    protocol = {"chunking_version": CHUNKING_VERSION, "context_tokens": 4096,
+                "output_tokens": args.max_tokens, "safety_tokens": 64,
+                "overlap_chars": 160, "source_quote_validation": "model_visible_chunk",
+                "checkpoint_compatibility": "old short-passage records retained"}
+    if protocol_path.exists():
+        if json.loads(protocol_path.read_text(encoding="utf-8")) != protocol:
+            raise ValueError("Chunking protocol changed for this checkpoint")
+    else:
+        protocol_path.write_text(
+            json.dumps(protocol, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     if args.audit_only and remaining:
         raise ValueError(f"Cannot audit: {len(remaining)} passages not extracted")
     if remaining and not args.audit_only:
@@ -100,18 +149,33 @@ def main() -> int:
         with args.out.open("a", encoding="utf-8") as output:
             for start in range(0, len(remaining), args.batch_size):
                 batch = remaining[start:start + args.batch_size]
-                generated = vllm_generate(
-                    batch, model=model, tokenizer=tokenizer,
-                    system=EXTRACTION_SYSTEM, max_tokens=args.max_tokens
-                )
-                if len(batch) != len(generated):
-                    raise RuntimeError("Batch output mismatch; no silent fallback")
-                for row, raw in zip(batch, generated):
-                    frame = extract_frame(row, raw, model=args.model)
+                # Token-length validated segmentation of every original source.
+                nested = [split_passage(tokenizer, row, max_tokens=args.max_tokens)
+                          for row in batch]
+                flat = [part for parts in nested for part in parts]
+                generated = []
+                # Bound generation requests independently from passage count:
+                # one long passage can produce multiple source-aligned chunks.
+                for off in range(0, len(flat), args.batch_size):
+                    generated.extend(vllm_generate(
+                        flat[off:off + args.batch_size],
+                        model=model, tokenizer=tokenizer,
+                        system=EXTRACTION_SYSTEM, max_tokens=args.max_tokens,
+                    ))
+                if len(flat) != len(generated):
+                    raise RuntimeError("Chunk generation count mismatch")
+                offset = 0
+                for row, chunks in zip(batch, nested):
+                    outputs = generated[offset:offset + len(chunks)]
+                    offset += len(chunks)
+                    frame = aggregate_chunks(row, chunks, outputs, model=args.model)
                     output.write(json.dumps(frame, ensure_ascii=False) + "\n")
                     done[frame["passage_id"]] = frame
                 output.flush()
-                print(f"Extracted {len(done)}/{len(passages)}", flush=True)
+                print(
+                    f"Extracted {len(done)}/{len(passages)} "
+                    f"({len(flat)} model-visible segments in batch)", flush=True
+                )
 
     frames = [done[pid] for pid in ids]
     successes = sum(f["label_status"] == "candidate" for f in frames)
