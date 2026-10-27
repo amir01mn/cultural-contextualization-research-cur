@@ -107,8 +107,11 @@ def pathways(frame: dict) -> list[dict]:
         "pathway_id": stable_id(frame["passage_id"], t["triple_id"], prefix="kzw_"),
         "passage_id": frame["passage_id"],
         "culture": frame["culture"], "source": frame["sources"],
-        "values": frame["values"], "norm_type": frame["norm_type"],
-        "norm": frame["norm"], "triple_id": t["triple_id"],
+        "values": t.get("chunk_values", frame["values"]),
+        "norm_type": t.get("chunk_norm_type", frame["norm_type"]),
+        "norm": t.get("chunk_norm", frame["norm"]),
+        "source_chunk_index": t.get("source_chunk_index"),
+        "triple_id": t["triple_id"],
         "evidence": t["evidence"], "provisional": True,
     } for t in frame["triples"]]
 
