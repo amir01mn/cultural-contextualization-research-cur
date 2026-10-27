@@ -211,3 +211,106 @@ def test_index_shard_resume_and_source_filter(tmp_path, monkeypatch):
     assert all(h["passage_id"] != "kzp_0" for h in hits)
     with pytest.raises(FileExistsError):
         MultilingualIndex.create(folder, units, chunk_size=2)
+
+
+def test_overlength_passage_is_chunked_losslessly_and_keeps_local_pathways():
+    """Regression for Narval 7474841: vLLM rejected a >4096-token passage."""
+    from src.construction.kazculture_chunking import (
+        aggregate_chunks, prompt_tokens, split_passage,
+    )
+    from src.construction.kazculture_kg import pathways
+    from src.retrieval.kazculture_index import make_units
+    import json
+
+    class FakeTokenizer:
+        def apply_chat_template(self, messages, **kwargs):
+            assert kwargs["enable_thinking"] is False
+            return "\\n".join(m["content"] for m in messages) + "\\nAssistant:"
+
+        def encode(self, text, add_special_tokens=False):
+            # Character-level stand-in makes the limit deterministic and
+            # exercises the exact templated prompt, including its headers.
+            return range(len(text))
+
+    text = ("Қазақтың дәстүрлі күйлері домбырада орындалады. " * 140)
+    original = {
+        "passage_id": "kzp_test_long", "text": text, "sources": ["Train book"],
+        "categories": ["Music"], "dataset": "issai/KazCulture",
+        "split": "train", "culture": "Kazakh", "train_row_ids": [1],
+    }
+    tok = FakeTokenizer()
+    budget = 3000 - 240 - 64
+    parts = split_passage(
+        tok, original, max_model_len=3000, max_tokens=240,
+    )
+    assert len(parts) > 1
+    assert parts[0]["_chunk_start"] == 0
+    assert parts[-1]["_chunk_end"] == len(text)
+    assert all(p["text"] == text[p["_chunk_start"]:p["_chunk_end"]]
+               for p in parts)
+    assert all(prompt_tokens(tok, p) <= budget for p in parts)
+    assert all(next_part["_chunk_start"] <= prev["_chunk_end"]
+               for prev, next_part in zip(parts, parts[1:]))
+
+    choices = ["tradition", "benevolence (caring)"]
+    replies = []
+    for i, p in enumerate(parts):
+        replies.append(json.dumps({
+            "triples": [{
+                "subject": f"dombyra_segment_{i}", "predicate": "part of",
+                "object": "Kazakh music",
+                "evidence": p["text"][:40],
+            }],
+            "norm": f"local norm {i}",
+            "norm_type": f"type {i}",
+            "values": [choices[i % 2]],
+        }, ensure_ascii=False))
+    merged = aggregate_chunks(original, parts, replies, model="test")
+    assert merged["text"] == text
+    assert merged["chunk_count"] == len(parts)
+    assert merged["label_status"] == "candidate"
+    assert len(merged["triples"]) == len(parts)
+    assert len(merged["chunk_interpretations"]) == len(parts)
+    for i, triple in enumerate(merged["triples"]):
+        assert triple["evidence"] in parts[i]["text"]
+        assert triple["source_chunk_index"] == i
+        assert triple["chunk_values"] == [choices[i % 2]]
+    routes = pathways(merged)
+    assert len(routes) == len(parts)
+    assert all(r["values"] == [choices[i % 2]] for i, r in enumerate(routes))
+    units = make_units([original], [merged])
+    s3 = [u for u in units if u["system"] == "S3"]
+    assert len(s3) == len(parts)
+    assert all(choices[i % 2] in unit["text"] for i, unit in enumerate(s3))
+
+
+def test_overlength_quote_cannot_be_laundered_from_other_chunk():
+    from src.construction.kazculture_chunking import aggregate_chunks
+    import json
+    orig = {
+        "passage_id": "kzp_quotes", "text": "Алма жеміс. Домбыра аспап.",
+        "sources": ["Book"], "categories": ["Culture"],
+        "dataset": "issai/KazCulture", "culture": "Kazakh",
+    }
+    chunks = [
+        {**orig, "text": "Алма жеміс.", "_chunk_start": 0, "_chunk_end": 11},
+        {**orig, "text": " Домбыра аспап.", "_chunk_start": 11,
+         "_chunk_end": len(orig["text"])},
+    ]
+    # The quote exists in the WHOLE passage but was never shown to model
+    # in the first chunk: it must not become a grounded triple.
+    responses = [
+        json.dumps({
+            "triples": [{"subject": "invented", "predicate": "related",
+                         "object": "value", "evidence": "Домбыра"}],
+            "norm": "fake", "norm_type": "fake", "values": ["tradition"],
+        }),
+        json.dumps({
+            "triples": [{"subject": "домбыра", "predicate": "is",
+                         "object": "аспап", "evidence": "Домбыра"}],
+            "norm": "music", "norm_type": "performance", "values": ["tradition"],
+        }, ensure_ascii=False),
+    ]
+    merged = aggregate_chunks(orig, chunks, responses, model="fake")
+    assert len(merged["triples"]) == 1
+    assert merged["triples"][0]["source_chunk_index"] == 1
