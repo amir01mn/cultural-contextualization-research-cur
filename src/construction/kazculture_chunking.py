@@ -7,6 +7,8 @@ the full passage; chunk-specific interpretation stays on each triple.
 """
 from __future__ import annotations
 
+from typing import Callable
+
 from ..construction.kazculture_kg import EXTRACTION_SYSTEM, extract_frame, MAX_TRIPLES
 
 CHUNKING_VERSION = "token_budgeted_original_text_overlapping_v1"
@@ -15,19 +17,25 @@ DEFAULT_SAFETY_TOKENS = 64
 DEFAULT_OVERLAP_CHARS = 160
 
 
-def render_extraction_prompt(tokenizer, passage: dict, *, system: str = EXTRACTION_SYSTEM) -> str:
+def render_extraction_prompt(tokenizer, passage: dict, *,
+                             system: str = EXTRACTION_SYSTEM,
+                             user_builder: Callable | None = None) -> str:
     from ..construction.kazculture_kg import extraction_user
+    user_builder = user_builder or extraction_user
     return tokenizer.apply_chat_template(
         [{"role": "system", "content": system},
-         {"role": "user", "content": extraction_user(passage)}],
+         {"role": "user", "content": user_builder(passage)}],
         tokenize=False, add_generation_prompt=True, enable_thinking=False,
     )
 
 
-def prompt_tokens(tokenizer, passage: dict, *, system: str = EXTRACTION_SYSTEM) -> int:
+def prompt_tokens(tokenizer, passage: dict, *,
+                  system: str = EXTRACTION_SYSTEM,
+                  user_builder: Callable | None = None) -> int:
     # Match the actual string sent to vLLM. An extra reserve handles any
     # minor tokenizer/runtime differences before model.generate() sees it.
-    text = render_extraction_prompt(tokenizer, passage, system=system)
+    text = render_extraction_prompt(tokenizer, passage, system=system,
+                                    user_builder=user_builder)
     return len(tokenizer.encode(text, add_special_tokens=False))
 
 
@@ -36,6 +44,7 @@ def split_passage(
     max_tokens: int = 512, safety_tokens: int = DEFAULT_SAFETY_TOKENS,
     overlap_chars: int = DEFAULT_OVERLAP_CHARS, max_chunks: int = 128,
     system: str = EXTRACTION_SYSTEM,
+    user_builder: Callable | None = None,
 ) -> list[dict]:
     """Return verbatim original substrings, each guaranteed below prompt budget."""
     if not isinstance(passage.get("text"), str) or not passage["text"]:
@@ -44,7 +53,8 @@ def split_passage(
     if budget <= 0:
         raise ValueError("No input token budget after reserving generation and safety")
     original = passage["text"]
-    if prompt_tokens(tokenizer, passage, system=system) <= budget:
+    if prompt_tokens(tokenizer, passage, system=system,
+                     user_builder=user_builder) <= budget:
         return [{**passage, "_chunk_start": 0, "_chunk_end": len(original)}]
 
     chunks = []
@@ -59,7 +69,8 @@ def split_passage(
         while low <= high:
             mid = (low + high) // 2
             probe = {**passage, "text": original[start:mid]}
-            if prompt_tokens(tokenizer, probe, system=system) <= budget:
+            if prompt_tokens(tokenizer, probe, system=system,
+                             user_builder=user_builder) <= budget:
                 best = mid
                 low = mid + 1
             else:
@@ -78,7 +89,8 @@ def split_passage(
                 end = search + 1
         chunk = {**passage, "text": original[start:end],
                  "_chunk_start": start, "_chunk_end": end}
-        if prompt_tokens(tokenizer, chunk, system=system) > budget:
+        if prompt_tokens(tokenizer, chunk, system=system,
+                         user_builder=user_builder) > budget:
             raise AssertionError("Chunk exceeds verified token budget")
         chunks.append(chunk)
         if end == len(original):
