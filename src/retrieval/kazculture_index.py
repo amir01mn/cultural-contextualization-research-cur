@@ -32,7 +32,7 @@ def make_units(passages: list[dict], frames: list[dict] | None = None,
         frame = by_pid.get(p["passage_id"])
         if not frame or frame.get("label_status") != "candidate":
             continue
-        is_v2 = frame.get("schema_version") == "kazculture-kg-factual-normative-v2"
+        is_v2 = frame.get("schema_version") in {"kazculture-kg-factual-normative-v2", "kazculture-kg-factual-normative-v2.1", "kazculture-kg-nested-norms-v2.2"}
         norm_parts = []
         for t in frame["triples"]:
             # Facts remain retrievable as S2 even when no social-norm layer is
