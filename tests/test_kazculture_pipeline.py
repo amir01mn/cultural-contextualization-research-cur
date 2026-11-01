@@ -136,6 +136,23 @@ def test_paired_statistics_stable():
         paired_statistics(before, after[:2])
 
 
+def test_exact_mcnemar_without_scipy():
+    """Known two-sided exact binomial tails for the discordant pairs."""
+    # Four baseline-wrong cases rescued by evidence, zero harmed:
+    # 2 * P(Binomial(4, 1/2) <= 0) = 2/16 = 0.125.
+    before = [{"question_id": str(i), "correct": False} for i in range(4)]
+    after = [{"question_id": str(i), "correct": True} for i in range(4)]
+    assert paired_statistics(before, after, iterations=100)["mcnemar_exact_p"] == 0.125
+
+    # Three rescued and one harmed: 2*(1 + 4)/16 = 0.625.
+    before = [{"question_id": str(i), "correct": i == 3} for i in range(4)]
+    after = [{"question_id": str(i), "correct": i != 3} for i in range(4)]
+    assert paired_statistics(before, after, iterations=100)["mcnemar_exact_p"] == 0.625
+
+    # No discordant pairs means no evidence for a change.
+    assert paired_statistics(before, before, iterations=100)["mcnemar_exact_p"] == 1.0
+
+
 def test_combined_requires_shared_values():
     class MockIndex:
         def search(self, query, *, system, combined, **kwargs):
