@@ -18,6 +18,12 @@ on:
       - 'tests/test_kazculture_pipeline.py'
       - 'tests/test_kazculture_kg_v2.py'
       - 'tests/test_kazculture_kg_v21.py'
+      - 'tests/test_kazculture_kg_v22.py'
+      - 'src/construction/kazculture_kg_v22.py'
+      - 'scripts/extract_kazculture_kg_v22.py'
+      - 'scripts/build_kazculture_heldout_audit.py'
+      - 'scripts/compare_kazculture_kg_holdout.py'
+      - 'slurm/kazculture_kg_holdout.sh'
       - 'src/construction/kazculture_kg_v21.py'
       - 'scripts/extract_kazculture_kg_v21.py'
       - 'scripts/export_kazculture_pathway_audit.py'
@@ -38,7 +44,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install pytest pydantic numpy scipy scikit-learn networkx
       - name: Test KazCulture schema, leakage guards and scoring
-        run: python -m pytest -q tests/test_kazculture_phase1.py tests/test_kazculture_phase1_v2.py tests/test_kazculture_pipeline.py tests/test_kazculture_kg_v2.py tests/test_kazculture_kg_v21.py
+        run: python -m pytest -q tests/test_kazculture_phase1.py tests/test_kazculture_phase1_v2.py tests/test_kazculture_pipeline.py tests/test_kazculture_kg_v2.py tests/test_kazculture_kg_v21.py tests/test_kazculture_kg_v22.py
       - name: Smoke test V2 CLI parser without dataset or GPU
         run: python scripts/eval_kazculture_phase1_v2.py --help
       - name: Smoke test all Phase 2-5 CLIs without dataset or GPU
@@ -55,5 +61,8 @@ jobs:
           python scripts/extract_kazculture_kg_v21.py --help
           python scripts/export_kazculture_pathway_audit.py --help
           python scripts/compare_kazculture_kg_versions.py --help
+          python scripts/extract_kazculture_kg_v22.py --help
+          python scripts/compare_kazculture_kg_holdout.py --help
+          python scripts/build_kazculture_heldout_audit.py --help
       - name: Compile Phase 1 files
-        run: python -m compileall -q src/loaders/kazculture_loader.py src/evaluation/kazculture_phase1.py src/evaluation/kazculture_hf_scorer.py src/evaluation/kazculture_hf_scorer_v2.py scripts/eval_kazculture_phase1.py scripts/eval_kazculture_phase1_v2.py scripts/stage_kazculture_phase1.py scripts/prepare_kazculture_corpus.py scripts/extract_kazculture_kg.py scripts/build_kazculture_index.py scripts/tune_kazculture_retrieval.py scripts/eval_kazculture_retrieval.py scripts/extract_kazculture_kg_v2.py scripts/extract_kazculture_kg_v21.py scripts/compare_kazculture_kg_v2.py scripts/compare_kazculture_kg_versions.py scripts/export_kazculture_pathway_audit.py scripts/review_kazculture_kg_v2.py src/construction/kazculture_kg_v21.py
+        run: python -m compileall -q src/loaders/kazculture_loader.py src/evaluation/kazculture_phase1.py src/evaluation/kazculture_hf_scorer.py src/evaluation/kazculture_hf_scorer_v2.py scripts/eval_kazculture_phase1.py scripts/eval_kazculture_phase1_v2.py scripts/stage_kazculture_phase1.py scripts/prepare_kazculture_corpus.py scripts/extract_kazculture_kg.py scripts/build_kazculture_index.py scripts/tune_kazculture_retrieval.py scripts/eval_kazculture_retrieval.py scripts/extract_kazculture_kg_v2.py scripts/extract_kazculture_kg_v21.py scripts/compare_kazculture_kg_v2.py scripts/compare_kazculture_kg_versions.py scripts/export_kazculture_pathway_audit.py scripts/review_kazculture_kg_v2.py src/construction/kazculture_kg_v21.py src/construction/kazculture_kg_v22.py scripts/extract_kazculture_kg_v22.py scripts/compare_kazculture_kg_holdout.py scripts/build_kazculture_heldout_audit.py
