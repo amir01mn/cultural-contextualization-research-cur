@@ -51,7 +51,7 @@ def rows_for_review(v21, v22, *, per_version=50, seed=42):
                 "predicate":t["predicate"],
                 "object":t["object"],
                 "factual_source_quote":t["evidence"],
-                "norm_proposed_0_or_1":int(bool(norm)),
+                "norm_proposed_0_or_1":"1" if norm else "0",
                 "norm_type_provisional":norm.get("norm_type",""),
                 "norm_provisional":norm.get("norm",""),
                 "norm_evidence_quote":norm.get("evidence",""),
