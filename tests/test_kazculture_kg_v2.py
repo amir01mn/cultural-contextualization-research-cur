@@ -118,10 +118,10 @@ class FakeTokenizer:
 
 
 def test_long_passage_with_no_metadata_and_segment_quote_provenance():
-    original = _p("Үлкендерге құрмет көрсету керек. " * 130)
+    original = _p("Үлкендерге құрмет көрсету керек. " * 230)
     tok = FakeTokenizer()
     parts = split_passage(
-        tok, original, max_model_len=3000, max_tokens=600,
+        tok, original, max_model_len=4096, max_tokens=600,
         system=SYSTEM_V2, user_builder=extraction_user_v2,
     )
     assert len(parts) > 1
@@ -129,7 +129,7 @@ def test_long_passage_with_no_metadata_and_segment_quote_provenance():
     assert parts[-1]["_chunk_end"] == len(original["text"])
     assert all(
         prompt_tokens(tok, p, system=SYSTEM_V2,
-                      user_builder=extraction_user_v2) <= 3000 - 600 - 64
+                      user_builder=extraction_user_v2) <= 4096 - 600 - 64
         for p in parts
     )
     responses = [
