@@ -162,3 +162,36 @@ def test_retrieval_does_not_invent_layered_norm_for_v21_or_v22():
         frame["schema_version"]=schema
         units=make_units([p],[frame])
         assert {unit["system"] for unit in units}=={"S1","S2"}
+
+
+def test_holdout_preparation_excludes_all_screened_passages():
+    from scripts.prepare_kazculture_heldout import select_heldout
+    source=[passage(f"Source {i}", f"p{i}") for i in range(350)]
+    screened={"p151","p160","p202"}
+    chosen,excluded=select_heldout(source,screened,dev_prefix=150,n=150)
+    ids={p["passage_id"] for p in chosen}
+    assert len(chosen)==150
+    assert not ids.intersection(screened)
+    assert not ids.intersection({p["passage_id"] for p in source[:150]})
+    assert chosen[0]["passage_id"]=="p150"
+    assert chosen[1]["passage_id"]=="p152"
+    assert "p151" in excluded
+
+
+def test_human_audit_scoring_does_not_invent_annotations():
+    from scripts.score_kazculture_heldout_audit import evaluate
+    v21,v22=[],[]
+    for i in range(150):
+        p=passage(f"Source {i}",f"p{i}")
+        f=parse(p,[fact(p["text"])])
+        v21.append(f)
+        v22.append(f)
+    rows,mapping=rows_for_review(v21,v22,per_version=5)
+    with pytest.raises(ValueError,match="Human review missing"):
+        evaluate(rows,{"keys":mapping},expected_per_version=5)
+    for row in rows:
+        row["factual_triple_correct_0_or_1"]="1"
+        row["norm_warranted_by_source_0_or_1"]="0"
+    scored=evaluate(rows,{"keys":mapping},expected_per_version=5)
+    assert scored["by_version"]["v21"]["triple_precision"]==1
+    assert scored["by_version"]["v22"]["gate"]=="not_enough_evidence_or_quality"
