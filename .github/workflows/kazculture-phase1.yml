@@ -24,6 +24,8 @@ on:
       - 'scripts/build_kazculture_heldout_audit.py'
       - 'scripts/compare_kazculture_kg_holdout.py'
       - 'slurm/kazculture_kg_holdout.sh'
+      - 'scripts/prepare_kazculture_heldout.py'
+      - 'scripts/score_kazculture_heldout_audit.py'
       - 'src/construction/kazculture_kg_v21.py'
       - 'scripts/extract_kazculture_kg_v21.py'
       - 'scripts/export_kazculture_pathway_audit.py'
@@ -64,5 +66,7 @@ jobs:
           python scripts/extract_kazculture_kg_v22.py --help
           python scripts/compare_kazculture_kg_holdout.py --help
           python scripts/build_kazculture_heldout_audit.py --help
+          python scripts/prepare_kazculture_heldout.py --help
+          python scripts/score_kazculture_heldout_audit.py --help
       - name: Compile Phase 1 files
-        run: python -m compileall -q src/loaders/kazculture_loader.py src/evaluation/kazculture_phase1.py src/evaluation/kazculture_hf_scorer.py src/evaluation/kazculture_hf_scorer_v2.py scripts/eval_kazculture_phase1.py scripts/eval_kazculture_phase1_v2.py scripts/stage_kazculture_phase1.py scripts/prepare_kazculture_corpus.py scripts/extract_kazculture_kg.py scripts/build_kazculture_index.py scripts/tune_kazculture_retrieval.py scripts/eval_kazculture_retrieval.py scripts/extract_kazculture_kg_v2.py scripts/extract_kazculture_kg_v21.py scripts/compare_kazculture_kg_v2.py scripts/compare_kazculture_kg_versions.py scripts/export_kazculture_pathway_audit.py scripts/review_kazculture_kg_v2.py src/construction/kazculture_kg_v21.py src/construction/kazculture_kg_v22.py scripts/extract_kazculture_kg_v22.py scripts/compare_kazculture_kg_holdout.py scripts/build_kazculture_heldout_audit.py
+        run: python -m compileall -q src/loaders/kazculture_loader.py src/evaluation/kazculture_phase1.py src/evaluation/kazculture_hf_scorer.py src/evaluation/kazculture_hf_scorer_v2.py scripts/eval_kazculture_phase1.py scripts/eval_kazculture_phase1_v2.py scripts/stage_kazculture_phase1.py scripts/prepare_kazculture_corpus.py scripts/extract_kazculture_kg.py scripts/build_kazculture_index.py scripts/tune_kazculture_retrieval.py scripts/eval_kazculture_retrieval.py scripts/extract_kazculture_kg_v2.py scripts/extract_kazculture_kg_v21.py scripts/compare_kazculture_kg_v2.py scripts/compare_kazculture_kg_versions.py scripts/export_kazculture_pathway_audit.py scripts/review_kazculture_kg_v2.py src/construction/kazculture_kg_v21.py src/construction/kazculture_kg_v22.py scripts/extract_kazculture_kg_v22.py scripts/compare_kazculture_kg_holdout.py scripts/build_kazculture_heldout_audit.py scripts/prepare_kazculture_heldout.py scripts/score_kazculture_heldout_audit.py
