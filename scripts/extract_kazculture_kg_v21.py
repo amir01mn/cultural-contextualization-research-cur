@@ -22,7 +22,7 @@ from src.construction.kazculture_chunking import (
     CHUNKING_VERSION, render_extraction_prompt, split_passage, prompt_tokens,
 )
 from src.construction.kazculture_kg_v21 import (
-    SCHEMA_VERSION, SYSTEM_V211, aggregate_v21,
+    SCHEMA_VERSION, SYSTEM_V21, aggregate_v21,
 )
 from src.construction.kazculture_kg_v2 import (
     extraction_user_v2, make_v2_audit, save_v2_audit,
@@ -85,8 +85,10 @@ def main() -> int:
         raise ValueError("limit, batch_size, audit_count must be positive")
     if args.out == args.passages or args.out == args.audit_csv:
         raise ValueError("Input and output paths must differ")
-    if args.out.name in ("pilot_frames.jsonl", "pilot_150_frames.jsonl"):
-        raise ValueError("Cannot overwrite original v1 pilot checkpoint")
+    if not args.out.parent.name.startswith("kg_v21"):
+        raise ValueError("V2.1 output must be inside a dedicated kg_v21 directory")
+    if not args.audit_csv.parent.name.startswith("kg_v21"):
+        raise ValueError("V2.1 audit must be inside a dedicated kg_v21 directory")
 
     rows = read_rows(args.passages)
     if args.start + args.limit > len(rows):
