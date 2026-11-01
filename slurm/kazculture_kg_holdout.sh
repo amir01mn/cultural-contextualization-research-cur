@@ -9,7 +9,7 @@
 #SBATCH --output=slurm/logs/kzkg_hout_%j.out
 #SBATCH --error=slurm/logs/kzkg_hout_%j.err
 #
-# Held-out 150 source passages at offsets [150:300). Use same Qwen3 32B
+# Held-out 150 source passages frozen after excluding prior audit IDs. Same Qwen3 32B
 # weights and TP settings for both protocols; different versioned outputs.
 # Set KG_HOLDOUT_VERSION=v21 or v22 at sbatch time. No test QA leakage.
 set -euo pipefail
@@ -22,6 +22,8 @@ setup_hf_offline
 source "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/activate"
 verify_torch_import "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/python"
 BASE=data/kazculture_pipeline
+INPUT="$BASE/heldout/heldout_train_passages_150.jsonl"
+[[ -f "$INPUT" ]] || { echo "Run prepare_kazculture_heldout.py first" >&2; exit 2; }
 VERSION="${KG_HOLDOUT_VERSION:?Must set KG_HOLDOUT_VERSION=v21 or v22}"
 case "$VERSION" in
   v21) SCRIPT=scripts/extract_kazculture_kg_v21.py
@@ -32,8 +34,8 @@ case "$VERSION" in
 esac
 mkdir -p slurm/logs "$DEST"
 python "$SCRIPT" \
-  --passages "$BASE/corpus/pilot_passages.jsonl" \
-  --start 150 --limit 150 \
+  --passages "$INPUT" \
+  --start 0 --limit 150 \
   --out "$DEST/heldout_150_frames.jsonl" \
   --audit_csv "$DEST/audit_heldout_150.csv" \
   --audit_count 60 --max_tokens 1536 --batch_size 8 \
