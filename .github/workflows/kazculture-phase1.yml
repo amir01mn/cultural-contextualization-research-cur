@@ -16,6 +16,9 @@ on:
       - 'src/retrieval/kazculture_index.py'
       - 'src/evaluation/kazculture_rag.py'
       - 'tests/test_kazculture_pipeline.py'
+      - 'tests/test_kazculture_kg_v2.py'
+      - 'src/construction/kazculture_kg_v2.py'
+      - 'scripts/extract_kazculture_kg_v2.py'
       - 'scripts/eval_kazculture_phase1.py'
       - 'tests/test_kazculture_phase1.py'
       - '.github/workflows/kazculture-phase1.yml'
@@ -30,7 +33,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install pytest pydantic numpy scipy scikit-learn networkx
       - name: Test KazCulture schema, leakage guards and scoring
-        run: python -m pytest -q tests/test_kazculture_phase1.py tests/test_kazculture_phase1_v2.py tests/test_kazculture_pipeline.py
+        run: python -m pytest -q tests/test_kazculture_phase1.py tests/test_kazculture_phase1_v2.py tests/test_kazculture_pipeline.py tests/test_kazculture_kg_v2.py
       - name: Smoke test V2 CLI parser without dataset or GPU
         run: python scripts/eval_kazculture_phase1_v2.py --help
       - name: Smoke test all Phase 2-5 CLIs without dataset or GPU
@@ -39,7 +42,10 @@ jobs:
           python scripts/extract_kazculture_kg.py --help
           python scripts/build_kazculture_index.py --help
           python scripts/tune_kazculture_retrieval.py --help
-          python scripts/eval_kazculture_retrieval.py --help
+          python scripts/eval_kazculture_retrieval.py scripts/extract_kazculture_kg_v2.py scripts/compare_kazculture_kg_v2.py scripts/review_kazculture_kg_v2.py --help
           python scripts/compare_kazculture_runs.py --help
+          python scripts/extract_kazculture_kg_v2.py --help
+          python scripts/compare_kazculture_kg_v2.py --help
+          python scripts/review_kazculture_kg_v2.py --help
       - name: Compile Phase 1 files
         run: python -m compileall -q src/loaders/kazculture_loader.py src/evaluation/kazculture_phase1.py src/evaluation/kazculture_hf_scorer.py src/evaluation/kazculture_hf_scorer_v2.py scripts/eval_kazculture_phase1.py scripts/eval_kazculture_phase1_v2.py scripts/stage_kazculture_phase1.py scripts/prepare_kazculture_corpus.py scripts/extract_kazculture_kg.py scripts/build_kazculture_index.py scripts/tune_kazculture_retrieval.py scripts/eval_kazculture_retrieval.py
