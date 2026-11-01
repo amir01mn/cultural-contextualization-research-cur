@@ -120,9 +120,17 @@ def paired_statistics(baseline: list[dict], comparison: list[dict],
     for _ in range(iterations):
         boot.append(sum(paired[rng.randrange(n)] for __ in range(n)) / n)
     boot.sort()
-    from scipy.stats import binomtest
     discordant = rescued + harmed
-    pval = binomtest(min(rescued, harmed), n=discordant, p=0.5).pvalue if discordant else 1.0
+    # Exact two-sided McNemar p-value is the two-sided binomial test with
+    # p=0.5 on discordant pairs. Integer combinations avoid scipy dependency
+    # and the numerical underflow of explicitly computing 0.5**discordant.
+    # Symmetry makes the two-sided probability twice the smaller tail.
+    if discordant:
+        smaller = min(rescued, harmed)
+        tail_count = sum(math.comb(discordant, k) for k in range(smaller + 1))
+        pval = min(1.0, (2 * tail_count) / (1 << discordant))
+    else:
+        pval = 1.0
     return {
         "baseline_accuracy": sum(bc) / n,
         "system_accuracy": sum(cc) / n,
