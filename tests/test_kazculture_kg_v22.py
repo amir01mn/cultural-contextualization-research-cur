@@ -148,3 +148,17 @@ def test_heldout_rejects_unmatched_sources_and_blinds_versions():
 def test_prompt_explicitly_disallows_standalone_path_array():
     assert "no triple_index" in SYSTEM_V22
     assert "values=[]" in SYSTEM_V22
+
+
+def test_retrieval_does_not_invent_layered_norm_for_v21_or_v22():
+    from src.retrieval.kazculture_index import make_units
+    p=passage("Садақтың кермесі малдың сіңірінен жасалады.")
+    for schema in ("kazculture-kg-factual-normative-v2.1",
+                   "kazculture-kg-nested-norms-v2.2"):
+        frame=parse(p,[{
+            "subject":"Садақтың кермесі","predicate":"MADE_FROM",
+            "object":"малдың сіңірі","evidence":p["text"],
+        }])
+        frame["schema_version"]=schema
+        units=make_units([p],[frame])
+        assert {unit["system"] for unit in units}=={"S1","S2"}
