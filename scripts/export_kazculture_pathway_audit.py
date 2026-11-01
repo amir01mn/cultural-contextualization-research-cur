@@ -40,6 +40,7 @@ def pathway_audit_rows(frames: list[dict]) -> list[dict]:
                 "predicate": triple["predicate"],
                 "object": triple["object"],
                 "triple_quote": triple["evidence"],
+                "rule_kind_provisional": path.get("rule_kind", ""),
                 "norm_type_provisional": path.get("norm_type", ""),
                 "norm_provisional": path.get("norm", ""),
                 "values_provisional": "; ".join(path.get("values", [])),
