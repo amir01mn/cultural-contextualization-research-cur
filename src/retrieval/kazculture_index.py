@@ -32,18 +32,30 @@ def make_units(passages: list[dict], frames: list[dict] | None = None,
         frame = by_pid.get(p["passage_id"])
         if not frame or frame.get("label_status") != "candidate":
             continue
+        is_v2 = frame.get("schema_version") == "kazculture-kg-factual-normative-v2"
+        norm_parts = []
         for t in frame["triples"]:
-            # For long passages preserve the norm and value labels from the
-            # exact model-visible segment supporting this triple.
-            triple_values = t.get("chunk_values", frame["values"])
-            triple_norm = t.get("chunk_norm", frame["norm"])
-            triple_norm_type = t.get("chunk_norm_type", frame["norm_type"])
+            # Facts remain retrievable as S2 even when no social-norm layer is
+            # justified. Only explicitly proposed v2 pathways can enter
+            # layered S3/S4R systems. The v1 representation is unchanged.
+            explicit_path = t.get("pathway") if is_v2 else None
+            triple_values = (explicit_path.get("values", []) if explicit_path
+                             else [] if is_v2 else
+                             t.get("chunk_values", frame["values"]))
+            triple_norm = (explicit_path.get("norm", "") if explicit_path
+                           else "" if is_v2 else
+                           t.get("chunk_norm", frame["norm"]))
+            triple_norm_type = (explicit_path.get("norm_type", "") if explicit_path
+                                else "" if is_v2 else
+                                t.get("chunk_norm_type", frame["norm_type"]))
             fact = f"{t['subject']} — {t['predicate']} — {t['object']}. Quote: {t['evidence']}"
             units.append({
                 **base, "unit_id": "S2:" + t["triple_id"],
                 "system": "S2", "text": fact,
                 "triple_id": t["triple_id"], "values": triple_values,
             })
+            if is_v2 and not explicit_path:
+                continue
             layers = (
                 f"L3 (provisional value): {', '.join(triple_values) or '(unclassified)'}\n"
                 f"L2 (provisional norm type): {triple_norm_type or '(unclassified)'}\n"
@@ -53,29 +65,34 @@ def make_units(passages: list[dict], frames: list[dict] | None = None,
             units.append({
                 **base, "unit_id": "S3:" + t["triple_id"],
                 "system": "S3", "text": layers,
-                "triple_id": t["triple_id"], "values": frame["values"],
+                "triple_id": t["triple_id"], "values": triple_values,
             })
-        if frame["triples"]:
+            units.append({
+                **base, "unit_id": "S4R:" + t["triple_id"],
+                "system": "S4R",
+                "text": (
+                    f"Value (provisional): {', '.join(triple_values)}. "
+                    f"Norm type: {triple_norm_type}. "
+                    f"Culture-specific norm: {triple_norm}. "
+                    f"Source-quoted practice: {t['evidence']}. "
+                    f"Relation: {t['subject']} — {t['predicate']} — {t['object']}."
+                ),
+                "values": triple_values, "triple_id": t["triple_id"],
+            })
+            norm_parts.append((triple_norm, t["evidence"], triple_values))
+        if (norm_parts if is_v2 else frame["triples"]):
+            evidence = (" | ".join(
+                f"Norm: {norm}. Evidence: {quote}" for norm, quote, _ in norm_parts
+                ) if is_v2 else
+                f"Kazakh cultural frame, provisional norm: {frame['norm']}. Source: {p['text']}")
+            frame_values = (sorted({val for _, _, vals in norm_parts for val in vals})
+                            if is_v2 else frame["values"])
             units.append({
                 **base, "unit_id": "S4F:" + p["passage_id"],
                 "system": "S4F",
-                "text": (f"Kazakh cultural frame, provisional norm: {frame['norm']}. "
-                         f"Source: {p['text']}"),
-                "values": frame["values"],
+                "text": evidence,
+                "values": frame_values,
             })
-            for t in frame["triples"]:
-                units.append({
-                    **base, "unit_id": "S4R:" + t["triple_id"],
-                    "system": "S4R",
-                    "text": (
-                        f"Value (provisional): {', '.join(triple_values)}. "
-                        f"Norm type: {triple_norm_type}. "
-                        f"Culture-specific norm: {triple_norm}. "
-                        f"Source-quoted practice: {t['evidence']}. "
-                        f"Relation: {t['subject']} — {t['predicate']} — {t['object']}."
-                    ),
-                    "values": triple_values, "triple_id": t["triple_id"],
-                })
 
     # Only source-preserving CultureBank KG v3 frames are eligible to align.
     for frame in culturebank_frames or []:
