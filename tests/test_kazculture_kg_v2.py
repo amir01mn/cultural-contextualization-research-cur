@@ -203,3 +203,18 @@ def test_normative_eligible_but_model_missed_pathway():
     assert parse["triples"][0]["pathway"] is None
     # The independent reviewer can still mark normative_eligible=1,
     # revealing missed pathways rather than calling an absent pathway wrong.
+
+
+def test_v2_facts_are_not_fake_layered_evidence():
+    from src.retrieval.kazculture_index import make_units
+    p = _p()
+    raw = _raw([{
+        "subject": "Садақтың кермесі", "predicate": "MADE_FROM",
+        "object": "малдың сіңірі", "evidence": p["text"],
+    }])
+    chunk = {**p, "_chunk_start": 0, "_chunk_end": len(p["text"])}
+    frame = aggregate_v2(p, [chunk], [raw], model="fake")
+    units = make_units([p], [frame])
+    assert {u["system"] for u in units} == {"S1", "S2"}
+    assert all(u["dataset"] == "KazCulture" for u in units)
+    assert not any(u["system"] in ("S3", "S4F", "S4R") for u in units)
