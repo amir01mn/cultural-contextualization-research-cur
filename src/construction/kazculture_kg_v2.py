@@ -164,6 +164,7 @@ def parse_v2_chunk(passage: dict, raw: str, *, model: str) -> dict:
             "passage_id": passage["passage_id"],
             "norm": norm, "norm_type": norm_type, "values": values,
             "evidence": evidence, "quote_verified": True,
+            "rule_kind": str(path.get("rule_kind") or ""),
             "review_status": "unreviewed", "provisional": True,
         }
         used.add(i)
@@ -233,6 +234,7 @@ def make_v2_audit(frames: list[dict], *, n: int = 60, seed: int = 42) -> list[di
             "subject_in_quote_automated": int(t["subject_in_quote"]),
             "object_in_quote_automated": int(t["object_in_quote"]),
             "model_proposed_pathway_0_or_1": int(path is not None),
+            "rule_kind_provisional": path.get("rule_kind", "") if path else "",
             "norm_type_provisional": path["norm_type"] if path else "",
             "norm_provisional": path["norm"] if path else "",
             "values_provisional": "; ".join(path["values"]) if path else "",
