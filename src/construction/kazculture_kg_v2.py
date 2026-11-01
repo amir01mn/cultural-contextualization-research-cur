@@ -59,6 +59,17 @@ Use the provided allowed values; prefer [] when the underlying value is
 not supported. Never force a factual triple into an L3->L2->L1 pathway.
 """
 
+def extraction_user_v2(passage: dict) -> str:
+    """No source title, category, record ID or test-related metadata in prompt."""
+    allowed = ", ".join(sorted(VALUES))
+    return (
+        "Culture: Kazakh.\n"
+        f"Allowed Schwartz value labels: {allowed}\n"
+        "SOURCE PASSAGE (only source of facts and norms):\n"
+        + passage["text"]
+    )
+
+
 def parse_v2_chunk(passage: dict, raw: str, *, model: str) -> dict:
     """Parse one model-visible chunk into quote-verified, still-unreviewed data."""
     obj = _candidate_json(raw)
