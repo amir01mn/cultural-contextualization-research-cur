@@ -246,6 +246,35 @@ The largest overlap-related gains occur in Cuisine, Musical instruments, Clothin
 
 ---
 
+## 5.2 What remains inside the 97 both-wrong cases
+
+The diagnostic export of the 97 questions missed by both full and strict S1 shows:
+
+- Household: **32**
+- Clothing: **19**
+- Cuisine: **15**
+- Musical instruments: **13**
+- Livestock: **13**
+- Craftsmanship: **3**
+- Traditions and customs: **2**
+
+Source-overlap breakdown:
+
+- exact train-source overlap exists: **92/97**
+- exact source was actually retrieved in full S1: **18/97**
+- exact source existed but was missed by full retrieval: **74/97**
+- no exact train-source overlap: **5/97**
+
+This means most of the remaining full-S1 failures are primarily **retrieval failures** rather than cases where Qwen saw the exact source and still answered incorrectly. The **18** both-wrong cases where full S1 did retrieve the exact source are especially valuable for studying whether compact S2 factual structure or S4R structure can improve evidence use/reasoning. The **74** overlap-eligible cases where the exact source was missed are more directly a retrieval problem and should not automatically be attributed to the absence of KG reasoning.
+
+The exported diagnostic file is:
+
+- `data/kazculture_pipeline/evaluation/s1_both_wrong_97.csv`
+
+This test-side analysis is for diagnosis. Do not repeatedly redesign the extraction prompt against these gold test outcomes and then report the same test set as untouched.
+
+---
+
 ## 6. KG extraction results so far
 
 A full final KG over all 6,749 passages has **not** yet been produced.
