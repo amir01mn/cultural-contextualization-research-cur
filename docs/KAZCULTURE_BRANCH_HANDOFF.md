@@ -981,48 +981,45 @@ The 0.45 threshold was chosen because it was the highest threshold that remained
 
 ---
 
-## 15. Current strongest result: full 1,334-question strict S1
+## 15. Full-scale S1 results: normal/full and strict source-disjoint
 
-The strict S1 Qwen job completed successfully:
+Both full-scale S1 conditions have now completed on all **1,334** KazCulture test questions.
+
+### 15.1 Frozen S0 baseline
+
+Closed-book Qwen3-32B V2:
+
+- correct: **552/1,334**
+- accuracy: **41.3793%**
+
+This remains the frozen comparator.
+
+### 15.2 Strict exact-passage-disjoint S1
+
+Strict S1 removes all **1,262 unique train passage IDs** that exactly overlap test source passages before retrieval.
+
+Completed run:
 
 - Slurm job: `7667979`
 - runtime: **28:25**
-- questions: **1,334**
-- exact overlapping train source passages removed before retrieval
+- correct: **831/1,334**
+- accuracy: **62.2939%**
+- change vs S0: **+20.9145 percentage points**
+- net additional correct answers vs S0: **+279**
 
-Result:
+Paired statistics vs S0:
 
-> **S1 strict accuracy = 0.6229385307 = 62.2939%**
-
-Frozen S0:
-
-> **41.3793%**
-
-Improvement:
-
-> **+20.9145 percentage points**
-
-Paired bootstrap 95% interval for the accuracy difference:
-
-- **+17.8411 to +24.1379 points**
-
-Exact McNemar p-value:
-
-- **9.22e-37**
-
-Question-level changes relative to S0:
-
+- bootstrap 95% delta interval: **+17.8411 to +24.1379 points**
+- exact McNemar p-value: **9.22e-37**
 - evidence rescued: **394**
 - evidence induced errors: **115**
-- net additional correct answers: **+279**
 
 Other strict metrics:
 
 - no-evidence questions: **15**
-- mean number of actually rendered retrieval units: **6.5127**
-- exact gold-source recall is undefined by design because exact overlapping source passages were removed
+- mean actually rendered retrieval units: **6.5127**
 
-### 15.1 Category accuracies in strict S1
+Strict category accuracies:
 
 - Clothing: **229/360 = 63.61%**
 - Craftsmanship: **5/11 = 45.45%**
@@ -1034,86 +1031,118 @@ Other strict metrics:
 - Superstitions: **4/4 = 100%** (tiny n)
 - Traditions and customs: **36/43 = 83.72%**
 
-### 15.2 Why this result matters
+This is the key generalization-oriented S1 result because the exact source match is unavailable.
 
-This is currently the strongest defensible KazCulture result on the branch.
+### 15.3 Normal/full S1
 
-It shows that even when exact train passages matching test passages are removed, retrieved **related cultural evidence** improves Qwen3 dramatically:
+The first full S1 attempt (`7667978`) stalled on node `ng10706` and hit the three-hour wall before saving a single prediction. The first full and strict prompts were then compared and found to be nearly identical in size/content, making a node/runtime problem more likely than a methodological problem.
+
+The full condition was retried while excluding `ng10706`:
+
+- Slurm job: `7692307`
+- node: `ng10803`
+- questions: **1,334**
+- correct: **1,221/1,334**
+- accuracy: **91.5292%**
+- change vs frozen S0: **+50.1499 percentage points**
+- net additional correct answers vs S0: **+669**
+- difference vs strict S1: **+29.2354 percentage points**
+- additional correct answers vs strict S1: **+390**
+
+The result files are:
+
+- `data/kazculture_pipeline/evaluation/s1_full/S1.jsonl`
+- `data/kazculture_pipeline/evaluation/s1_full/S1_report.json`
+- `data/kazculture_pipeline/evaluation/s1_full/comparison.json`
+
+### 15.4 What the full-vs-strict gap means
+
+The contrast is extremely large:
 
 ```
-S0 closed-book               41.38%
-S1 strict passage RAG        62.29%
-published reference target   64.54%
+S0 closed-book                    41.38%
+S1 strict exact-source-disjoint   62.29%
+S1 full                           91.53%
+published reference target        64.54%
 ```
 
-Strict S1 has closed roughly 90% of the accuracy gap between the frozen S0 and the 64.54% reference.
+Two conclusions must be kept separate.
 
-At 1,334 questions, 64.54% corresponds to roughly 861 correct answers. Strict S1 has 831 correct, so it is roughly **30 net questions** below that reference.
+**First:** passage retrieval is genuinely useful beyond exact source memorization. Strict S1 still gains **+20.91 points** over closed-book Qwen after exact matching sources are removed.
 
-This changes the role of the KG:
+**Second:** the normal/full KazCulture setting is heavily advantaged by exact train/test source overlap. Full S1 is **29.24 points** above strict S1 and retrieves from a corpus containing the exact source for many test items.
 
-> S2/S4 no longer need to create a ~20-point gain. They need to demonstrate a modest, reliable incremental gain over a strong 62.29% source-RAG baseline.
+Therefore the **91.53% full S1 score must not be presented as unseen-source generalization**. It is a valid benchmark-setting result, but the strict result is the cleaner measure of transfer to related rather than identical source evidence.
+
+The full S1 score exceeds the published 64.54% reference by roughly **26.99 percentage points**, but the methods are not directly comparable: the published number is a two-stage fine-tuned result, while this is retrieval-augmented inference in a benchmark with substantial source overlap.
+
+### 15.5 Consequence for the KG research question
+
+The role of the KG is now clearer.
+
+In the normal/full setting, S1 is already near saturation at **91.53%**, leaving little headroom for S2/S4 and making incremental gains difficult to interpret.
+
+The more scientifically useful target is therefore the **strict S1 baseline of 62.29%**.
+
+Relative to the published 64.54% reference, strict S1 is only about **30 additional net correct answers** short. A source-grounded S2/S4 enrichment method that adds roughly 2-3 percentage points without increasing leakage would be a meaningful result.
+
+The primary next question is:
+
+> **Can source-grounded structured cultural evidence improve the strict 62.29% S1 baseline, especially on questions where raw passage retrieval retrieves related evidence but Qwen still answers incorrectly?**
 
 ---
 
-## 16. Full S1 run status and current issue
+## 16. Immediate interpretation and follow-up analyses
 
-The full S1 condition is also required because it quantifies how much exact train/test source overlap can inflate the ordinary benchmark setting.
+### 16.1 Full S1 is complete
 
-First full S1 attempt:
+The abnormal first full run is no longer a blocker. The retry completed successfully and wrote the full comparison artifacts.
 
-- Slurm job: `7667978`
-- node: `ng10706`
-- state: TIMEOUT
-- wall time: 3:00:14
-- saved predictions: **0**
-- Qwen weights loaded successfully
+### 16.2 Detailed full S1 paired statistics should be preserved
 
-This behavior was abnormal because the strict job using the same Qwen/scorer completed all 1,334 questions in 28 minutes.
+The top-line full result is now known. For the branch record, also preserve/report the values in:
 
-### 16.1 Diagnostic comparison of first full vs strict prompt
+`data/kazculture_pipeline/evaluation/s1_full/comparison.json`
 
-For test question 0:
+especially:
 
-Full:
+- paired bootstrap interval
+- exact McNemar p-value
+- evidence-rescued count
+- evidence-induced-error count
+- exact-source retrieval recall
+- no-evidence count
+- mean rendered evidence count
+- category-level accuracies
 
-- evidence chars: 3,015
-- actual rendered hits: 8
+These are useful for diagnosing how much of the 91.53% comes from exact source retrieval and where the remaining 113 errors occur.
 
-Strict:
+### 16.3 Analyze full vs strict question-level changes
 
-- evidence chars: 2,890
-- actual rendered hits: 8
+A useful next analysis is to partition the 1,334 questions into:
 
-The first seven passage IDs were identical; only the 8th differed.
+1. correct in both full and strict
+2. full correct / strict wrong
+3. strict correct / full wrong
+4. wrong in both
 
-Therefore the timeout is not explained by a giant first full prompt or by the evidence budget.
+The **full-correct / strict-wrong** set is especially important because it estimates questions whose success depends strongly on access to exact-overlap evidence.
 
-Current working hypothesis:
+### 16.4 Analyze strict S1 failures before scaling the KG
 
-- bad/stalled GPU/node execution on `ng10706`
+Strict S1 has **503 errors**.
 
-Recommended retry:
+Before final full KG extraction, inspect this error set to determine:
 
-~~~bash
-export KAZCULTURE_DEV_CONFIG="$PWD/data/kazculture_pipeline/s1_full_dev_thresholds_v3.json"
+- whether a relevant related source was retrieved
+- whether the retrieved passage actually contained the answer
+- whether Qwen failed despite sufficient evidence
+- whether retrieval introduced misleading evidence
+- whether factual S2 structure could make the needed relation explicit
+- whether norm/value S4R structure is plausibly relevant
+- which categories have the most recoverable errors
 
-JEFULL2=$(sbatch --parsable   --exclude=ng10706   --export=ALL,KAZCULTURE_S1_EVAL_MODE=full   slurm/kazculture_s1_eval.sh | cut -d';' -f1)
-
-echo "$JEFULL2"
-~~~
-
-Monitor early progress:
-
-~~~bash
-tail -f slurm/logs/kz_s1_eval_JOBID.out
-~~~
-
-After model loading, the run should print `S1: 25/1334`, `S1: 50/1334`, etc.
-
-If another retry loads the model but remains at zero saved predictions, cancel it and instrument the first Qwen scoring call instead of spending another 3-hour allocation.
-
-At the time of this handoff, **strict S1 is complete; full S1 is pending a clean retry.**
+This should guide the next structured-evidence experiment without using test answers to tune the extraction prompt itself.
 
 ---
 
@@ -1134,7 +1163,7 @@ At the time of this handoff, **strict S1 is complete; full S1 is pending a clean
 
 ### Not established
 
-1. We do **not** yet know full S1 test accuracy.
+1. Full S1 test accuracy is now known: **91.53%** in the normal/full setting and **62.29%** in the exact-passage-disjoint strict setting.
 2. We do **not** yet have a full 6,749-passage final KG.
 3. We do **not** yet have full-test S1+S2 or S1+S4R accuracy.
 4. We do **not** yet have independent human semantic validation of the 100-row held-out audit.
@@ -1386,7 +1415,7 @@ Historical configs may exist, but the current prompt-budget-correct config is:
 ### Full-scale S1 QA
 
 - `data/kazculture_pipeline/evaluation/s1_strict/` — complete
-- `data/kazculture_pipeline/evaluation/s1_full/` — first attempt timed out with empty S1 checkpoint; retry pending
+- `data/kazculture_pipeline/evaluation/s1_full/` — complete; **91.53%** full S1
 
 ---
 
@@ -1554,5 +1583,5 @@ Before reporting a result:
 
 If you only remember one paragraph:
 
-> We froze a corrected Qwen3-32B closed-book KazCulture baseline at **41.38%**. We built several source-grounded KG extraction versions (V1, V2, V2.1, V2.2) and learned that V2.1 has better coverage while V2.2 is cleaner but sparse. Held-out BGE-M3 experiments showed that raw passages (S1) are much better retrievers than KG-only representations, so the architecture changed to **S1 source retrieval plus optional S2/S4 enrichment**. A 17-question overlap-only QA pilot hit a ceiling at 100% with S1, so we scaled S1 to the full benchmark. The exact-passage-disjoint S1 run on all 1,334 questions reached **62.29%**, a **+20.91 point** gain over S0, despite removing 1,262 exact-overlap train passages. The normal/full S1 run still needs a clean retry after an abnormal node timeout. Independent human validation of the held-out KG audit is still pending, and a full 6,749-passage final KG has not yet been built. The next scientific question is whether source-grounded S2/S4 structure can add a modest but reliable improvement over the strong 62.29% strict S1 baseline.
+> We froze a corrected Qwen3-32B closed-book KazCulture baseline at **41.38%**. We built several source-grounded KG extraction versions (V1, V2, V2.1, V2.2) and learned that V2.1 has better coverage while V2.2 is cleaner but sparse. Held-out BGE-M3 experiments showed that raw passages (S1) are much better retrievers than KG-only representations, so the architecture changed to **S1 source retrieval plus optional S2/S4 enrichment**. Full-scale S1 evaluation is now complete: the exact-passage-disjoint strict condition reached **62.29%**, a **+20.91 point** gain over S0 despite removing 1,262 exact-overlap train passages, while the normal/full condition reached **91.53%**. The 29.24-point full-vs-strict gap shows that exact train/test source overlap strongly inflates the normal RAG setting, while the strict gain demonstrates substantial benefit from related cultural evidence even without the exact source. Independent human validation of the held-out KG audit is still pending, and a full 6,749-passage final KG has not yet been built. The next scientific question is whether source-grounded S2/S4 structure can improve the strong **62.29% strict S1 baseline**.
 
