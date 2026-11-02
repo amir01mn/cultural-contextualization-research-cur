@@ -1055,6 +1055,34 @@ The result files are:
 - `data/kazculture_pipeline/evaluation/s1_full/S1_report.json`
 - `data/kazculture_pipeline/evaluation/s1_full/comparison.json`
 
+Paired statistics vs S0:
+
+- bootstrap 95% delta interval: **+47.4513 to +53.0735 points**
+- exact McNemar p-value: **2.81e-168**
+- evidence rescued: **697**
+- evidence induced errors: **28**
+- net additional correct answers: **+669**
+
+Retrieval statistics:
+
+- test questions eligible for an exact train-source hit: **1,263**
+- exact source recalled within the rendered top-k evidence: **1,074**
+- exact source Recall@k on overlap-eligible questions: **85.04%**
+- no-evidence questions: **3**
+- mean actually rendered retrieval units: **6.9018**
+
+Full S1 category accuracies:
+
+- Clothing: **336/360 = 93.33%**
+- Craftsmanship: **8/11 = 72.73%**
+- Cuisine: **345/362 = 95.30%**
+- Household: **367/403 = 91.07%**
+- Livestock: **25/41 = 60.98%**
+- Musical instruments: **86/100 = 86.00%**
+- National games: **10/10 = 100%**
+- Superstitions: **3/4 = 75.00%** (tiny n)
+- Traditions and customs: **41/43 = 95.35%**
+
 ### 15.4 What the full-vs-strict gap means
 
 The contrast is extremely large:
