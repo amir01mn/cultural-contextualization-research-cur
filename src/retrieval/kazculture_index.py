@@ -127,10 +127,11 @@ class MultilingualIndex:
         meta = json.loads((self.index_dir / "metadata.json").read_text(encoding="utf-8"))
         if meta["embedding_model"] != MODEL_NAME:
             raise ValueError("Unexpected embedding model; rebuild index explicitly")
-        self.units = [
-            json.loads(line) for line in (self.index_dir / "units.jsonl").read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        ]
+        # Read JSONL by physical newline records. str.splitlines() also splits on
+        # Unicode separators such as U+2028/U+2029, which may legitimately
+        # occur inside source text and would corrupt an otherwise valid JSON row.
+        with (self.index_dir / "units.jsonl").open(encoding="utf-8") as stream:
+            self.units = [json.loads(line) for line in stream if line.strip()]
         self.emb = np.load(self.index_dir / "embeddings.npy", mmap_mode="r")
         if len(self.units) != len(self.emb):
             raise ValueError("Inconsistent unit/embedding counts")
