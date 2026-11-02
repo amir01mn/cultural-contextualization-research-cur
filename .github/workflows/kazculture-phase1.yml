@@ -27,6 +27,7 @@ on:
       - 'scripts/build_kazculture_s1_index.py'
       - 'slurm/kazculture_s1_index.sh'
       - 'slurm/kazculture_s1_eval.sh'
+      - 'slurm/kazculture_s1_tune.sh'
       - 'slurm/kazculture_holdout_source_first_qa.sh'
       - 'slurm/kazculture_kg_retrieval_diagnostic.sh'
       - 'src/construction/kazculture_kg_v22.py'
