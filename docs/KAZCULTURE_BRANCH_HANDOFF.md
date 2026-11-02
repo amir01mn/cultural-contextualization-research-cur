@@ -5,6 +5,10 @@
 **Working checkout on Narval:** `~/projects/def-enaskt/divc/kazculture-restart`  
 **Last updated:** 2026-11-02
 
+> **New collaborator?** Start with [`KAZCULTURE_PARTNER_TAKEOVER.md`](KAZCULTURE_PARTNER_TAKEOVER.md) for the short operational checklist, then use this file for the full history.
+
+**Current human-audit status:** `data/kazculture_pipeline/heldout/blind_review_100.csv` exists, but as of this handoff all 100 official human-review rows remain unannotated. The scoring script is expected to refuse to score it until a reviewer fills the required fields. Preserve the blank original and score a reviewed copy only.
+
 This document is the handoff for **all KazCulture work on this branch**. It is intended to let another researcher understand the scientific goal, reproduce the current state, know why each design decision was made, find every important artifact, and continue the work without reconstructing the project from chat history.
 
 The most important rule when reading this document is to distinguish four kinds of evidence:
