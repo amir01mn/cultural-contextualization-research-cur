@@ -189,3 +189,28 @@ def test_same_source_structured_units_have_explicit_nonretrieval_score():
     assert len(rows)==1
     assert rows[0]["similarity"] is None
     assert rows[0]["attachment_mode"]=="same_source_provenance"
+
+
+
+def test_s1_full_and_strict_passage_selection():
+    from scripts.build_kazculture_s1_index import select_passages
+
+    passages=[
+        {
+            "passage_id":f"p{i}","text":f"text {i}",
+            "dataset":"issai/KazCulture","split":"train",
+            "sources":["book"],"categories":["customs"],
+            "train_row_ids":[i],"culture":"Kazakh",
+        }
+        for i in range(4)
+    ]
+    full,excluded=select_passages(passages,strict=False,overlap=None)
+    assert [p["passage_id"] for p in full]==["p0","p1","p2","p3"]
+    assert excluded==set()
+
+    strict,excluded=select_passages(
+        passages,strict=True,
+        overlap={"exclude_train_passage_ids":["p1","p3"]},
+    )
+    assert [p["passage_id"] for p in strict]==["p0","p2"]
+    assert excluded=={"p1","p3"}
