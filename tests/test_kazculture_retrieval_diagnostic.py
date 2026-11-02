@@ -79,3 +79,31 @@ def test_conditional_coverage_distinct_from_global_recall():
     assert result["source_recall_at_5_all"]==0.5
     assert result["source_recall_at_5_conditional"]==1.0
     assert result["gold_source_availability"]==0.5
+
+
+
+def test_index_loader_preserves_unicode_line_separator_inside_json(tmp_path):
+    """U+2028 in source text must not be mistaken for a JSONL record boundary."""
+    import json
+    import numpy as np
+    from src.retrieval.kazculture_index import MultilingualIndex, MODEL_NAME
+
+    folder=tmp_path/"index"
+    folder.mkdir()
+    unit={
+        "unit_id":"S1:p1","passage_id":"p1","system":"S1",
+        "dataset":"KazCulture","culture":"Kazakh","source":["source"],
+        "category":["customs"],"values":[],"indirect":False,
+        "text":"before\u2028after",
+    }
+    (folder/"units.jsonl").write_text(
+        json.dumps(unit,ensure_ascii=False)+"\n",encoding="utf-8"
+    )
+    np.save(folder/"embeddings.npy",np.asarray([[1.0,0.0]],dtype=np.float32))
+    (folder/"metadata.json").write_text(json.dumps({
+        "embedding_model":MODEL_NAME,"n_units":1,"dimension":2
+    }),encoding="utf-8")
+
+    ix=MultilingualIndex(folder)
+    assert len(ix.units)==1
+    assert ix.units[0]["text"]=="before\u2028after"
