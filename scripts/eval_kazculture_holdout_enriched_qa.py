@@ -57,14 +57,15 @@ def same_source_units(index,passage_id_value,system):
     ],key=lambda u:u["unit_id"])
 
 
-def source_first_evidence(index,question,structured_systems=()):
-    hits=index.search(question,system="S1",k=1,min_similarity=0.0)
+def source_first_evidence(s1_index,question,structured_index=None,structured_systems=()):
+    hits=s1_index.search(question,system="S1",k=1,min_similarity=0.0)
     if not hits:
         return "",[],[]
     source=hits[0]
+    structured_index=structured_index or s1_index
     structured=[]
     for system in structured_systems:
-        structured.extend(same_source_units(index,source["passage_id"],system))
+        structured.extend(same_source_units(structured_index,source["passage_id"],system))
     evidence=render_evidence([source],max_chars=100000)
     if structured:
         evidence += "\n\n[OPTIONAL SAME-SOURCE STRUCTURED EVIDENCE]\n"
@@ -74,15 +75,15 @@ def source_first_evidence(index,question,structured_systems=()):
 
 def _condition(index21,index22,condition,q):
     if condition=="S1":
-        return source_first_evidence(index21,q.question,())
+        return source_first_evidence(index21,q.question,index21,())
     version,rest=condition.split("_",1)
-    index=index21 if version=="V21" else index22
+    structured_index=index21 if version=="V21" else index22
     systems=[]
     if "S2" in rest:
         systems.append("S2")
     if "S4R" in rest:
         systems.append("S4R")
-    return source_first_evidence(index,q.question,systems)
+    return source_first_evidence(index21,q.question,structured_index,systems)
 
 
 def _trim_structured_to_context(scorer,q,evidence,source_hits,structured):
