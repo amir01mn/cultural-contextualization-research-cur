@@ -9,7 +9,7 @@
 #SBATCH --error=slurm/logs/kzkg_ret_diag_%j.err
 #
 # Diagnostic-only experiment, uses no GPU or Qwen3 QA answers.
-# KG_DIAG_STAGE=v21_index | v22_index | probe
+# KG_DIAG_STAGE=v21_index | v22_index | probe | enrichment
 set -euo pipefail
 PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
 cd "$PROJECT_DIR"
@@ -50,8 +50,18 @@ case "$STAGE" in
       --out "$BASE/retrieval_diagnostic/heldout_v21_vs_v22_source_recall.json" \
       --max_questions 300 --per_passage 3 --device cpu --batch_size 16
     ;;
+  enrichment)
+    [[ -f "$I21/diagnostic_manifest.json" && -f "$I22/diagnostic_manifest.json" ]] || {
+      echo "Both indexes must complete before source-first enrichment." >&2; exit 2;
+    }
+    python scripts/probe_kazculture_source_enrichment.py \
+      --index_v21 "$I21" --index_v22 "$I22" \
+      --train_dev_qa "$BASE/corpus/train_dev_qa.jsonl" \
+      --out "$BASE/retrieval_diagnostic/heldout_source_first_enrichment.json" \
+      --max_questions 300 --per_passage 3 --device cpu --batch_size 16
+    ;;
   *)
-    echo "Invalid KG_DIAG_STAGE=$STAGE" >&2
+    echo "Invalid KG_DIAG_STAGE=$STAGE (expected v21_index, v22_index, probe, or enrichment)" >&2
     exit 2
     ;;
 esac
