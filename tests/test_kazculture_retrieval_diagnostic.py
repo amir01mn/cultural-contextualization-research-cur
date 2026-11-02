@@ -126,3 +126,49 @@ def test_source_first_enrichment_preserves_s1_and_measures_attachability():
     assert out["structured"]["S2"]["gold_structured_availability_all"]==0.5
     assert out["structured"]["S2"]["gold_enrichment_rate_conditional_on_s1_hit_at_5"]==0.5
     assert out["structured"]["S4R"]["gold_enrichment_rate_conditional_on_s1_hit_at_5"]==0.5
+
+
+
+def test_overlap_qwen_diagnostic_selects_by_source_not_answer():
+    from types import SimpleNamespace
+    from scripts.eval_kazculture_holdout_enriched_qa import select_overlap
+    from src.loaders.kazculture_corpus import passage_id
+
+    questions=[SimpleNamespace(question_id="q1"),SimpleNamespace(question_id="q2")]
+    rows=[
+        {"item_description":"Source A","answer_label":"D"},
+        {"item_description":"Source B","answer_label":"A"},
+    ]
+    selected=select_overlap(questions,rows,{passage_id("Source B")})
+    assert [(q.question_id,pid) for q,pid in selected]==[
+        ("q2",passage_id("Source B"))
+    ]
+
+
+def test_source_first_qwen_condition_freezes_s1_and_attaches_other_index():
+    from scripts.eval_kazculture_holdout_enriched_qa import source_first_evidence
+
+    source={
+        "unit_id":"S1:p1","system":"S1","passage_id":"p1",
+        "dataset":"KazCulture","indirect":False,"source":["book"],
+        "text":"raw passage","culture":"Kazakh","category":["customs"],"values":[],
+    }
+    fact={
+        "unit_id":"S2:t1","system":"S2","passage_id":"p1",
+        "dataset":"KazCulture","indirect":False,"source":["book"],
+        "text":"fact relation","culture":"Kazakh","category":["customs"],"values":[],
+    }
+    class S1Index:
+        units=[source]
+        def search(self,query,**kwargs):
+            assert kwargs["system"]=="S1"
+            return [{**source,"similarity":0.9}]
+    class StructuredIndex:
+        units=[fact]
+
+    evidence,hits,structured=source_first_evidence(
+        S1Index(),"question",StructuredIndex(),("S2",)
+    )
+    assert [h["passage_id"] for h in hits]==["p1"]
+    assert [u["unit_id"] for u in structured]==["S2:t1"]
+    assert "raw passage" in evidence and "fact relation" in evidence
