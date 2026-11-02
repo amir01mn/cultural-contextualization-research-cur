@@ -198,6 +198,54 @@ The correct framing is:
 
 ---
 
+## 5.1 Full-vs-strict question-level decomposition
+
+The completed paired analysis over all 1,334 questions gives:
+
+- **both correct:** 815
+- **full correct / strict wrong:** 406
+- **strict correct / full wrong:** 16
+- **both wrong:** 97
+
+This decomposition is important for the next phase:
+
+- the **406 full-only** cases are the clearest evidence that access to the normal/full corpus, including exact-overlap sources, materially changes success;
+- the **16 strict-only** cases show that additional full-corpus evidence can occasionally hurt;
+- the **97 both-wrong** cases are the highest-priority test-side diagnostic set for understanding what raw S1 evidence still fails to solve.
+
+### Accuracy conditional on exact-source retrieval
+
+Among the 1,263 overlap-eligible test questions:
+
+- exact source retrieved: **1,074**
+- full S1 accuracy when exact source was retrieved: **97.86%**
+- exact source available but missed: **189**
+- full S1 accuracy when exact source was missed: **55.56%**
+
+This is a very large conditional gap and confirms that exact-source retrieval is the dominant driver of the 91.53% full result.
+
+Among the **71** test questions with no exact matching train passage:
+
+- full S1 accuracy: **91.55%**
+
+This small non-overlap subset is encouraging, but it should not be interpreted as a clean unseen-source benchmark. Exact passage disjointness does not remove paraphrases, related passages, or other near-duplicate cultural evidence. The strict 62.29% condition remains the more conservative generalization-oriented benchmark.
+
+### Category full-minus-strict gaps
+
+- Clothing: **+29.72 pp**
+- Craftsmanship: **+27.27 pp**
+- Cuisine: **+33.43 pp**
+- Household: **+28.54 pp**
+- Livestock: **+7.32 pp**
+- Musical instruments: **+34.00 pp**
+- National games: **+30.00 pp**
+- Superstitions: **-25.00 pp** (n=4; do not over-interpret)
+- Traditions and customs: **+11.63 pp**
+
+The largest overlap-related gains occur in Cuisine, Musical instruments, Clothing, Household, and National games.
+
+---
+
 ## 6. KG extraction results so far
 
 A full final KG over all 6,749 passages has **not** yet been produced.
