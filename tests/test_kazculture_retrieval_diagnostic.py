@@ -107,3 +107,22 @@ def test_index_loader_preserves_unicode_line_separator_inside_json(tmp_path):
     ix=MultilingualIndex(folder)
     assert len(ix.units)==1
     assert ix.units[0]["text"]=="before\u2028after"
+
+
+
+def test_source_first_enrichment_preserves_s1_and_measures_attachability():
+    from scripts.probe_kazculture_source_enrichment import summarize_source_first
+    units=[
+        {"system":"S1","passage_id":"p1","dataset":"KazCulture","indirect":False},
+        {"system":"S1","passage_id":"p2","dataset":"KazCulture","indirect":False},
+        {"system":"S2","passage_id":"p1","dataset":"KazCulture","indirect":False},
+        {"system":"S4R","passage_id":"p2","dataset":"KazCulture","indirect":False},
+    ]
+    rankings=[["p1","p2"],["p1","p2"]]
+    gold=["p1","p2"]
+    out=summarize_source_first(units,rankings,gold,systems=("S2","S4R"))
+    assert out["s1_recall_at_1"]==0.5
+    assert out["s1_recall_at_5"]==1.0
+    assert out["structured"]["S2"]["gold_structured_availability_all"]==0.5
+    assert out["structured"]["S2"]["gold_enrichment_rate_conditional_on_s1_hit_at_5"]==0.5
+    assert out["structured"]["S4R"]["gold_enrichment_rate_conditional_on_s1_hit_at_5"]==0.5
