@@ -172,3 +172,20 @@ def test_source_first_qwen_condition_freezes_s1_and_attaches_other_index():
     assert [h["passage_id"] for h in hits]==["p1"]
     assert [u["unit_id"] for u in structured]==["S2:t1"]
     assert "raw passage" in evidence and "fact relation" in evidence
+
+
+
+def test_same_source_structured_units_have_explicit_nonretrieval_score():
+    from scripts.eval_kazculture_holdout_enriched_qa import same_source_units
+
+    class Index:
+        units=[{
+            "unit_id":"S2:t1","system":"S2","passage_id":"p1",
+            "dataset":"KazCulture","indirect":False,"source":["book"],
+            "text":"fact","culture":"Kazakh","category":["customs"],"values":[],
+        }]
+
+    rows=same_source_units(Index(),"p1","S2")
+    assert len(rows)==1
+    assert rows[0]["similarity"] is None
+    assert rows[0]["attachment_mode"]=="same_source_provenance"
