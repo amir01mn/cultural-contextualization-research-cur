@@ -1156,6 +1156,31 @@ A useful next analysis is to partition the 1,334 questions into:
 
 The **full-correct / strict-wrong** set is especially important because it estimates questions whose success depends strongly on access to exact-overlap evidence.
 
+### 16.3a Completed full-vs-strict paired decomposition
+
+The paired 1,334-question analysis is now complete:
+
+- both full and strict correct: **815**
+- full correct / strict wrong: **406**
+- strict correct / full wrong: **16**
+- both wrong: **97**
+
+Thus **406/503 = 80.7%** of strict S1 errors are corrected when the full corpus is allowed, while only 16 questions move in the opposite direction.
+
+Conditional on full-mode exact-source retrieval:
+
+- overlap-eligible questions: **1,263**
+- exact source retrieved: **1,074**
+- full accuracy with exact source retrieved: **97.86%** (**1,051/1,074**)
+- exact source available but not retrieved: **189**
+- full accuracy when exact source is missed: **55.56%** (**105/189**)
+- non-overlap test questions: **71**
+- full accuracy on those 71: **91.55%** (**65/71**)
+
+Of the 113 total full-S1 errors, **84** occur in overlap-eligible questions where the exact source was available but not retrieved, **23** occur despite retrieving the exact source, and **6** occur among the 71 exact-nonoverlap questions.
+
+This strongly confirms that exact-source retrieval drives the normal/full score. The 71 non-overlap examples are too small and not near-duplicate-controlled, so they must not be treated as a clean unseen-source benchmark.
+
 ### 16.4 Analyze strict S1 failures before scaling the KG
 
 Strict S1 has **503 errors**.
