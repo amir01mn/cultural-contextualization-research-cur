@@ -259,15 +259,31 @@ class MultilingualIndex:
         return results
 
 
-def render_evidence(hits: list[dict], *, max_chars: int = 5000) -> str:
+def render_evidence_with_hits(
+    hits: list[dict], *, max_chars: int = 5000
+) -> tuple[str, list[dict]]:
+    """Render only evidence that actually fits and return the corresponding hits.
+
+    Retrieval metrics and prediction metadata must describe what the answering
+    model saw, not additional candidates that were silently dropped by the
+    prompt character budget.
+    """
     blocks = []
-    for i, unit in enumerate(hits, 1):
+    used = []
+    for unit in hits:
+        number = len(used) + 1
         label = ("INDIRECT COMPARISON" if unit["indirect"] else "KAZAKH TRAINING SOURCE")
         block = (
-            f"[{i}] {label} | dataset={unit['dataset']} | source={'; '.join(unit['source'])}"
+            f"[{number}] {label} | dataset={unit['dataset']} | source={'; '.join(unit['source'])}"
             f" | id={unit['passage_id']}\n{unit['text']}"
         )
         if len("\n\n".join(blocks + [block])) > max_chars:
             break
         blocks.append(block)
-    return "\n\n".join(blocks)
+        used.append(unit)
+    return "\n\n".join(blocks), used
+
+
+def render_evidence(hits: list[dict], *, max_chars: int = 5000) -> str:
+    """Backward-compatible text-only evidence renderer."""
+    return render_evidence_with_hits(hits, max_chars=max_chars)[0]
