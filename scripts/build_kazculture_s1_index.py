@@ -23,6 +23,23 @@ def fingerprint(path:Path)->str:
     return h.hexdigest()
 
 
+def select_passages(passages, *, strict:bool, overlap:dict|None):
+    if not passages:
+        raise ValueError("No passages")
+    if any(x.get("split")!="train" or x.get("dataset")!="issai/KazCulture" for x in passages):
+        raise ValueError("S1 index requires KazCulture train passages only")
+    excluded=set()
+    if strict:
+        if overlap is None:
+            raise ValueError("Strict mode requires overlap data")
+        excluded=set(overlap["exclude_train_passage_ids"])
+        if not excluded <= {x["passage_id"] for x in passages}:
+            raise ValueError("Overlap manifest does not match this corpus")
+        passages=[x for x in passages if x["passage_id"] not in excluded]
+        validate_no_test_content(passages,excluded)
+    return passages,excluded
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     p.add_argument("--passages",type=Path,required=True)
@@ -34,23 +51,16 @@ def main():
     a=p.parse_args()
 
     passages=read_rows(a.passages)
-    if not passages:
-        raise ValueError("No passages")
-    if any(x.get("split")!="train" or x.get("dataset")!="issai/KazCulture" for x in passages):
-        raise ValueError("S1 index requires KazCulture train passages only")
-
-    excluded=set()
+    overlap=None
     if a.strict_passage_disjoint:
         if a.overlap_file is None:
             raise ValueError("Strict mode requires --overlap_file")
         overlap=json.loads(a.overlap_file.read_text(encoding="utf-8"))
-        excluded=set(overlap["exclude_train_passage_ids"])
-        if not excluded <= {x["passage_id"] for x in passages}:
-            raise ValueError("Overlap manifest does not match this corpus")
-        passages=[x for x in passages if x["passage_id"] not in excluded]
-        validate_no_test_content(passages,excluded)
     elif a.overlap_file is not None:
         raise ValueError("--overlap_file is only valid with --strict_passage_disjoint")
+    passages,excluded=select_passages(
+        passages,strict=a.strict_passage_disjoint,overlap=overlap
+    )
 
     units=make_units(passages,frames=None,culturebank_frames=None)
     if not units or any(u["system"]!="S1" for u in units):
