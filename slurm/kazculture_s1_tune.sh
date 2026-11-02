@@ -19,7 +19,7 @@ source "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/activate"
 export TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-12}"
 
-OUT=data/kazculture_pipeline/s1_full_dev_thresholds_v2.json
+OUT=data/kazculture_pipeline/s1_full_dev_thresholds_v3.json
 [[ ! -e "$OUT" ]] || {
   echo "Frozen config already exists: $OUT" >&2
   exit 2
@@ -29,6 +29,6 @@ python scripts/tune_kazculture_retrieval.py \
   --index data/kazculture_pipeline/index/s1_full \
   --dev data/kazculture_pipeline/corpus/train_dev_qa.jsonl \
   --max_queries 400 \
-  --target_recall 0.75 \
+  --target_recall 0.70 \
   --batch_size 32 \
   --out "$OUT"
