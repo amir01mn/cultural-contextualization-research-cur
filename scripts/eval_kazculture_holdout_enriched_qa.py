@@ -50,8 +50,11 @@ def select_overlap(questions,test_rows,source_ids):
 
 
 def same_source_units(index,passage_id_value,system):
+    # These units are attached deterministically after S1 chooses a passage;
+    # they are not independently retrieved/ranked by cosine similarity.
     return sorted([
-        u for u in index.units
+        {**u, "similarity": None, "attachment_mode": "same_source_provenance"}
+        for u in index.units
         if u["dataset"]=="KazCulture" and not u["indirect"]
         and u["passage_id"]==passage_id_value and u["system"]==system
     ],key=lambda u:u["unit_id"])
