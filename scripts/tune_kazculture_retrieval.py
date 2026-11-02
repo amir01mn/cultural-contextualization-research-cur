@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.loaders.kazculture_corpus import read_rows
-from src.retrieval.kazculture_index import MultilingualIndex
+from src.retrieval.kazculture_index import MultilingualIndex, render_evidence_with_hits
 
 
 def main() -> int:
@@ -86,12 +86,13 @@ def main() -> int:
     candidates = []
     for top_k in (3, 5, 8):
         for threshold in (0, 0.15, 0.25, 0.35, 0.45, 0.55):
-            hits = sum(
-                q["passage_id"] in {
-                    h["passage_id"] for h in row[:top_k]
-                    if h["similarity"] >= threshold
-                } for q, row in retrieved
-            )
+            hits = 0
+            for q, row in retrieved:
+                thresholded = [
+                    h for h in row[:top_k] if h["similarity"] >= threshold
+                ]
+                _, shown = render_evidence_with_hits(thresholded)
+                hits += q["passage_id"] in {h["passage_id"] for h in shown}
             candidates.append({
                 "top_k": top_k, "min_similarity": threshold,
                 "matched": hits, "n": len(samples),
@@ -108,7 +109,8 @@ def main() -> int:
         "top_k": best["top_k"], "min_similarity": best["min_similarity"],
         "dev_n": len(samples), "train_dev_recall": best["recall_at_k"],
         "target_recall": args.target_recall, "candidate_grid": candidates,
-        "note": "Gold source comes from training; test never used to tune."
+        "evidence_budget_chars": 5000,
+        "note": "Gold source comes from training; test never used to tune. Recall counts only source passages actually rendered into the evidence prompt."
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     if args.out.exists():
