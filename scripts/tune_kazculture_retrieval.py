@@ -12,6 +12,8 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
@@ -26,7 +28,10 @@ def main() -> int:
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--max_queries", type=int, default=400)
     p.add_argument("--target_recall", type=float, default=0.75)
+    p.add_argument("--batch_size", type=int, default=32)
     args = p.parse_args()
+    if args.batch_size < 1:
+        raise ValueError("--batch_size must be positive")
     index = MultilingualIndex(args.index, device="cpu")
     qa = read_rows(args.dev)[:args.max_queries]
     if not qa:
@@ -36,11 +41,48 @@ def main() -> int:
     samples = [q for q in qa if q["passage_id"] in source_ids]
     if len(samples) < 30:
         raise ValueError("Insufficient same-source development questions")
-    # Search once at broadest k; thresholds are applied to immutable scores.
-    retrieved = [
-        (q, index.search(q["question"], system="S1", k=8, min_similarity=0.0))
-        for q in samples
+    # Encode all train-dev queries in batches once. The previous implementation
+    # called index.search() separately for every query, causing 400 independent
+    # BGE-M3 forward passes on CPU. This keeps the same S1 cosine ranking while
+    # making the diagnostic practical on a compute node.
+    model = index._load_model()
+    questions = [q["question"] for q in samples]
+    vectors = np.asarray(model.encode(
+        questions,
+        batch_size=args.batch_size,
+        show_progress_bar=True,
+        normalize_embeddings=True,
+        convert_to_numpy=True,
+    ), dtype=np.float32)
+    if vectors.shape[0] != len(samples) or not np.isfinite(vectors).all():
+        raise ValueError("Invalid train-development query embeddings")
+
+    s1_indices = [
+        i for i, u in enumerate(index.units)
+        if u["system"] == "S1" and u["dataset"] == "KazCulture"
+        and not u.get("indirect", False)
     ]
+    if not s1_indices:
+        raise ValueError("Index contains no KazCulture S1 units")
+    s1_units = [index.units[i] for i in s1_indices]
+    s1_emb = np.asarray(index.emb[s1_indices], dtype=np.float32)
+    scores = np.asarray(vectors @ s1_emb.T, dtype=np.float32)
+
+    retrieved = []
+    for q, row_scores in zip(samples, scores):
+        order = sorted(
+            range(len(s1_units)),
+            key=lambda j: (-float(row_scores[j]), s1_units[j]["unit_id"]),
+        )
+        hits = []
+        for j in order:
+            score = round(float(row_scores[j]), 6)
+            if score < 0.0:
+                continue
+            hits.append({**s1_units[j], "similarity": score})
+            if len(hits) >= 8:
+                break
+        retrieved.append((q, hits))
     candidates = []
     for top_k in (3, 5, 8):
         for threshold in (0, 0.15, 0.25, 0.35, 0.45, 0.55):
