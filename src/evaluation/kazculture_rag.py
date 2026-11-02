@@ -14,7 +14,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from ..loaders.kazculture_loader import CHOICES, KazCultureQuestion
-from ..retrieval.kazculture_index import render_evidence
+from ..retrieval.kazculture_index import render_evidence, render_evidence_with_hits
 from .kazculture_hf_scorer_v2 import (
     HFQwenLetterScorerV2, candidate_token_ids, user_question,
 )
@@ -62,12 +62,12 @@ def selected_evidence(index, question: KazCultureQuestion, system: str, *,
         exclude_passage_ids=exclude_passage_ids, combined=False
     )
     if not combined:
-        return render_evidence(direct), direct
+        return render_evidence_with_hits(direct)
     # Shared abstract values are the ONLY allowed alignment pivot. Every
     # CultureBank analog is explicitly indirect and has its own source ID.
     kaz_values = {v for hit in direct for v in hit.get("values", [])}
     if not kaz_values:
-        return render_evidence(direct), direct
+        return render_evidence_with_hits(direct)
     candidates = index.search(
         question.question, system="S4R", k=top_k * 6,
         min_similarity=min_similarity,
@@ -79,7 +79,7 @@ def selected_evidence(index, question: KazCultureQuestion, system: str, *,
         and bool(set(hit.get("values", [])) & kaz_values)
     ][:min(2, max(0, top_k - 1))]
     hits = (direct[:max(1, top_k - len(analogs))] + analogs)[:top_k]
-    return render_evidence(hits), hits
+    return render_evidence_with_hits(hits)
 
 
 def prediction(q: KazCultureQuestion, scores: dict, hits: list[dict],
