@@ -214,3 +214,21 @@ def test_s1_full_and_strict_passage_selection():
     )
     assert [p["passage_id"] for p in strict]==["p0","p2"]
     assert excluded=={"p1","p3"}
+
+
+
+def test_rendered_evidence_returns_only_hits_model_can_see():
+    from src.retrieval.kazculture_index import render_evidence_with_hits
+
+    base={
+        "dataset":"KazCulture","indirect":False,"source":["book"],
+        "culture":"Kazakh","category":["customs"],"values":[],
+    }
+    hits=[
+        {**base,"unit_id":"S1:p1","passage_id":"p1","system":"S1","text":"A"*100},
+        {**base,"unit_id":"S1:p2","passage_id":"p2","system":"S1","text":"B"*100},
+    ]
+    text,used=render_evidence_with_hits(hits,max_chars=180)
+    assert len(used)==1
+    assert used[0]["passage_id"]=="p1"
+    assert "p1" in text and "p2" not in text
