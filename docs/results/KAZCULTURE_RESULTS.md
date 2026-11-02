@@ -456,6 +456,10 @@ AI-assisted screening has been performed for prioritization and error diagnosis,
 
 The official human fields must remain independent.
 
+**Current status:** the 100-row blind-review CSV is present on Narval, but all required official human-review fields are still blank. A returned copy received at handoff was unchanged from the original, so there are currently **no human audit scores to report**. The scorer correctly fails on the first missing human field.
+
+Preserve the blank original and use a separate reviewed copy such as `blind_review_100_reviewed.csv`.
+
 A Kazakh-literate human audit is still required before claiming:
 
 - factual triple precision
