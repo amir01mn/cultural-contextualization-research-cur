@@ -6,9 +6,10 @@ and the remaining work. For formal hypotheses and the preregistered-style
 evaluation protocol, see [`RESEARCH_DESIGN.md`](RESEARCH_DESIGN.md). For cluster
 execution, see [`NARVAL_SETUP.md`](NARVAL_SETUP.md).
 
-> **KazCulture branch handoff:** for the complete history, current results,
-> artifact map, scientific caveats, and continuation plan for
-> `experiment/kazculture-qwen3-phase1`, see
+> **KazCulture work:** a new collaborator should start with
+> [`KAZCULTURE_PARTNER_TAKEOVER.md`](KAZCULTURE_PARTNER_TAKEOVER.md).
+> For the complete history, current results, artifact map, scientific caveats,
+> and continuation plan, see
 > [`KAZCULTURE_BRANCH_HANDOFF.md`](KAZCULTURE_BRANCH_HANDOFF.md).
 
 ## 1. Current stage
