@@ -611,3 +611,35 @@ FRAME_LABEL_RETRY_SUFFIX = """
 Your previous reply was not valid. Return ONLY the JSON object, with "values" chosen
 from the list above."""
 # === END KG_V3: FRAME LABELING ===============================================
+
+# === KAZCULTURE FRAMES V3K: FRAME LABELING ===================================
+# KazCulture variant of FRAME_LABEL_USER (docs/KAZCULTURE_FRAMES_V3K.md). Same
+# system prompt (FRAME_LABEL_SYSTEM), retry suffix, JSON schema and token cap
+# (frame_builder.LABEL_MAX_TOKENS), so frame_builder.parse_label and everything
+# downstream are unchanged. Differences from the CultureBank prompt: the source
+# is a Kazakh-language passage (possibly truncated for the prompt only), the
+# group is fixed to Kazakh, the output must be English, and a purely descriptive
+# passage may return "none". parse_label rejects "none" exactly as it rejects
+# an empty field in v3, so such a passage stays a refine-only frame without a
+# norm (label_status "none"); nothing is invented.
+KAZCULTURE_FRAME_LABEL_USER = """Cultural passage (from KazCulture, written in Kazakh; topic: {topic}):
+{passage}
+
+The passage describes {culture} culture. Fill in three fields, written in English:
+- "norm": one sentence stating the social norm or expectation this practice follows
+  among {culture} people. Keep the group's specific stance (what is expected, avoided
+  or valued), but state it so it would also cover similar situations. At most 30 words.
+  Use only what the passage says or directly implies.
+- "norm_type": a short culture-neutral name for the kind of norm, 2-6 words, that
+  would fit any group's version of it (e.g. "tipping service staff",
+  "removing shoes indoors", "greeting elders"). Do not name the group.
+- "values": one or two values the norm expresses, copied exactly from this list:
+{value_list}
+
+If the passage is purely descriptive (for example an object's material, a place, a
+date, or a definition) and states or implies no social norm or expectation, do not
+invent one: return {{"norm": "none", "norm_type": "none", "values": []}}.
+
+Return exactly: {{"norm": "...", "norm_type": "...", "values": ["..."]}}"""
+# === END KAZCULTURE FRAMES V3K ================================================
+
