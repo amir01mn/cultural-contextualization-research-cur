@@ -56,9 +56,9 @@ suite instead of eroding silently. To add an edge, update this table and
 | `core` | nothing in `src` | `config`, `schemas`, `utils`, `storage`, `culture_normalizer`, `embedding_utils` |
 | `llm` | `core` | `llm_backend` (interface + Ollama/vLLM), `local_llm` (Ollama client, JSON repair), `prompts` |
 | `loaders` | `core` | `culturebank_loader`, `culturalbench_loader` |
-| `construction` | `core`, `llm` | `triple_extractor`, `critique_agent`, `layer_classifier`, `entity_resolver`, `cross_cultural_aligner`, `graph_builder`, `pathway_builder` |
-| `retrieval` | `core` | `retriever` (passages, triples), `pathway_retriever` (persistent index), `retrieval_ranking` |
-| `evaluation` | `core`, `llm`, `loaders`, `retrieval` | `mcq_systems`, `mcq_evaluator`, `mechanism_analysis`; `kazculture_*` scorers use `loaders.kazculture_loader.KazCultureQuestion` |
+| `construction` | `core`, `llm` | `triple_extractor`, `critique_agent`, `layer_classifier`, `entity_resolver`, `cross_cultural_aligner`, `graph_builder`, `pathway_builder`, `frame_builder` (KG v3), `kazculture_frames_v3k` (KG v3 port to KazCulture) |
+| `retrieval` | `core` | `retriever` (passages, triples), `pathway_retriever` (persistent index), `retrieval_ranking`, `frame_retriever` (KG v3 routing), `kazculture_frame_retriever` (KazCulture S4R adapter over `frame_retriever`) |
+| `evaluation` | `core`, `llm`, `loaders`, `retrieval` | `mcq_systems`, `mcq_evaluator`, `mechanism_analysis`; `kazculture_*` scorers use `loaders.kazculture_loader.KazCultureQuestion`; `kazculture_final` holds the final KazCulture conditions, checkpoints and paired statistics (`scripts/eval_kazculture_final.py`, `scripts/analyze_kazculture_final.py`) |
 | `legacy` | `core`, `llm`, `retrieval` | `evaluator` (MVP heuristic scorer) |
 
 Scripts orchestrate across packages; the library modules never import scripts.
@@ -155,6 +155,10 @@ identical to A3; it now uses the raw store as `RESEARCH_DESIGN.md` §7 defines.
 KG v3 (`construction/frame_builder.py`, `construction/record_pathways.py`,
 `scripts/build_kg_v3.py`) is described in `docs/EVAL_V3_PLAN.md`; it is built only
 from descriptor fields (`core/leakage.py` keeps CultureBank's `eval_*` columns out).
+KazCulture frames v3k (`construction/kazculture_frames_v3k.py`,
+`scripts/build_kazculture_frames.py`, `retrieval/kazculture_frame_retriever.py`)
+ports the KG v3 frame method to KazCulture and writes only under
+`data/kazculture_pipeline/frames_v3k/`; see `docs/KAZCULTURE_FRAMES_V3K.md`.
 
 The answering prompt, model, decoding, and `top_k` are shared by all systems.
 Only the evidence block and its header (`llm.prompts.MCQ_EVIDENCE_HEADERS`)
@@ -205,7 +209,8 @@ knobs that matter most:
 | `VLLM_MODEL` | `Qwen/Qwen2.5-7B-Instruct` | model for every stage and for answering |
 | `EXTRACTION_MAX_TOKENS` / `CRITIQUE_MAX_TOKENS` | 2048 / 1536 | per-stage budgets; part of the cache key |
 | `CORPUS_SCHEMA_FALLBACK_ON_EMPTY` | true | tags fallback triples `llm_failed` (kept out of pathways) |
-| `EMBEDDING_BACKEND` | `auto` | `tfidf` for tests; MiniLM loads slowly from Lustre |
+| `EMBEDDING_BACKEND` | `auto` | `tfidf` for tests; MiniLM loads slowly from Lustre; `bge-m3` = BAAI/bge-m3@5617a9f6, no fallback |
+| `EMBEDDING_CACHE_DIR` / `EMBEDDING_BATCH_SIZE` / `EMBEDDING_DEVICE` | `data/processed/embedding_cache` / 16 / auto | BGE-M3 vector cache (model+revision+text sha256), batch, device |
 | `ER_SIMILARITY_THRESHOLD` / `ALIGNMENT_SIMILARITY_THRESHOLD` | 0.88 / 0.82 | merge / pivot candidate thresholds |
 | `MAX_PATHWAYS_PER_CULTURE` / `MAX_TOTAL_PATHWAYS` | 500 / 150000 | pathway index caps |
 | `RETRIEVAL_TOP_K` | 8 | evidence budget for every system |
