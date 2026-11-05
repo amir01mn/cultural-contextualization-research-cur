@@ -315,6 +315,20 @@ def s1_block(number: int, unit: dict) -> str:
     )
 
 
+def render_s1_blocks(
+    hits: list[dict], *, max_chars: int = 5000, skip_oversize: bool = False,
+    annotate=None,
+) -> tuple[list[str], list[dict]]:
+    """Numbered S1 blocks that fit, and their hits (see ``render_evidence_with_hits``)."""
+    def make(number, unit):
+        block = s1_block(number, unit)
+        extra = annotate(unit) if annotate else None
+        return block + "\n" + extra if extra else block
+
+    return pack_numbered_blocks(
+        hits, make, max_chars=max_chars, skip_oversize=skip_oversize)
+
+
 def render_evidence_with_hits(
     hits: list[dict], *, max_chars: int = 5000, skip_oversize: bool = False,
     annotate=None,
@@ -329,13 +343,8 @@ def render_evidence_with_hits(
     that overflows the budget). ``skip_oversize`` is opt-in; ``annotate(unit)``
     may return extra text appended to that unit's block (S1+L labels).
     """
-    def make(number, unit):
-        block = s1_block(number, unit)
-        extra = annotate(unit) if annotate else None
-        return block + "\n" + extra if extra else block
-
-    blocks, used = pack_numbered_blocks(
-        hits, make, max_chars=max_chars, skip_oversize=skip_oversize)
+    blocks, used = render_s1_blocks(hits, max_chars=max_chars,
+                                    skip_oversize=skip_oversize, annotate=annotate)
     return "\n\n".join(blocks), used
 
 
