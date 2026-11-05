@@ -84,6 +84,8 @@ def main(argv=None) -> int:
     p.add_argument("--max_model_len", type=int, default=6144)
     p.add_argument("--gpu_memory_utilization", type=float, default=0.92)
     p.add_argument("--batch_size", type=int, default=256)
+    p.add_argument("--enforce_eager", action="store_true",
+                   help="vLLM without CUDA graphs (frees memory for KV cache)")
     p.add_argument("--embedding_backend", default="bge-m3", choices=["bge-m3", "tfidf"])
     p.add_argument("--fake_labeler", action="store_true", help="smoke/test only")
     p.add_argument("--limit", type=int, default=None, help="first N passages (smoke)")
@@ -128,7 +130,8 @@ def main(argv=None) -> int:
                 model=model, revision=revision, max_model_len=args.max_model_len,
                 tensor_parallel_size=args.tensor_parallel_size,
                 gpu_memory_utilization=args.gpu_memory_utilization,
-                chat_template_kwargs={"enable_thinking": False})
+                chat_template_kwargs={"enable_thinking": False},
+                enforce_eager=args.enforce_eager)
             backend.warmup()
             tokenizer = backend._tokenizer
             if tokenizer is None:
