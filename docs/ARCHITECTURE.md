@@ -58,7 +58,7 @@ suite instead of eroding silently. To add an edge, update this table and
 | `loaders` | `core` | `culturebank_loader`, `culturalbench_loader` |
 | `construction` | `core`, `llm` | `triple_extractor`, `critique_agent`, `layer_classifier`, `entity_resolver`, `cross_cultural_aligner`, `graph_builder`, `pathway_builder` |
 | `retrieval` | `core` | `retriever` (passages, triples), `pathway_retriever` (persistent index), `retrieval_ranking` |
-| `evaluation` | `core`, `llm`, `retrieval` | `mcq_systems`, `mcq_evaluator`, `mechanism_analysis` |
+| `evaluation` | `core`, `llm`, `loaders`, `retrieval` | `mcq_systems`, `mcq_evaluator`, `mechanism_analysis`; `kazculture_*` scorers use `loaders.kazculture_loader.KazCultureQuestion` |
 | `legacy` | `core`, `llm`, `retrieval` | `evaluator` (MVP heuristic scorer) |
 
 Scripts orchestrate across packages; the library modules never import scripts.

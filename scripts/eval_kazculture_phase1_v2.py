@@ -22,7 +22,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     p.add_argument("--test_file", required=True)
     p.add_argument("--model", default="Qwen/Qwen3-32B")
-    p.add_argument("--model_revision", default=None)
+    p.add_argument("--model_revision", default="9216db5781bf21249d130ec9da846c4624c16137")
     p.add_argument("--output", required=True)
     p.add_argument("--limit", type=int)
     p.add_argument("--max_context_tokens", type=int, default=4096)

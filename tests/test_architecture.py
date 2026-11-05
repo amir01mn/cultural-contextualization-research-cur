@@ -16,7 +16,7 @@ ALLOWED = {
     "loaders": {"core"},
     "construction": {"core", "llm"},
     "retrieval": {"core"},
-    "evaluation": {"core", "llm", "retrieval"},
+    "evaluation": {"core", "llm", "loaders", "retrieval"},
     "legacy": {"core", "llm", "retrieval"},
 }
 
