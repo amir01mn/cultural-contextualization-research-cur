@@ -42,7 +42,7 @@ echo "===== frames v3k label shard ${SHARD}/${N_SHARDS}: $(date) ====="
 python scripts/build_kazculture_frames.py --stages label --shard "${SHARD}/${N_SHARDS}" \
   --out "$OUT" \
   --model Qwen/Qwen3-32B --revision 9216db5781bf21249d130ec9da846c4624c16137 \
-  --tensor_parallel_size 2 --max_model_len "${MAX_MODEL_LEN:-6144}" \
+  --tensor_parallel_size "${TENSOR_PARALLEL_SIZE:-${SLURM_GPUS_ON_NODE:-2}}" --max_model_len "${MAX_MODEL_LEN:-6144}" \
   --gpu_memory_utilization "${GPU_MEM_UTIL:-0.92}" \
   ${ENFORCE_EAGER:+--enforce_eager}
 touch "$OUT/labels/DONE_${SHARD}_of_${N_SHARDS}"

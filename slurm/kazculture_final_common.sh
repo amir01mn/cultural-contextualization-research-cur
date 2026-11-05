@@ -37,7 +37,8 @@ kz_setup_env() {  # $1 = gpu|cpu
   export TOKENIZERS_PARALLELISM=false
   if [[ "$1" == gpu ]]; then verify_torch_import "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/python"; fi
   mkdir -p slurm/logs
-  echo "host=$(hostname) job=${SLURM_JOB_ID:-none} commit=$(git rev-parse HEAD)"
+  source slurm/cluster_profile.sh
+  echo "cluster=$KZ_CLUSTER host=$(hostname) job=${SLURM_JOB_ID:-none} gpus=${CUDA_VISIBLE_DEVICES:-none} commit=$(git rev-parse HEAD)"
 }
 
 kz_require() {

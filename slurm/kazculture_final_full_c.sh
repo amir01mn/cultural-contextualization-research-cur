@@ -6,7 +6,6 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
 #SBATCH --time=03:00:00
-#SBATCH --exclude=ng10706
 #SBATCH --output=slurm/logs/kz_final_full_c_%j.out
 #SBATCH --error=slurm/logs/kz_final_full_c_%j.err
 #
