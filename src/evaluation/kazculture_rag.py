@@ -21,22 +21,40 @@ from .kazculture_hf_scorer_v2 import (
 from .kazculture_phase1 import choose_highest
 
 
-def evidence_prompt(tokenizer, q: KazCultureQuestion, evidence: str) -> str:
-    if not evidence.strip():
-        from .kazculture_hf_scorer_v2 import render_prompt
-        return render_prompt(tokenizer, q)
-    user = "Retrieved cultural evidence (may be incomplete; answer only from supported facts):\n"
-    user += evidence + "\n\n" + user_question(q)
+EVIDENCE_HEADER = ("Retrieved cultural evidence (may be incomplete; answer only "
+                   "from supported facts):\n")
+QWEN3_TEMPLATE_KWARGS = {"enable_thinking": False}
+
+
+def evidence_prompt(tokenizer, q: KazCultureQuestion, evidence: str, *,
+                    template_kwargs: dict | None = None) -> str:
+    """The single answering template; only the evidence block varies.
+
+    Empty evidence gives exactly the closed-book V2 prompt. ``template_kwargs``
+    defaults to Qwen3 non-thinking; other models (OLMo-2) pass ``{}``.
+    """
+    kwargs = QWEN3_TEMPLATE_KWARGS if template_kwargs is None else template_kwargs
+    user = user_question(q)
+    if evidence.strip():
+        user = EVIDENCE_HEADER + evidence + "\n\n" + user
     return tokenizer.apply_chat_template(
         [{"role": "user", "content": user}], tokenize=False,
-        add_generation_prompt=True, enable_thinking=False
+        add_generation_prompt=True, **kwargs
     ) + "Answer:"
 
 
 class V2EvidenceScorer(HFQwenLetterScorerV2):
-    def score_with_evidence(self, q: KazCultureQuestion, evidence: str) -> dict[str, float]:
+    template_kwargs: dict | None = None  # None -> Qwen3 enable_thinking=False
+
+    def render(self, q: KazCultureQuestion, evidence: str) -> str:
+        return evidence_prompt(self.tokenizer, q, evidence,
+                               template_kwargs=self.template_kwargs)
+
+    def count_tokens(self, rendered: str) -> int:
+        return len(self.tokenizer.encode(rendered, add_special_tokens=False))
+
+    def score_rendered(self, rendered: str) -> dict[str, float]:
         torch = self.torch
-        rendered = evidence_prompt(self.tokenizer, q, evidence)
         ids = candidate_token_ids(self.tokenizer, rendered)
         inputs = self.tokenizer(
             rendered, return_tensors="pt", add_special_tokens=False
@@ -49,6 +67,9 @@ class V2EvidenceScorer(HFQwenLetterScorerV2):
             logits = self.model(**inputs).logits[0, -1].float()
             logprobs = torch.log_softmax(logits, dim=-1)
         return {label: float(logprobs[token].item()) for label, token in ids.items()}
+
+    def score_with_evidence(self, q: KazCultureQuestion, evidence: str) -> dict[str, float]:
+        return self.score_rendered(self.render(q, evidence))
 
 
 def selected_evidence(index, question: KazCultureQuestion, system: str, *,

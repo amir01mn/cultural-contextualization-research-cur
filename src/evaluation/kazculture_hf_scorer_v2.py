@@ -61,6 +61,23 @@ def candidate_token_ids(tokenizer, rendered: str) -> dict[str, int]:
     return result
 
 
+def gold_continuation_ids(tokenizer, prompt: str, gold: str) -> tuple[list[int], int]:
+    """Token IDs of ``prompt`` followed by `` <gold>``, and the prompt length.
+
+    The prompt (ending in the assistant ``Answer:`` prefix) and the gold answer
+    are tokenized separately and concatenated, so the scored span is exactly
+    the gold answer's tokens regardless of BPE merges at the boundary.
+    """
+    gold = " ".join(str(gold).split())
+    if not gold:
+        raise ValueError("Empty gold answer cannot be scored")
+    base = list(tokenizer.encode(prompt, add_special_tokens=False))
+    cont = list(tokenizer.encode(" " + gold, add_special_tokens=False))
+    if not base or not cont:
+        raise ValueError("Prompt and gold answer must both be non-empty in tokens")
+    return base + cont, len(base)
+
+
 class HFQwenLetterScorerV2:
     def __init__(self, model_name: str = "Qwen/Qwen3-32B",
                  *, model_revision: str | None = None,
@@ -77,6 +94,38 @@ class HFQwenLetterScorerV2:
             model_name, revision=model_revision, dtype=torch.bfloat16,
             device_map="auto", low_cpu_mem_usage=True, trust_remote_code=False
         ).eval()
+
+    def score_gold_loglik(self, prompts: list[str], golds: list[str]) -> list[dict]:
+        """Mean per-token log-likelihood of each free-text gold answer.
+
+        ``prompts`` are fully rendered chat prompts ending in the assistant
+        ``Answer:`` prefix; the gold is scored as the continuation `` <gold>``
+        (teacher forcing, no EOS). Used only for the train-dev gate, whose
+        train questions have free-text answers (preregistration §4).
+        """
+        if len(prompts) != len(golds):
+            raise ValueError("prompts and golds must have equal length")
+        torch = self.torch
+        device = next(self.model.parameters()).device
+        results = []
+        with torch.inference_mode():
+            for prompt, gold in zip(prompts, golds):
+                ids, n_prompt = gold_continuation_ids(self.tokenizer, prompt, gold)
+                if len(ids) > self.max_context_tokens:
+                    raise ValueError(f"Input exceeds {self.max_context_tokens} tokens")
+                input_ids = torch.tensor([ids], device=device)
+                logits = self.model(input_ids=input_ids).logits[0].float()
+                # Position t predicts token t+1: rows n_prompt-1 .. len-2.
+                logprobs = torch.log_softmax(logits[n_prompt - 1:-1], dim=-1)
+                targets = input_ids[0, n_prompt:]
+                tok = logprobs.gather(1, targets.unsqueeze(1)).squeeze(1)
+                results.append({
+                    "mean_loglik": float(tok.mean().item()),
+                    "sum_loglik": float(tok.sum().item()),
+                    "n_gold_tokens": int(targets.shape[0]),
+                    "n_prompt_tokens": n_prompt,
+                })
+        return results
 
     def score(self, questions):
         results = []
