@@ -129,7 +129,11 @@ def significant(res: dict, p_key: str = "mcnemar_exact_p") -> bool:
     return res[p_key] < ALPHA and (lo > 0 or hi < 0)
 
 
-def frame_audit_status(path: Path | None) -> dict:
+AUDIT_RATE_KEYS = ("n_reviewed", "proposed_norm_warranted", "proposed_norm_correct",
+                   "proposed_values_correct", "none_label_correct")
+
+
+def frame_audit_status(path: Path | None, verdict: str | None = None) -> dict:
     if path is None or not path.exists():
         return {"status": "pending", "reason": "no frame-audit scored JSON "
                 "(preregistration §7: no human reviewer available)",
@@ -139,6 +143,16 @@ def frame_audit_status(path: Path | None) -> dict:
         if isinstance(data.get(key), bool):
             return {"status": "met" if data[key] else "not met", "source_key": key,
                     "path": str(path)}
+    if "n_reviewed" in data:  # scripts/build_kazculture_frame_audit.py score output
+        rates = {k: data.get(k) for k in AUDIT_RATE_KEYS}
+        if (data.get("n_reviewed") or 0) < 100:
+            return {"status": "pending", "reason": "fewer than 100 frames reviewed",
+                    "path": str(path), **rates}
+        if verdict in ("met", "not met"):
+            return {"status": verdict, "verdict_source": "--frame_audit_verdict (human)",
+                    "path": str(path), **rates}
+        return {"status": "pending", "reason": "scored, but §6 sets no numeric threshold; "
+                "record the human verdict with --frame_audit_verdict", "path": str(path), **rates}
     if data.get("reviewer_type") in ("ai", "model", "llm"):
         return {"status": "not met", "reason": "AI screening is not a substitute (§7)",
                 "path": str(path)}
@@ -235,6 +249,8 @@ def main(argv=None) -> int:
     p.add_argument("--olmo_dir", type=Path)
     p.add_argument("--test_file", type=Path, required=True)
     p.add_argument("--frame_audit_json", type=Path)
+    p.add_argument("--frame_audit_verdict", choices=("met", "not met"),
+                   help="Human verdict on the scored 100-frame audit (criterion 4)")
     p.add_argument("--near_dedup_list", type=Path,
                    help="audit_kazculture_near_duplicates.py flagged list JSON")
     p.add_argument("--out", type=Path, required=True)
@@ -297,7 +313,8 @@ def main(argv=None) -> int:
         "integrity": integrity,
     }
     report["checklist"] = checklist(primary, controls, olmo,
-                                    audit=frame_audit_status(a.frame_audit_json),
+                                    audit=frame_audit_status(a.frame_audit_json,
+                                                             a.frame_audit_verdict),
                                     integrity={k: integrity[k] for k in (
                                         "git_commit", "test_file_sha256",
                                         "test_file_hash_matches_eval", "kazculture_tests_sha256")},

@@ -587,6 +587,9 @@ def test_analysis_checklist(tmp_path):
     audit = tmp_path / "audit.json"
     audit.write_text(json.dumps({"passed": False}))
     assert an.frame_audit_status(audit)["status"] == "not met"
+    audit.write_text(json.dumps({"n_reviewed": 100, "proposed_norm_correct": {"rate": 0.9}}))
+    assert an.frame_audit_status(audit)["status"] == "pending"
+    assert an.frame_audit_status(audit, "met")["status"] == "met"
 
 
 # ----------------------------------------------------------------- near-dup audit
