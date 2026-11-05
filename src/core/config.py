@@ -119,6 +119,12 @@ def stage_max_tokens(stage: str) -> int:
 # for fast, deterministic, offline test runs (loading MiniLM from a shared
 # filesystem can take minutes).
 EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "auto").strip().lower()
+# 'bge-m3' selects BAAI/bge-m3 at a pinned revision (KazCulture frames v3k).
+# It never falls back to TF-IDF, and every vector is cached on disk keyed by
+# model + revision + text hash (core/embedding_utils.py).
+EMBEDDING_CACHE_DIR = Path(os.getenv("EMBEDDING_CACHE_DIR", str(DATA_DIR / "processed" / "embedding_cache")))
+EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", "16"))
+EMBEDDING_DEVICE = os.getenv("EMBEDDING_DEVICE", "").strip() or None   # None = cuda if available
 
 
 # --- Ollama (local dev) ----------------------------------------------------
