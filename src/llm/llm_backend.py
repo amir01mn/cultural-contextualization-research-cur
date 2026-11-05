@@ -137,8 +137,16 @@ class VLLMBackend:
                  dtype: Optional[str] = None,
                  max_model_len: Optional[int] = None,
                  gpu_memory_utilization: Optional[float] = None,
-                 tensor_parallel_size: Optional[int] = None):
+                 tensor_parallel_size: Optional[int] = None,
+                 revision: Optional[str] = None,
+                 chat_template_kwargs: Optional[dict] = None,
+                 enforce_eager: bool = False):
         self.model = model or config.VLLM_MODEL
+        # Pinned weights (``revision``) and template switches such as Qwen3's
+        # ``{"enable_thinking": False}``. Both default to the old behaviour.
+        self.revision = revision
+        self.chat_template_kwargs = dict(chat_template_kwargs or {})
+        self.enforce_eager = enforce_eager
         self.dtype = dtype or config.VLLM_DTYPE
         self.max_model_len = max_model_len or config.VLLM_MAX_MODEL_LEN
         self.gpu_memory_utilization = (
@@ -163,11 +171,17 @@ class VLLMBackend:
                 "--provider ollama for local development."
             ) from exc
 
-        LOGGER.info("Loading vLLM model '%s' (dtype=%s, max_model_len=%s, tp=%d)...",
-                    self.model, self.dtype, self.max_model_len,
+        LOGGER.info("Loading vLLM model '%s' (revision=%s, dtype=%s, max_model_len=%s, tp=%d)...",
+                    self.model, self.revision, self.dtype, self.max_model_len,
                     self.tensor_parallel_size)
+        extra = {}
+        if self.revision:
+            extra.update(revision=self.revision, tokenizer_revision=self.revision)
+        if self.enforce_eager:
+            extra["enforce_eager"] = True
         self._llm = LLM(
             model=self.model,
+            **extra,
             dtype=self.dtype,
             max_model_len=self.max_model_len,
             gpu_memory_utilization=self.gpu_memory_utilization,
@@ -191,8 +205,11 @@ class VLLMBackend:
         messages.append({"role": "user", "content": prompt})
         try:
             return self._tokenizer.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True)
+                messages, tokenize=False, add_generation_prompt=True,
+                **self.chat_template_kwargs)
         except Exception:  # noqa: BLE001
+            if self.chat_template_kwargs:
+                raise  # e.g. thinking mode must not silently revert to a raw prompt
             if system_prompt:
                 return f"{system_prompt}\n\n{prompt}"
             return prompt
