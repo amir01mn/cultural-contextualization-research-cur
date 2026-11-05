@@ -39,7 +39,8 @@ from src.loaders.kazculture_corpus import passage_id, read_rows
 from src.evaluation.kazculture_phase1 import choose_highest
 from src.evaluation.kazculture_final import (
     CLOSED_BOOK, CONDITIONS, CTRL_LEN_MODES, DEFAULT_FRAME_ADAPTER,
-    DEFAULT_ROUTE_MODES, FRAME_CONDITIONS, FRAME_RENDER_MODES, FROZEN_S1, SETTINGS, Evidence,
+    DEFAULT_ROUTE_MODES, DOCUMENTED, FRAME_CONDITIONS, check_documented_s1_config,
+    documented_count_check, FRAME_RENDER_MODES, FROZEN_S1, SETTINGS, Evidence,
     append_jsonl, condition_summary, ctrl_len_evidence, file_sha256, fit_blocks,
     format_labels, frame_evidence, load_frame_adapter, prediction_row,
     parse_route_modes, read_jsonl_checkpoint, reproduction_check, s1_evidence,
@@ -113,7 +114,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--reference_s1_strict", type=Path)
     p.add_argument("--reference_s1_full", type=Path)
     p.add_argument("--require_reproduction", action="store_true",
-                   help="Refuse non-baseline conditions in a setting until S0/S1 reproduce exactly")
+                   help="Refuse non-baseline conditions until S0/S1 (and the S1 config and "
+                        "index sizes) reproduce exactly: against --reference_* prediction files "
+                        "when they exist, else against the documented counts")
+    p.add_argument("--accept_reproduction_mismatch", metavar="REASON", default=None,
+                   help="Proceed despite a reproduction mismatch; the reason is recorded")
     p.add_argument("--max_minutes", type=float, default=165.0,
                    help="Stop cleanly (resumable) after this wall time")
     p.add_argument("--limit", type=int, default=None, help="Smoke runs only")
@@ -353,22 +358,60 @@ class Runner:
 
     def reference_for(self, setting: str, condition: str) -> Path | None:
         a = self.args
-        if condition == "S0":
-            return a.reference_s0
-        if condition == "S1":
-            return getattr(a, f"reference_s1_{setting}")
-        return None
+        ref = (a.reference_s0 if condition == "S0" else
+               getattr(a, f"reference_s1_{setting}") if condition == "S1" else None)
+        return ref if ref is not None and ref.exists() else None
+
+    def write_reproduction(self, name: str, rep: dict) -> None:
+        (self.args.out / f"reproduction_{name}.json").write_text(
+            json.dumps(rep, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({"reproduction": name, "exact": rep["exact"],
+                          "expected": rep.get("expected"), "observed": rep.get("observed")}),
+              flush=True)
+
+    def refuse_or_accept(self, failed: list[str]) -> None:
+        """Exit 3 on reproduction failures unless a recorded reason accepts them."""
+        reason = self.args.accept_reproduction_mismatch
+        if not reason:
+            print(f"Reproduction gate: {failed} missing or not exact; refusing downstream "
+                  "conditions (pass --accept_reproduction_mismatch REASON to override)",
+                  flush=True)
+            raise SystemExit(3)
+        with (self.args.out / "reproduction_acceptance.jsonl").open("a", encoding="utf-8") as fh:
+            append_jsonl(fh, {"utc": datetime.now(timezone.utc).isoformat(),
+                              "accepted_failures": failed, "reason": reason,
+                              "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+                              "git_commit": git_commit()})
+        print(f"WARNING: accepting reproduction failures {failed}: {reason}", flush=True)
+
+    def preflight_reproduction(self) -> None:
+        """Documented S1 config and index sizes (artifacts were regenerated)."""
+        if not self.args.require_reproduction:
+            return
+        cfg = json.loads(self.args.s1_config.read_text(encoding="utf-8"))
+        self.write_reproduction("config", check_documented_s1_config(cfg))
+        for setting in self.settings:
+            if setting == "strict" or getattr(self.args, f"index_{setting}") is not None:
+                ix = self.index(setting)[0]
+                n = len({u["passage_id"] for u in ix.units
+                         if u["system"] == "S1" and u["dataset"] == "KazCulture"})
+                exp = DOCUMENTED[f"{setting}_index_passages"]
+                self.write_reproduction(f"index_{setting}", {
+                    "check": f"{setting}_index_passages", "mode": "documented",
+                    "expected": exp, "observed": n, "exact": n == exp})
 
     def check_reproduction_gate(self, setting: str):
         if not self.args.require_reproduction:
             return
-        for cond, sett in (("S0", CLOSED_BOOK), ("S1", setting)):
-            rep = self.args.out / f"reproduction_{sett}_{cond}.json"
-            ok = rep.exists() and json.loads(rep.read_text(encoding="utf-8")).get("exact")
-            if not ok:
-                raise SystemExit(
-                    f"Reproduction gate: {rep.name} missing or not exact; run S0 and S1 "
-                    f"(with --reference_*) first or drop --require_reproduction (exit 3)")
+        names = ["config", f"index_{setting}", f"{CLOSED_BOOK}_S0", f"{setting}_S1"]
+        failed = []
+        for name in names:
+            rep = self.args.out / f"reproduction_{name}.json"
+            if not (rep.exists() and json.loads(rep.read_text(encoding="utf-8")).get("exact")):
+                failed.append(name)
+        if failed and failed != self._accepted.get(setting):
+            self.refuse_or_accept(failed)
+            self._accepted[setting] = failed
 
     def run_condition(self, setting: str, condition: str) -> str:
         path = self.output_path(setting, condition)
@@ -409,15 +452,18 @@ class Runner:
             json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         ref = self.reference_for(setting, condition)
         status = "complete"
+        rep = None
         if ref is not None:
             rep = reproduction_check(ordered, read_jsonl_checkpoint(ref, repair=False))
-            rep["reference"] = str(ref)
-            (self.args.out / f"reproduction_{sett}_{condition}.json").write_text(
-                json.dumps(rep, indent=2) + "\n", encoding="utf-8")
-            print(json.dumps({"reproduction": f"{sett}/{condition}", "exact": rep["exact"],
-                              "correct": rep["correct"],
-                              "reference_correct": rep["reference_correct_on_same_ids"]}),
-                  flush=True)
+            rep.update(mode="frozen_predictions", reference=str(ref),
+                       expected={"correct": rep["reference_correct_on_same_ids"]},
+                       observed={"correct": rep["correct"]})
+        elif condition in ("S0", "S1") and (
+                self.args.require_reproduction or f"{sett}/{condition}" in DOCUMENTED["counts"]):
+            rep = documented_count_check(ordered, f"{sett}/{condition}")
+            rep["note"] = "frozen prediction file unavailable; checked against documented counts"
+        if rep is not None:
+            self.write_reproduction(f"{sett}_{condition}", rep)
             if not rep["exact"]:
                 status = "reproduction_mismatch"
         print(json.dumps({"condition": condition, "setting": sett, "n": summary["n"],
@@ -472,10 +518,12 @@ class Runner:
             a.max_context_tokens = a.max_context_tokens or 16384
         self.load_data()
         self.check_settings()
+        self._accepted: dict = {}
         if a.retrieval_only:
             for s in self.settings:
                 self.retrieval_only(s)
             return 0
+        self.preflight_reproduction()
         statuses = {}
         jobs = []
         if "S0" in self.conditions:
@@ -486,11 +534,13 @@ class Runner:
             statuses[f"{CLOSED_BOOK if cond == 'S0' else setting}/{cond}"] = status
             if status == "incomplete":
                 break
-            if status == "reproduction_mismatch" and a.require_reproduction:
+            if status == "reproduction_mismatch" and a.require_reproduction \
+                    and not a.accept_reproduction_mismatch:
                 print("Reproduction mismatch: stopping before further conditions", flush=True)
                 break
         print(json.dumps({"statuses": statuses}), flush=True)
-        if any(v == "reproduction_mismatch" for v in statuses.values()) and a.require_reproduction:
+        if any(v == "reproduction_mismatch" for v in statuses.values()) \
+                and a.require_reproduction and not a.accept_reproduction_mismatch:
             return 3
         return 0
 

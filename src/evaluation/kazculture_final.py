@@ -528,3 +528,47 @@ def gate_decision(rows_by_condition: dict[str, list[dict]], *, n_boot: int = 100
             "passed": proceed,
         },
     }
+
+
+# --------------------------------------------------------------------------
+# Documented baselines (regeneration without the frozen artifacts)
+# --------------------------------------------------------------------------
+# docs/KAZCULTURE_PREREGISTRATION.md §2 and KAZCULTURE_BRANCH_HANDOFF.md §14-15.
+# The original prediction files/indexes/config are not accessible, so they are
+# regenerated and must reproduce these documented numbers exactly.
+DOCUMENTED = {
+    "counts": {"closed_book/S0": (552, 1334), "strict/S1": (831, 1334),
+               "full/S1": (1221, 1334)},
+    "strict_index_passages": 5487,
+    "full_index_passages": 6749,
+    "s1_config": {"top_k": 8, "min_similarity": 0.45, "evidence_budget_chars": 5000,
+                  "dev_n": 400, "matched": 285},
+}
+
+
+def check_documented_s1_config(cfg: dict) -> dict:
+    """Compare a tuned S1 config with the documented frozen one (exact)."""
+    exp = DOCUMENTED["s1_config"]
+    chosen = next((c for c in cfg.get("candidate_grid", [])
+                   if c.get("top_k") == cfg.get("top_k")
+                   and c.get("min_similarity") == cfg.get("min_similarity")), {})
+    obs = {"top_k": cfg.get("top_k"), "min_similarity": cfg.get("min_similarity"),
+           "evidence_budget_chars": cfg.get("evidence_budget_chars"),
+           "dev_n": cfg.get("dev_n"),
+           "matched": chosen.get("matched", round((cfg.get("train_dev_recall") or 0)
+                                                  * (cfg.get("dev_n") or 0)))}
+    mism = {k: {"expected": exp[k], "observed": obs[k]} for k in exp if obs[k] != exp[k]}
+    if cfg.get("source") != "train_dev_only":
+        mism["source"] = {"expected": "train_dev_only", "observed": cfg.get("source")}
+    return {"check": "s1_config", "mode": "documented", "expected": exp, "observed": obs,
+            "mismatches": mism, "exact": not mism}
+
+
+def documented_count_check(rows: list[dict], key: str) -> dict:
+    exp_correct, exp_n = DOCUMENTED["counts"][key]
+    obs_correct, obs_n = sum(bool(r["correct"]) for r in rows), len(rows)
+    return {"check": key, "mode": "documented_counts",
+            "expected": {"correct": exp_correct, "n": exp_n},
+            "observed": {"correct": obs_correct, "n": obs_n},
+            "difference_correct": obs_correct - exp_correct,
+            "exact": (obs_correct, obs_n) == (exp_correct, exp_n)}

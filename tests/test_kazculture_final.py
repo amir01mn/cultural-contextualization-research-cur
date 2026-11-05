@@ -410,8 +410,20 @@ def test_final_evaluator_all_conditions_one_model_load(harness):
     assert len(runs) == 1 and runs[0]["conditions"] == list(kf.CONDITIONS)
 
 
-def test_final_evaluator_resume_after_truncation_and_reproduction(harness):
+def match_documented(monkeypatch, h, counts=None):
+    """Point the documented baselines at the fake fixture's values."""
+    monkeypatch.setitem(kf.DOCUMENTED, "s1_config", {
+        "top_k": 8, "min_similarity": 0.0, "evidence_budget_chars": 1500,
+        "dev_n": None, "matched": 0})
+    monkeypatch.setitem(kf.DOCUMENTED, "strict_index_passages", len(h.train))
+    monkeypatch.setitem(kf.DOCUMENTED, "full_index_passages", len(h.train))
+    if counts:
+        monkeypatch.setitem(kf.DOCUMENTED, "counts", counts)
+
+
+def test_final_evaluator_resume_after_truncation_and_reproduction(harness, monkeypatch):
     h = harness
+    match_documented(monkeypatch, h)
     assert h.ev.main(h.base + ["--conditions", "S0,S1"]) == 0
     s1 = h.out / "strict" / "S1.jsonl"
     lines = s1.read_text().splitlines(keepends=True)
@@ -442,8 +454,73 @@ def test_reproduction_gate_blocks_structured_conditions(harness):
                              "--require_reproduction"])
     assert rc == 3
     assert not (h.out / "strict" / "S4R.jsonl").exists()
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as exc:
         h.ev.main(h.base + ["--conditions", "S4R", "--require_reproduction"])
+    assert exc.value.code == 3
+
+
+def test_documented_counts_replace_missing_frozen_files(harness, monkeypatch):
+    h = harness
+    match_documented(monkeypatch, h, counts={"closed_book/S0": (2, 6), "strict/S1": (2, 6),
+                                             "full/S1": (2, 6)})
+    missing = str(h.tmp / "no_such_file.jsonl")
+    args = h.base + ["--conditions", "S0,S1,S4R", "--require_reproduction",
+                     "--reference_s0", missing, "--reference_s1_strict", missing]
+    assert h.ev.main(args) == 0
+    rep = json.loads((h.out / "reproduction_strict_S1.json").read_text())
+    assert rep["mode"] == "documented_counts" and rep["exact"]
+    assert rep["expected"] == {"correct": 2, "n": 6} and rep["observed"]["correct"] == 2
+    for name in ("config", "index_strict", "closed_book_S0"):
+        assert json.loads((h.out / f"reproduction_{name}.json").read_text())["exact"]
+    assert (h.out / "strict" / "S4R.jsonl").exists()
+
+
+def test_documented_mismatch_refuses_unless_reason_recorded(harness, monkeypatch):
+    h = harness
+    match_documented(monkeypatch, h, counts={"closed_book/S0": (2, 6), "strict/S1": (5, 6),
+                                             "full/S1": (2, 6)})
+    args = h.base + ["--conditions", "S0,S1,S4R", "--require_reproduction"]
+    assert h.ev.main(args) == 3
+    rep = json.loads((h.out / "reproduction_strict_S1.json").read_text())
+    assert not rep["exact"] and rep["difference_correct"] == -3
+    assert not (h.out / "strict" / "S4R.jsonl").exists()
+    assert h.ev.main(args) == 3  # resubmitting re-checks and still refuses
+    with pytest.raises(SystemExit) as exc:  # structured-only job hits the gate
+        h.ev.main(h.base + ["--conditions", "S4R", "--require_reproduction"])
+    assert exc.value.code == 3
+    assert h.ev.main(args + ["--accept_reproduction_mismatch", "retokenized test"]) == 0
+    acc = kf.read_jsonl_checkpoint(h.out / "reproduction_acceptance.jsonl")
+    assert acc[-1]["reason"] == "retokenized test" and "strict_S1" in acc[-1]["accepted_failures"]
+    assert len(kf.read_jsonl_checkpoint(h.out / "strict" / "S4R.jsonl")) == len(h.rows)
+
+
+def test_documented_index_and_config_checks(harness, monkeypatch):
+    h = harness
+    match_documented(monkeypatch, h, counts={"closed_book/S0": (2, 6), "strict/S1": (2, 6),
+                                             "full/S1": (2, 6)})
+    monkeypatch.setitem(kf.DOCUMENTED, "strict_index_passages", 5487)
+    with pytest.raises(SystemExit):
+        h.ev.main(h.base + ["--conditions", "S1,S4R", "--require_reproduction"])
+    rep = json.loads((h.out / "reproduction_index_strict.json").read_text())
+    assert rep == {"check": "strict_index_passages", "mode": "documented",
+                   "expected": 5487, "observed": len(h.train), "exact": False}
+
+
+def test_s1_config_documented_check_and_script(tmp_path):
+    good = {"source": "train_dev_only", "top_k": 8, "min_similarity": 0.45,
+            "evidence_budget_chars": 5000, "dev_n": 400, "train_dev_recall": 0.7125,
+            "candidate_grid": [{"top_k": 8, "min_similarity": 0.45, "matched": 285, "n": 400}]}
+    assert kf.check_documented_s1_config(good)["exact"]
+    bad = {**good, "min_similarity": 0.35,
+           "candidate_grid": [{"top_k": 8, "min_similarity": 0.35, "matched": 290, "n": 400}]}
+    res = kf.check_documented_s1_config(bad)
+    assert not res["exact"] and set(res["mismatches"]) == {"min_similarity", "matched"}
+    from scripts import check_kazculture_s1_config as chk
+    path = tmp_path / "cfg.json"
+    path.write_text(json.dumps(good))
+    assert chk.main([str(path), "--report", str(tmp_path / "r.json")]) == 0
+    path.write_text(json.dumps(bad))
+    assert chk.main([str(path)]) == 3
 
 
 def test_settings_change_and_strict_leak_are_refused(harness, monkeypatch):
