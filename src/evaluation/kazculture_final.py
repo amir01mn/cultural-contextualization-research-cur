@@ -113,6 +113,9 @@ class FrameAdapter:
         if configure is not None and kwargs is not None:
             configure(**kwargs)
         self._retrieve = getattr(module, "retrieve_s4r")
+        # The adapter's own layout joins its blocks with SEPARATOR (frame KG v3
+        # render_route); "adapter" rendering keeps that text verbatim.
+        self.separator = getattr(module, "SEPARATOR", "\n")
         self._labels = getattr(module, "labels_for_passage", None)
         params = inspect.signature(self._retrieve).parameters
         self.exclude_kw = next((k for k in ("exclude_passage_ids", "exclude_source_ids")
@@ -133,9 +136,8 @@ class FrameAdapter:
                 mode = "post_filter"
         items = list(self._retrieve(question_text, options, **kwargs) or [])
         for it in items:
-            if not isinstance(it, dict) or not str(it.get("text") or "").strip() \
-                    or not it.get("source_id"):
-                raise ValueError(f"Adapter item lacks text/source_id: {it!r}")
+            if not isinstance(it, dict) or not str(it.get("text") or "").strip():
+                raise ValueError(f"Adapter item lacks text: {it!r}")
         if mode == "post_filter":
             items = [it for it in items if it["source_id"] not in exclude_passage_ids]
         return items, mode
@@ -200,7 +202,8 @@ def s1_meta(unit: dict) -> dict:
 
 
 def frame_meta(item: dict) -> dict:
-    return {"id": item["source_id"], "unit_id": item.get("unit_id") or item["source_id"],
+    sid = item.get("source_id") or "-"
+    return {"id": sid, "unit_id": item.get("unit_id") or sid,
             "similarity": item.get("similarity"), "indirect": bool(item.get("indirect")),
             "layer": item.get("layer"), "route": item.get("route")}
 
@@ -208,15 +211,16 @@ def frame_meta(item: dict) -> dict:
 class Evidence:
     """Numbered evidence blocks plus metadata describing exactly what is shown."""
 
-    def __init__(self, blocks: list[str], meta: list[dict], **info):
+    def __init__(self, blocks: list[str], meta: list[dict], *, sep: str = "\n\n", **info):
         if len(blocks) != len(meta):
             raise ValueError("blocks/meta mismatch")
         self.blocks = blocks
         self.meta = meta
+        self.sep = sep
         self.info = info
 
     def text(self, n: int | None = None) -> str:
-        return "\n\n".join(self.blocks if n is None else self.blocks[:n])
+        return self.sep.join(self.blocks if n is None else self.blocks[:n])
 
     def __len__(self):
         return len(self.blocks)
@@ -234,13 +238,37 @@ def s1_evidence(candidates: list[dict], *, top_k: int, max_chars: int,
                     oversize_break_affected=len(skip_used) > len(frozen_used))
 
 
-def frame_evidence(items: list[dict], *, max_chars: int,
-                   skip_oversize: bool = False) -> Evidence:
-    blocks, used = pack_numbered_blocks(items, frame_block, max_chars=max_chars,
-                                        skip_oversize=skip_oversize)
-    return Evidence(blocks, [frame_meta(x) for x in used],
-                    routes_used=sorted({str(x.get("route")) for x in used}),
-                    adapter_items=len(items))
+FRAME_RENDER_MODES = ("adapter", "numbered")
+
+
+def frame_evidence(items: list[dict], *, max_chars: int, skip_oversize: bool = False,
+                   render: str = "adapter", sep: str = "\n") -> Evidence:
+    """S4R-type evidence from adapter items.
+
+    ``adapter`` (default): the adapter's block texts verbatim, joined by its
+    separator (the frame-KG v3 layout, already numbered); kept as the longest
+    in-order prefix within ``max_chars`` (a no-op when the adapter budgeted).
+    ``numbered``: each item wrapped in an S1-style ``[n] LABEL | layer | route``
+    header and packed like S1.
+    """
+    if render == "adapter":
+        blocks, used = [], []
+        for it in items:
+            if len(sep.join(blocks + [it["text"]])) > max_chars:
+                if skip_oversize:
+                    continue
+                break
+            blocks.append(it["text"])
+            used.append(it)
+    elif render == "numbered":
+        blocks, used = pack_numbered_blocks(items, frame_block, max_chars=max_chars,
+                                            skip_oversize=skip_oversize)
+        sep = "\n\n"
+    else:
+        raise ValueError(f"Unknown frame render mode {render!r}")
+    return Evidence(blocks, [frame_meta(x) for x in used], sep=sep,
+                    frame_render=render, frame_items_dropped=len(items) - len(used),
+                    routes_used=sorted({str(x.get("route")) for x in used}))
 
 
 def ctrl_len_evidence(candidates: list[dict], s1: Evidence, *, extra_chars: int,

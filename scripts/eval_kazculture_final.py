@@ -39,7 +39,7 @@ from src.loaders.kazculture_corpus import passage_id, read_rows
 from src.evaluation.kazculture_phase1 import choose_highest
 from src.evaluation.kazculture_final import (
     CLOSED_BOOK, CONDITIONS, CTRL_LEN_MODES, DEFAULT_FRAME_ADAPTER,
-    DEFAULT_ROUTE_MODES, FRAME_CONDITIONS, FROZEN_S1, SETTINGS, Evidence,
+    DEFAULT_ROUTE_MODES, FRAME_CONDITIONS, FRAME_RENDER_MODES, FROZEN_S1, SETTINGS, Evidence,
     append_jsonl, condition_summary, ctrl_len_evidence, file_sha256, fit_blocks,
     format_labels, frame_evidence, load_frame_adapter, prediction_row,
     parse_route_modes, read_jsonl_checkpoint, reproduction_check, s1_evidence,
@@ -105,6 +105,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Opt-in: skip a block that overflows the budget instead of stopping "
                         "(frozen S1 stops; leave off to reproduce 831/1334)")
     p.add_argument("--ctrl_len_mode", choices=CTRL_LEN_MODES, default="append")
+    p.add_argument("--frame_render", choices=FRAME_RENDER_MODES, default="adapter",
+                   help="adapter: frame-KG v3 layout verbatim (default); numbered: S1-style headers")
     p.add_argument("--s1_candidates", type=int, default=40,
                    help="Ranked S1 candidates cached per question (S1 uses the first top_k)")
     p.add_argument("--reference_s0", type=Path)
@@ -167,7 +169,8 @@ class Runner:
             "top_k": self.top_k, "min_similarity": self.min_sim,
             "evidence_budget_chars": self.budget, "frozen_s1_config": self.frozen_config,
             "s1_candidates": a.s1_candidates, "skip_oversize": a.skip_oversize,
-            "ctrl_len_mode": a.ctrl_len_mode, "frame_adapter": a.frame_adapter,
+            "ctrl_len_mode": a.ctrl_len_mode, "frame_render": a.frame_render,
+            "frame_adapter": a.frame_adapter,
             "frame_adapter_kwargs": a.frame_adapter_kwargs,
             "route_modes": self.route_modes,
             "embedding_model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
@@ -291,13 +294,17 @@ class Runner:
         return items
 
     # ---------------- evidence ----------------
+    def frame_ev(self, items: list[dict]) -> Evidence:
+        sep = self.frame_adapter().separator if self.args.frame_render == "adapter" else "\n\n"
+        return frame_evidence(items, max_chars=self.budget, skip_oversize=self.args.skip_oversize,
+                              render=self.args.frame_render, sep=sep)
+
     def evidence(self, setting: str, condition: str, q) -> Evidence:
         a = self.args
         if condition == "S0":
             return Evidence([], [])
         if condition in FRAME_CONDITIONS:
-            return frame_evidence(self.frame_items(setting, condition, q),
-                                  max_chars=self.budget, skip_oversize=a.skip_oversize)
+            return self.frame_ev(self.frame_items(setting, condition, q))
         cands = self.s1_candidates(setting, q)
         annotate = None
         if condition == "S1+L":
@@ -310,8 +317,7 @@ class Runner:
                 s1.info["labels_attached"] = sum(
                     "\nProvisional labels (model-generated" in b for b in s1.blocks)
             return s1
-        s4r = frame_evidence(self.frame_items(setting, "S4R", q),
-                             max_chars=self.budget, skip_oversize=a.skip_oversize)
+        s4r = self.frame_ev(self.frame_items(setting, "S4R", q))
         s1_chars, s4r_chars = len(s1.text()), len(s4r.text())
         ev = ctrl_len_evidence(cands[:a.s1_candidates], s1,
                                extra_chars=max(0, s4r_chars - s1_chars), top_k=self.top_k,

@@ -233,9 +233,34 @@ def test_format_labels_and_frame_blocks_number_continuously():
     lab = kf.format_labels({"norm": "n", "norm_type": "t", "values": ["v1", "v2"]})
     assert lab.startswith("Provisional labels") and "values: v1, v2" in lab
     ev = kf.frame_evidence([{"text": "a", "source_id": "s1", "layer": "L2", "route": "refine"},
-                            {"text": "b", "source_id": "cb", "indirect": True}], max_chars=1000)
+                            {"text": "b", "source_id": "cb", "indirect": True}], max_chars=1000,
+                           render="numbered")
     assert ev.text().startswith("[1] KAZAKH TRAINING SOURCE | layer=L2 | route=refine")
     assert "[2] INDIRECT COMPARISON" in ev.text()
+
+
+def test_frame_evidence_adapter_layout_is_verbatim_and_budgeted():
+    items = [{"text": "Specific knowledge about Kazakh:\n[1] Kazakh\n  norm: n1",
+              "source_id": "kzp_a", "layer": "frame", "route": "refine"},
+             {"text": "[2] Kazakh\n  norm: n2", "source_id": "kzp_b", "layer": "frame",
+              "route": "refine"},
+             {"text": "x" * 500, "source_id": None, "layer": "frame", "route": "refine"}]
+    ev = kf.frame_evidence(items, max_chars=200)
+    assert ev.text() == items[0]["text"] + "\n" + items[1]["text"]
+    assert ev.info["frame_items_dropped"] == 1 and ev.meta[1]["route"] == "refine"
+    assert kf.frame_meta(items[2])["id"] == "-"
+
+
+def test_real_frame_adapter_contract_if_present():
+    mod = pytest.importorskip("src.retrieval.kazculture_frame_retriever")
+    import inspect
+    params = inspect.signature(mod.retrieve_s4r).parameters
+    for name in ("question_text", "options", "setting", "top_k", "budget_chars", "route_mode",
+                 "exclude_passage_ids"):
+        assert name in params
+    assert set(kf.DEFAULT_ROUTE_MODES.values()) <= set(mod.ROUTE_MODES)
+    assert callable(mod.labels_for_passage) and callable(mod.configure)
+    assert kf.FrameAdapter(mod).exclude_kw == "exclude_passage_ids"
 
 
 def test_fit_blocks_largest_prefix():

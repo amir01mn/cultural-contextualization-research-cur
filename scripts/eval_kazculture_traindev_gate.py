@@ -148,7 +148,7 @@ def main(argv=None) -> int:
                         q["question"], None, setting=a.setting, top_k=top_k,
                         budget_chars=budget, route_mode=route_modes[cond],
                         exclude_passage_ids=own)
-                    ev = frame_evidence(items, max_chars=budget)
+                    ev = frame_evidence(items, max_chars=budget, sep=adapter.separator)
                     blocks_text, meta = ev.text(), ev.meta
                 if any(m["id"] in own and not m.get("indirect") for m in meta):
                     raise ValueError(f"Own source leaked for train row {q['train_row_id']}")
