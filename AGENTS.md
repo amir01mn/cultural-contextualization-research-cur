@@ -68,6 +68,10 @@ export EMBEDDING_BACKEND=tfidf          # else MiniLM loads from Lustre for ~10 
 `bash slurm/run_tests.sh` does the same thing. Use `sbatch slurm/run_tests.sh`
 if the login node's Lustre client stalls.
 
+- The same checkout layout exists on **Nibi** (H100). Submit KazCulture jobs
+  with `slurm/submit_kz.sh slurm/<script>.sh` on either cluster; it sets the
+  GPU gres per cluster. See NARVAL_SETUP "Running on Nibi as well as Narval".
+
 - A single test file: `.venv/bin/python -m pytest -q tests/test_x.py`.
 - A bare `pytest` from the repo root is safe, because `pytest.ini` limits
   collection to `tests/`.

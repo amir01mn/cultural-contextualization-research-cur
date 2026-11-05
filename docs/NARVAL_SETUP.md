@@ -175,6 +175,30 @@ export HF_HUB_OFFLINE=1
 If a dataset/model is not found offline, re-run `slurm/prep_offline.sh` on the
 login node to cache it.
 
+## Running on Nibi as well as Narval
+
+The same layout is mirrored on Nibi under
+`~/projects/def-enaskt/amir01mn/cultural-contextualization-research-cur/`
+(`/project/6113454/...`), so repo-relative paths and `slurm/env_hf.sh` work
+unchanged. Both clusters share the StdEnv/2023 module stack from CVMFS, the
+accounts (`def-enaskt_gpu`, `def-enaskt_cpu`), and the partition names
+(`gpubase_bygpu_b1` = 3 h, `b2` = 12 h, `b3` = 24 h). Build the Nibi venv
+with the §1 commands; never copy it from Narval.
+
+The `#SBATCH` headers in `slurm/kazculture_*.sh` are written for Narval. To
+submit them on either cluster, use the wrapper, which adds the cluster's GPU
+gres (and, on Narval, `--exclude=ng10706`) on the sbatch command line:
+
+```bash
+slurm/submit_kz.sh slurm/kazculture_final_strict_a.sh          # Narval: gpu:a100:2, Nibi: gpu:h100:2
+KZ_NGPU=1 slurm/submit_kz.sh slurm/kazculture_final_olmo.sh    # override the GPU count
+KZ_DRY_RUN=1 slurm/submit_kz.sh --time=00:30:00 slurm/kazculture_phase1_v2.sh  # print only
+```
+
+Narval's A100s have 40 GB and Nibi's H100s have 80 GB, so `gpu:h100:2` has
+twice the memory that the Narval runs had. Cluster values live in
+`slurm/cluster_profile.sh`.
+
 ## Useful SLURM tips
 
 - Interactive GPU debugging: `salloc --account=def-<pi> --gres=gpu:a100:1 --cpus-per-task=6 --mem=48G --time=1:00:00`
