@@ -3,6 +3,7 @@
 # (scipy, pandas, pyarrow come from the modules, not from this file.)
 #   .venv/bin/pip install -r requirements-lock.txt
 Pillow_SIMD==9.5.0.post2
+accelerate==1.14.0  # KazCulture HF scorer device_map="auto" (requirements-kazculture-phase1.txt), added 2026-11-05
 aiohappyeyeballs==2.6.2
 aiohttp==3.13.3
 aiosignal==1.4.0
