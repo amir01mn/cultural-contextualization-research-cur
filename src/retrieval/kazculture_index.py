@@ -12,6 +12,9 @@ from pathlib import Path
 import numpy as np
 
 MODEL_NAME = "BAAI/bge-m3"
+# Frozen retriever revision (docs/KAZCULTURE_PREREGISTRATION.md §2). Loading is
+# pinned so an updated hub snapshot can never silently change the embeddings.
+MODEL_REVISION = "5617a9f61b028005a4858fdac845db406aefb181"
 SYSTEMS = ("S1", "S2", "S3", "S4F", "S4R")
 
 
@@ -127,6 +130,13 @@ class MultilingualIndex:
         meta = json.loads((self.index_dir / "metadata.json").read_text(encoding="utf-8"))
         if meta["embedding_model"] != MODEL_NAME:
             raise ValueError("Unexpected embedding model; rebuild index explicitly")
+        # Indexes built before the pin carry no revision; the cached snapshot
+        # they were built from is this same revision (the only one in hf_cache).
+        recorded = meta.get("embedding_model_revision")
+        if recorded is not None and recorded != MODEL_REVISION:
+            raise ValueError(f"Index built with BGE-M3 revision {recorded}; "
+                             f"expected {MODEL_REVISION}")
+        self.recorded_model_revision = recorded
         # Read JSONL by physical newline records. str.splitlines() also splits on
         # Unicode separators such as U+2028/U+2029, which may legitimately
         # occur inside source text and would corrupt an otherwise valid JSON row.
@@ -141,7 +151,8 @@ class MultilingualIndex:
     def _load_model(self):
         if self._model is None:
             from sentence_transformers import SentenceTransformer
-            self._model = SentenceTransformer(MODEL_NAME, device=self.device)
+            self._model = SentenceTransformer(
+                MODEL_NAME, revision=MODEL_REVISION, device=self.device)
         return self._model
 
     @staticmethod
@@ -174,9 +185,14 @@ class MultilingualIndex:
 
         plan_path = out / "embedding_plan.json"
         plan = {"units_sha256": unit_digest, "n_units": len(units),
-                "model": MODEL_NAME, "chunk_size": chunk_size}
+                "model": MODEL_NAME, "model_revision": MODEL_REVISION,
+                "chunk_size": chunk_size}
         if plan_path.exists():
-            if json.loads(plan_path.read_text(encoding="utf-8")) != plan:
+            old_plan = json.loads(plan_path.read_text(encoding="utf-8"))
+            # Plans written before the revision pin lack the key; the only
+            # cached snapshot is the pinned one, so they remain resumable.
+            old_plan.setdefault("model_revision", MODEL_REVISION)
+            if old_plan != plan:
                 raise ValueError("Embedding checkpoint plan changed")
         else:
             plan_path.write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
@@ -195,7 +211,8 @@ class MultilingualIndex:
                     raise ValueError(f"Invalid embedding shard: {shard}")
             else:
                 if model is None:
-                    model = SentenceTransformer(MODEL_NAME, device=device)
+                    model = SentenceTransformer(
+                        MODEL_NAME, revision=MODEL_REVISION, device=device)
                 arr = model.encode(
                     docs[start:stop], batch_size=batch_size, show_progress_bar=False,
                     normalize_embeddings=True, convert_to_numpy=True
@@ -217,7 +234,8 @@ class MultilingualIndex:
             np.save(fh, emb)
         os.replace(tmp_emb, out / "embeddings.npy")
         meta = {
-            "embedding_model": MODEL_NAME, "n_units": len(units),
+            "embedding_model": MODEL_NAME, "embedding_model_revision": MODEL_REVISION,
+            "n_units": len(units),
             "dimension": emb.shape[1], "units_sha256": unit_digest,
             "system_counts": {s: sum(u["system"] == s for u in units) for s in SYSTEMS},
             "culturebank_units": sum(u["dataset"] == "CultureBank" for u in units),
@@ -259,29 +277,73 @@ class MultilingualIndex:
         return results
 
 
+def pack_numbered_blocks(
+    items: list, make_block, *, max_chars: int, skip_oversize: bool = False,
+    start: int = 1, prefix_chars: int | None = None,
+) -> tuple[list[str], list]:
+    """Pack numbered blocks into a character budget.
+
+    ``make_block(number, item)`` renders one block; numbers are continuous over
+    the blocks actually kept. The joined text is ``"\n\n".join(blocks)``.
+
+    Frozen behaviour (``skip_oversize=False``, used by every published S1 run)
+    stops at the first block that does not fit, even if a later, shorter block
+    would. ``skip_oversize=True`` skips such a block and keeps trying later
+    ones. ``prefix_chars`` is the length of already-rendered text these blocks
+    are appended to (a ``"\n\n"`` separator is then counted too).
+    """
+    blocks: list[str] = []
+    used: list = []
+    for item in items:
+        block = make_block(start + len(used), item)
+        body = len("\n\n".join(blocks + [block]))
+        total = body if prefix_chars is None else prefix_chars + 2 + body
+        if total > max_chars:
+            if skip_oversize:
+                continue
+            break
+        blocks.append(block)
+        used.append(item)
+    return blocks, used
+
+
+def s1_block(number: int, unit: dict) -> str:
+    label = ("INDIRECT COMPARISON" if unit["indirect"] else "KAZAKH TRAINING SOURCE")
+    return (
+        f"[{number}] {label} | dataset={unit['dataset']} | source={'; '.join(unit['source'])}"
+        f" | id={unit['passage_id']}\n{unit['text']}"
+    )
+
+
 def render_evidence_with_hits(
-    hits: list[dict], *, max_chars: int = 5000
+    hits: list[dict], *, max_chars: int = 5000, skip_oversize: bool = False,
+    annotate=None,
 ) -> tuple[str, list[dict]]:
     """Render only evidence that actually fits and return the corresponding hits.
 
     Retrieval metrics and prediction metadata must describe what the answering
     model saw, not additional candidates that were silently dropped by the
     prompt character budget.
+
+    The default reproduces the frozen S1 runs exactly (stop at the first block
+    that overflows the budget). ``skip_oversize`` is opt-in; ``annotate(unit)``
+    may return extra text appended to that unit's block (S1+L labels).
     """
-    blocks = []
-    used = []
-    for unit in hits:
-        number = len(used) + 1
-        label = ("INDIRECT COMPARISON" if unit["indirect"] else "KAZAKH TRAINING SOURCE")
-        block = (
-            f"[{number}] {label} | dataset={unit['dataset']} | source={'; '.join(unit['source'])}"
-            f" | id={unit['passage_id']}\n{unit['text']}"
-        )
-        if len("\n\n".join(blocks + [block])) > max_chars:
-            break
-        blocks.append(block)
-        used.append(unit)
+    def make(number, unit):
+        block = s1_block(number, unit)
+        extra = annotate(unit) if annotate else None
+        return block + "\n" + extra if extra else block
+
+    blocks, used = pack_numbered_blocks(
+        hits, make, max_chars=max_chars, skip_oversize=skip_oversize)
     return "\n\n".join(blocks), used
+
+
+def oversize_break_affected(hits: list[dict], *, max_chars: int = 5000) -> bool:
+    """True when the frozen first-overflow ``break`` hid a later hit that fits."""
+    frozen = render_evidence_with_hits(hits, max_chars=max_chars)[1]
+    skipping = render_evidence_with_hits(hits, max_chars=max_chars, skip_oversize=True)[1]
+    return len(skipping) > len(frozen)
 
 
 def render_evidence(hits: list[dict], *, max_chars: int = 5000) -> str:

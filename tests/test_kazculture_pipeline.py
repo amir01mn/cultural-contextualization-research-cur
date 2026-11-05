@@ -194,8 +194,9 @@ def test_index_shard_resume_and_source_filter(tmp_path, monkeypatch):
     calls = {"n": 0}
 
     class FakeSentenceTransformer:
-        def __init__(self, model_name, device="cpu"):
+        def __init__(self, model_name, revision=None, device="cpu"):
             assert model_name == "BAAI/bge-m3"
+            assert revision == "5617a9f61b028005a4858fdac845db406aefb181"
 
         def encode(self, texts, **kwargs):
             calls["n"] += 1
@@ -220,6 +221,7 @@ def test_index_shard_resume_and_source_filter(tmp_path, monkeypatch):
     assert not (folder / "metadata.json").exists()
     meta = MultilingualIndex.create(folder, units, chunk_size=2, batch_size=2)
     assert meta["n_units"] == 5
+    assert meta["embedding_model_revision"] == "5617a9f61b028005a4858fdac845db406aefb181"
     assert (folder / "embeddings.npy").exists()
     ix = MultilingualIndex(folder)
     hits = ix.search("Kazakh text", system="S1", k=3,
