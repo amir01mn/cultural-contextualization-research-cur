@@ -6,6 +6,11 @@ KZ_TEST="${KZ_TEST:-data/raw/kazculture_phase1/test.parquet}"
 KZ_CONFIG="${KZ_CONFIG:-$KZ_BASE/s1_full_dev_thresholds_v3.json}"
 KZ_INDEX_STRICT="${KZ_INDEX_STRICT:-$KZ_BASE/index/s1_strict}"
 KZ_INDEX_FULL="${KZ_INDEX_FULL:-$KZ_BASE/index/s1_full}"
+# Frozen prediction files are optional: Divnoor's originals are not accessible,
+# so when a file is absent the evaluator checks the documented counts instead
+# (S0 552, strict S1 831, full S1 1221 of 1334; strict index 5,487 passages;
+# config top_k 8 / min_sim 0.45 / 5,000 chars / recall 285/400).
+# KZ_ACCEPT_REPRO_MISMATCH="<reason>" proceeds past a mismatch (recorded).
 KZ_REF_S0="${KZ_REF_S0:-data/outputs/kazculture_phase1_v2/predictions.jsonl}"
 KZ_REF_S1_STRICT="${KZ_REF_S1_STRICT:-$KZ_BASE/evaluation/s1_strict/S1.jsonl}"
 KZ_REF_S1_FULL="${KZ_REF_S1_FULL:-$KZ_BASE/evaluation/s1_full/S1.jsonl}"
@@ -55,9 +60,15 @@ kz_check_adapter() {
 # Run the final evaluator for one stage: $1 = settings, $2 = conditions.
 kz_run_final() {
   local settings="$1" conditions="$2"
-  kz_require "$KZ_TEST" "$KZ_CONFIG" "$KZ_REF_S0"
-  [[ "$settings" == *strict* ]] && kz_require "$KZ_INDEX_STRICT/build_manifest.json" "$KZ_REF_S1_STRICT"
-  [[ "$settings" == *full* ]] && kz_require "$KZ_INDEX_FULL/build_manifest.json" "$KZ_REF_S1_FULL"
+  kz_require "$KZ_TEST" "$KZ_CONFIG"
+  [[ "$settings" == *strict* ]] && kz_require "$KZ_INDEX_STRICT/build_manifest.json"
+  [[ "$settings" == *full* ]] && kz_require "$KZ_INDEX_FULL/build_manifest.json"
+  local ref_args=() f
+  for f in "--reference_s0=$KZ_REF_S0" "--reference_s1_strict=$KZ_REF_S1_STRICT" \
+           "--reference_s1_full=$KZ_REF_S1_FULL"; do
+    if [[ -e "${f#*=}" ]]; then ref_args+=("$f"); else echo "No frozen file ${f#*=}: documented counts"; fi
+  done
+  [[ -n "${KZ_ACCEPT_REPRO_MISMATCH:-}" ]] && ref_args+=(--accept_reproduction_mismatch "$KZ_ACCEPT_REPRO_MISMATCH")
   if [[ "$conditions" == *S4R* || "$conditions" == *CTRL* || "$conditions" == *S1+L* ]]; then
     kz_check_adapter
   fi
@@ -68,9 +79,7 @@ kz_run_final() {
     --index_strict "$KZ_INDEX_STRICT" --index_full "$KZ_INDEX_FULL" \
     --settings "$settings" --conditions "$conditions" \
     --out "$KZ_FINAL_OUT" \
-    --reference_s0 "$KZ_REF_S0" \
-    --reference_s1_strict "$KZ_REF_S1_STRICT" --reference_s1_full "$KZ_REF_S1_FULL" \
-    --require_reproduction \
+    --require_reproduction "${ref_args[@]}" \
     --max_minutes "${KZ_MAX_MINUTES:-165}" \
     "${adapter_args[@]}"
 }

@@ -32,3 +32,9 @@ python scripts/tune_kazculture_retrieval.py \
   --target_recall 0.70 \
   --batch_size 32 \
   --out "$OUT"
+
+# The original frozen config is not accessible; the regenerated one must equal
+# the documented config (top_k 8, min_sim 0.45, 5,000 chars, recall 285/400).
+# Exit 3 (job fails) on any mismatch; the check JSON sits next to the config.
+python scripts/check_kazculture_s1_config.py "$OUT" \
+  --report "${OUT%.json}_documented_check.json"
