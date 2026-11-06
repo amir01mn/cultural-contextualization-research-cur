@@ -16,5 +16,5 @@ kz_setup_env gpu
 : "${KZ_DEV_OUT:?set KZ_DEV_OUT}"
 python scripts/eval_kazculture_v2_dev.py --out "$KZ_DEV_OUT" \
   --conditions "${KZ_DEV_CONDITIONS:-S0,S1,S1+L,S4R,S4R-PR}" \
-  --n "${KZ_DEV_N:-1000}" --seed "${KZ_DEV_SEED:-1}" \
+  --n "${KZ_DEV_N:-1000}" \
   --max_minutes "${KZ_MAX_MINUTES:-165}" ${KZ_DEV_EXTRA:-}
