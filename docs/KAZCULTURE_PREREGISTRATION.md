@@ -87,4 +87,28 @@ AI screening is not used as a substitute.
 
 ## Amendments
 
-(none yet)
+### 2026-11-05: frame retrieval ran with the wrong embedder (protocol deviation, corrected rerun)
+
+**What happened.** §3 specifies BGE-M3 retrieval embeddings. The routing tuner set
+`EMBEDDING_BACKEND=bge-m3`, but the train-dev gate (job 8590655) and the first test jobs
+(8590660 strict A, 8590661 strict B, 8590663 OLMo) did not. The default `auto` backend
+loaded the English-only `all-MiniLM-L6-v2`, and `FrameRetriever` silently re-embedded all
+frames in that space (logged as "Loading sentence-transformers model (all-MiniLM-L6-v2)").
+S0, S1 and S1+L do not use frame retrieval and are unaffected.
+
+**How it was found.** While diagnosing the negative S4R test result: S4R evidence overlapped
+S1's passages by 0.7% (same top passage for 2/709 questions) and 49% of it came from the 6.2%
+of passages without labels. Re-running retrieval only (no scoring) for 40 strict test
+questions with BGE-M3 gave 52% overlap, 18/40 same top passage, 5.5% unlabelled.
+
+**Correction.** The affected stages are re-run once with the preregistered embedder, with no
+other change (same code, thresholds, prompts, budget): gate → `evaluation/traindev_gate_v1b`,
+test → `evaluation/final_v1b` and `final_v1b_olmo` (S0/S1 predictions copied from v1, since
+they are embedder-independent and reproduced exactly). `slurm/kazculture_final_common.sh` now
+defaults the backend to BGE-M3, and the KazCulture adapter refuses a KG whose stored backend
+differs from the active one.
+
+**Disclosure.** The deviation was found because the result was negative, and the as-run v1
+numbers (`final_v1`, `traindev_gate_v1`) are kept and reported next to the corrected ones.
+v1b is the preregistered analysis; v1 is the record of the deviation. No threshold, prompt or
+condition was changed in response to test outcomes.

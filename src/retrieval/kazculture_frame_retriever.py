@@ -44,6 +44,24 @@ SHUFFLE_SEED = 0
 THRESHOLDS_FILE = "routing_thresholds.json"
 
 
+def check_embedding_backend(kg_dir: Path) -> None:
+    """Refuse to query a KG in a different embedding space than it was built in.
+
+    ``FrameRetriever`` re-embeds every frame when the active backend differs
+    from ``index_config.json`` (by design for TF-IDF/CultureBank). For KazCulture
+    that silently swapped BGE-M3 for English-only MiniLM in the first v1 runs.
+    """
+    from ..core.embedding_utils import backend_name
+    cfg = kg_dir / "index_config.json"
+    if not cfg.exists():
+        return
+    stored = json.loads(cfg.read_text(encoding="utf-8")).get("backend")
+    active = backend_name()
+    if stored and stored != active:
+        raise RuntimeError(f"{kg_dir} was embedded with {stored} but the active backend is "
+                           f"{active}; set EMBEDDING_BACKEND=bge-m3")
+
+
 def render_s4r_evidence(blocks: list[dict]) -> str:
     """The evidence string for the prompt (what the budget was checked against)."""
     return SEPARATOR.join(b["text"] for b in blocks)
@@ -175,6 +193,7 @@ class KazCultureFrameRetriever:
         if setting not in self.retrievers:
             if setting not in self.settings:
                 raise ValueError(f"setting {setting!r} not enabled (have {self.settings})")
+            check_embedding_backend(self.frames_dir / setting)
             self.retrievers[setting] = FrameRetriever(self.frames_dir / setting)
         return self.retrievers[setting]
 

@@ -35,6 +35,13 @@ kz_setup_env() {  # $1 = gpu|cpu
   setup_hf_offline
   source "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/activate"
   export TOKENIZERS_PARALLELISM=false
+  # The frame KGs are embedded with BGE-M3. Without this the "auto" backend
+  # loads English-only MiniLM and FrameRetriever silently re-embeds every frame
+  # (this happened in the first v1 gate/test runs; see the prereg amendment).
+  export EMBEDDING_BACKEND="${EMBEDDING_BACKEND:-bge-m3}"
+  export EMBEDDING_DEVICE="${EMBEDDING_DEVICE:-cpu}"
+  export EMBEDDING_CACHE_DIR="${EMBEDDING_CACHE_DIR:-$KZ_BASE/embedding_cache}"
+  echo "embedding_backend=$EMBEDDING_BACKEND"
   if [[ "$1" == gpu ]]; then verify_torch_import "${VENV_DIR:-$PROJECT_DIR/.venv}/bin/python"; fi
   mkdir -p slurm/logs
   source slurm/cluster_profile.sh
