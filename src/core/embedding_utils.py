@@ -156,6 +156,15 @@ class EmbeddingCache:
     def _load(self) -> None:
         if not self.keys_path.exists() or not self.vec_path.exists():
             return
+        import fcntl
+        with (self.dir / ".lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)  # never read/repair mid-append
+            try:
+                self._load_locked()
+            finally:
+                fcntl.flock(lock, fcntl.LOCK_UN)
+
+    def _load_locked(self) -> None:
         raw = self.keys_path.read_bytes()
         complete = raw[:raw.rfind(b"\n") + 1] if b"\n" in raw else b""
         keys = [k for k in complete.decode("ascii").split("\n") if k]
@@ -192,13 +201,23 @@ class EmbeddingCache:
             raise ValueError(f"Cache dim {self.dim} != {vecs.shape[1]}")
         # Vectors first, then keys: a crash between the two leaves extra vector
         # bytes, which _load() trims; a key never points at a missing vector.
-        with self.vec_path.open("ab") as fh:
-            vecs.tofile(fh)
-            fh.flush()
-            os.fsync(fh.fileno())
-        with self.keys_path.open("a", encoding="ascii") as fh:
-            fh.write("".join(k + "\n" for k in keys))
-        start = len(self.index)
+        # The exclusive lock keeps concurrent jobs from interleaving the two
+        # appends (several SLURM jobs share one cache directory).
+        import fcntl
+        with (self.dir / ".lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            try:
+                with self.vec_path.open("ab") as fh:
+                    vecs.tofile(fh)
+                    fh.flush()
+                    os.fsync(fh.fileno())
+                with self.keys_path.open("a", encoding="ascii") as fh:
+                    fh.write("".join(k + "\n" for k in keys))
+            finally:
+                fcntl.flock(lock, fcntl.LOCK_UN)
+        # Row number, not len(self.index): keys.txt may hold a key twice (two jobs
+        # encoding the same text), and then the dict is shorter than the matrix.
+        start = self.matrix.reshape(-1, self.dim).shape[0]
         self.matrix = np.vstack([self.matrix.reshape(-1, self.dim), vecs])
         for i, k in enumerate(keys):
             self.index[k] = start + i
