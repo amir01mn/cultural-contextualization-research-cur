@@ -64,3 +64,22 @@ def test_render_budget_dedupe_and_abstraction():
     assert "norm p1" not in "\n".join(blocks)
     small, _ = render_option_grounded(OPTS, per, fr, budget_chars=200, per_option=2)
     assert len("\n".join(small)) <= 200
+
+
+def test_flat_layered_keeps_order_budget_and_reserves_abstraction():
+    from src.retrieval.kazculture_option_grounded import (
+        abstraction_for_ungrounded, render_flat_layered)
+    r = retriever()
+    per = r.per_option("Көлікті немен айдайды?", OPTS, k=2)
+    hits = OptionGroundedRetriever.interleave(per, 8)
+    fr = {u["passage_id"]: SimpleNamespace(values=["tradition"], norm_type_label="tools",
+                                            norm_type_id="nt1", norm=f"norm {u['passage_id']}")
+          for u in UNITS}
+    blocks, meta = render_flat_layered(hits, fr, budget_chars=5000)
+    assert [m["id"] for m in meta if m["layer"] == "frame"] == [h["passage_id"] for h in hits]
+    assert not any("Option" in b for b in blocks)
+    lines = abstraction_for_ungrounded(per, fr, {"nt1": [u["passage_id"] for u in UNITS]},
+                                       tau_ground=1.01)
+    assert lines and sum(l.startswith("  related norm type") for l in lines) == 1
+    blocks, meta = render_flat_layered(hits, fr, budget_chars=700, abstract_lines=lines)
+    assert len("\n".join(blocks)) <= 700 and meta[-1]["layer"] == "abstract"

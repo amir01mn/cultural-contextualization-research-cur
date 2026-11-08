@@ -22,6 +22,9 @@ Conditions (identical V2 prompt and scorer as scripts/eval_kazculture_final.py):
     S1-OG+L  S1-OG with each passage's own labels (S1+L annotation)
     S1-OGpo  flat S1 blocks, per-option hybrid ranking interleaved (control for S4R-OG)
     S4R-OG   per-option grounded frames, grouped by option, layered (values/norm type/norm)
+    S4R-OGF  S1-OGpo's passages in the same order, rendered flat as layered frames
+    S4R-OGFR S4R-OGF plus the abstract route (norm types + sibling norms) for options
+             whose key words no retrieved source names
     S4R-OGR  S4R-OG with grounding routing: an option no retrieved passage mentions
              in full (grounding < 1.0) also gets the abstract route (norm type + sibling norms)
 
@@ -52,7 +55,7 @@ from src.loaders.kazculture_loader import CHOICES, KazCultureQuestion  # noqa: E
 QWEN = ("Qwen/Qwen3-32B", "9216db5781bf21249d130ec9da846c4624c16137")
 BASE = ROOT / "data" / "kazculture_pipeline"
 CONDITIONS = ("S0", "S1", "S1+L", "S4R", "S4R-PR",
-              "S1-OG", "S1-OG+L", "S1-OGpo", "S4R-OG", "S4R-OGR")
+              "S1-OG", "S1-OG+L", "S1-OGpo", "S4R-OG", "S4R-OGR", "S4R-OGF", "S4R-OGFR")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -157,7 +160,7 @@ class Evidencer:
                                          budget_chars=self.budget, route_mode="routed",
                                          exclude_passage_ids=excl)
             return frame_evidence(items, max_chars=self.budget, sep="\n")
-        if condition in ("S1-OG", "S1-OG+L", "S1-OGpo", "S4R-OG", "S4R-OGR"):
+        if condition.startswith(("S1-OG", "S4R-OG")):
             return self.og_evidence(condition, q, excl)
         if condition == "S4R-PR":
             return frame_evidence(self.passage_ranked_items(q, excl),

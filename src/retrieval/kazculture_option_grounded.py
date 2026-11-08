@@ -263,3 +263,69 @@ def norm_abstraction(frames: dict, nt_members: dict[str, list[str]], *,
             return lines
         return []
     return fn
+
+
+# ---------------------------------------------------------------------------
+# Flat layered rendering (S4R-OGF / S4R-OGFR)
+# ---------------------------------------------------------------------------
+# Dev a2 showed that grouping practices under "Option X" headers misattributes
+# them (a passage retrieved for several options is printed under the first, so
+# the layout asserts support it does not have; Qwen over-picked A). The flat
+# layout keeps S1-OGpo's passages and order exactly and only adds the KG layers.
+
+FLAT_HEADER = ("Kazakh training sources, each practice with its model-labelled "
+               "values, norm type and norm:")
+ABSTRACT_HEADER = ("Broader Kazakh norms (abstraction layer; no source above names "
+                   "some options' key words):")
+
+
+def render_flat_layered(hits: list[dict], frames: dict, *, budget_chars: int,
+                        abstract_lines: Optional[list[str]] = None
+                        ) -> tuple[list[str], list[dict]]:
+    """Numbered practices (same order as ``hits``) with their layer line, then the
+    optional abstraction section, all within ``budget_chars`` (joined by "\\n").
+
+    The abstraction section is reserved first, so it is never squeezed out by
+    the practices; practices are packed in order and stop at the first that
+    does not fit (the frozen S1 packing rule).
+    """
+    abstract = [ABSTRACT_HEADER, *abstract_lines] if abstract_lines else []
+    reserve = len("\n".join(abstract)) + 1 if abstract else 0
+    if reserve > budget_chars // 3:          # never let abstraction crowd out practices
+        abstract, reserve = [], 0
+    blocks, meta = [FLAT_HEADER], [{"id": None, "layer": "header"}]
+    used = len(FLAT_HEADER)
+    for h in hits:
+        lay = _layer_line(frames.get(h["passage_id"]))
+        num = sum(1 for m in meta if m["layer"] == "frame") + 1
+        text = f"[{num}] practice: {h['text']}" + (f"\n    {lay}" if lay else "")
+        if used + 1 + len(text) + reserve > budget_chars:
+            break
+        blocks.append(text)
+        meta.append({"id": h["passage_id"], "unit_id": h.get("unit_id"), "layer": "frame",
+                     "similarity": h.get("similarity"), "grounding": h.get("grounding")})
+        used += 1 + len(text)
+    for line in abstract:
+        blocks.append(line)
+        meta.append({"id": None, "layer": "abstract"})
+    return blocks, meta
+
+
+def abstraction_for_ungrounded(per: dict[str, list[dict]], frames: dict,
+                               nt_members: dict[str, list[str]], *, tau_ground: float,
+                               exclude: Optional[set] = None, n_related: int = 2
+                               ) -> list[str]:
+    """Abstract route: for each option whose best grounding is below ``tau_ground``,
+    the norm type of its top frame and up to ``n_related`` sibling norms; norm
+    types are listed once, options are not named (no attribution claims)."""
+    fn = norm_abstraction(frames, nt_members, n_related=n_related, exclude=exclude)
+    lines, seen = [], set()
+    for letter in sorted(per):
+        hits = per[letter]
+        if max((h.get("grounding", 0.0) for h in hits), default=0.0) >= tau_ground:
+            continue
+        got = fn(letter, hits)
+        if got and got[0] not in seen:
+            seen.add(got[0])
+            lines += got
+    return lines

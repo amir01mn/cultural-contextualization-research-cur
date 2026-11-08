@@ -15,9 +15,10 @@ import numpy as np
 from src.core.schemas import CulturalFrame
 from src.evaluation.kazculture_final import Evidence, format_labels, s1_evidence
 from src.retrieval.kazculture_option_grounded import (
-    OptionGroundedRetriever, norm_abstraction, render_option_grounded)
+    OptionGroundedRetriever, abstraction_for_ungrounded, norm_abstraction,
+    render_flat_layered, render_option_grounded)
 
-OG_CONDITIONS = ("S1-OG", "S1-OG+L", "S1-OGpo", "S4R-OG", "S4R-OGR")
+OG_CONDITIONS = ("S1-OG", "S1-OG+L", "S1-OGpo", "S4R-OG", "S4R-OGR", "S4R-OGF", "S4R-OGFR")
 TAU_GROUND = 1.0      # fixed before any dev result: "all distinctive option stems found"
 PER_OPTION_K = 4      # candidates retrieved per option
 PER_OPTION_SHOWN = 2  # practices shown per option in S4R-OG(R)
@@ -83,6 +84,19 @@ class OGEvidenceBuilder:
         per = self.og.per_option(question, options, exclude=exclude, k=PER_OPTION_K)
         if condition == "S1-OGpo":
             return s1_evidence(self.og.interleave(per, top_k), top_k=top_k, max_chars=budget)
+        if condition in ("S4R-OGF", "S4R-OGFR"):
+            lines = None
+            if condition == "S4R-OGFR":
+                lines = abstraction_for_ungrounded(per, self.frames, self.nt_members,
+                                                   tau_ground=TAU_GROUND, exclude=exclude)
+            blocks, meta = render_flat_layered(self.og.interleave(per, top_k), self.frames,
+                                               budget_chars=budget, abstract_lines=lines)
+            for m in meta:
+                m.setdefault("unit_id", None)
+                m["route"] = "abstract" if m["layer"] == "abstract" else "refine"
+                m.setdefault("indirect", False)
+            return Evidence(blocks, meta, sep="\n",
+                            n_abstract_lines=sum(m["layer"] == "abstract" for m in meta))
         if condition not in ("S4R-OG", "S4R-OGR"):
             raise ValueError(condition)
         tau = abstraction = None
