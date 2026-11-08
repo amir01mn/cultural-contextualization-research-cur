@@ -67,6 +67,22 @@ What would support the layered-KG claim, as opposed to option-aware retrieval:
 S4R-OG or S4R-OGR beating **S1-OGpo** (same retrieval, flat layout, no layers).
 Beating only S1 would show option grounding helps, not the layers.
 
-## 3. Dev results
+## 3. Dev results (1,000 rows; jobs 8752862 → `a2`, 8754552 → `a3`)
 
-(pending: job 8752862 → `evaluation/v2_dev/a2/summary.json`)
+| condition | acc % | paired vs its control |
+|---|---|---|
+| S0 | 56.6 | n/a |
+| S1 | 68.9 | n/a |
+| **S1-OG** | **76.6** | +7.7 vs S1 |
+| S1-OG+L | 74.5 | −2.1 vs S1-OG (+31/−52) |
+| S1-OGpo | 72.1 | +3.2 vs S1 |
+| S4R-OGF | 71.3 | −0.8 vs S1-OGpo (+47/−55) |
+| S4R-OGFR | 70.5 | −1.6 vs S1-OGpo (+54/−70) |
+| S4R-OG | 59.3 | grouped by option: misattribution, Qwen over-picks A |
+| S4R-OGR | 60.0 | same layout |
+
+Reading: the answer options are the missing retrieval key (+7.7 pp). The layered
+labels, which helped on CultureBank and NormAd (norm and value questions), are
+neutral to negative on KazCulture's item-lookup questions at every retrieval
+quality tried (S1+L, S4R-PR, S1-OG+L, S4R-OGF). Test plan:
+`KAZCULTURE_PREREGISTRATION_V2.md`.
