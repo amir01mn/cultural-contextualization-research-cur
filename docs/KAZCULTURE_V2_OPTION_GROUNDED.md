@@ -86,3 +86,39 @@ labels, which helped on CultureBank and NormAd (norm and value questions), are
 neutral to negative on KazCulture's item-lookup questions at every retrieval
 quality tried (S1+L, S4R-PR, S1-OG+L, S4R-OGF). Test plan:
 `KAZCULTURE_PREREGISTRATION_V2.md`.
+
+## 4. Test results (preregistered, run once; `evaluation/analysis_v2/final_analysis_v2.md`)
+
+Jobs 8756287/8/9 (Qwen3-32B) and 8756356 (OLMo), on prereg commit 6e72f21 and
+analysis script 8ee8984, both pushed before the runs.
+
+| comparison | Δ pp | 95% CI | McNemar p | Holm p |
+|---|---|---|---|---|
+| **primary: strict S1-OG vs S1** | **+0.00** (831 vs 831) | [−2.55, +2.62] | 1.0 | n/a |
+| strict S1-OG+L vs S1-OG | +0.52 | [−1.20, +2.25] | 0.61 | 1.0 |
+| strict S4R-OGF vs S1-OGpo | −0.45 | [−2.25, +1.35] | 0.68 | 1.0 |
+| full S1-OG vs full S1 | **+4.20** (95.73 vs 91.53) | [+2.62, +5.77] | 1.5e-7 | 1e-6 |
+| full S1-OG+L vs S1-OG | −0.60 | [−1.35, +0.15] | 0.19 | 0.56 |
+| OLMo strict S1-OG vs S1 | −0.52 | [−3.30, +2.25] | 0.75 | n/a |
+
+§5: criterion 1 not met, criterion 2 not met, criterion 4 = layers neutral/negative.
+**v2 is negative on the preregistered primary.** The only significant gain is in the full setting
+(test passages in the index), where option grounding finds the source passage more often.
+
+### Why dev did not transfer (exploratory, after the test; no claim is changed by it)
+
+Lexical proxies as in §1:
+
+| | dev S1 | dev S1-OG | test-strict S1 | test-strict S1-OG |
+|---|---|---|---|---|
+| answer-bearing passage shown | 23% | 45% | 25% | 41% |
+| distractor-bearing passage shown | 23% | 59% | 36% | **72%** |
+| accuracy when answer-bearing shown | 91% | 86% | 87% | 79% |
+
+The gold-retrieval gain transferred to test. But the test distractors are real Kazakh items
+that the corpus also describes (86% of test distractors vs 79% of dev distractors are
+grounded somewhere), so keying retrieval on the options doubles the evidence for
+wrong options, and the two effects cancel. The dev MCQ distractors were written by Qwen
+and were too easy to reject, so dev overestimated the net effect. A dev proxy for KazCulture
+needs the dataset's own distractor style, for example distractors sampled from corpus items
+of the same category.
