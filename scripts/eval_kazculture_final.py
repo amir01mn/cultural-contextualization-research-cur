@@ -47,7 +47,8 @@ from src.evaluation.kazculture_final import (
 )
 
 QWEN = ("Qwen/Qwen3-32B", "9216db5781bf21249d130ec9da846c4624c16137")
-OLMO_ALLOWED = {"conditions": {"S0", "S1", "S4R"}, "settings": {"strict"}}
+# v2 prereg §3 adds the strict S1-OG replication.
+OLMO_ALLOWED = {"conditions": {"S0", "S1", "S4R", "S1-OG"}, "settings": {"strict"}}
 NEEDS_S4R_CHARS = {"CTRL-LEN"}
 
 
@@ -533,7 +534,7 @@ class Runner:
                 OLMO_MAX_CONTEXT_TOKENS, OLMO_MODEL, OLMO_REVISION)
             if set(self.conditions) - OLMO_ALLOWED["conditions"] or \
                     set(self.settings) - OLMO_ALLOWED["settings"]:
-                raise ValueError("OLMo replication is S0,S1,S4R in strict only")
+                raise ValueError("OLMo replication is S0,S1,S4R,S1-OG in strict only")
             a.model = a.model or OLMO_MODEL
             a.model_revision = a.model_revision or OLMO_REVISION
             a.max_context_tokens = a.max_context_tokens or OLMO_MAX_CONTEXT_TOKENS
