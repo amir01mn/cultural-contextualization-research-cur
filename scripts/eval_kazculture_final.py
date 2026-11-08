@@ -40,7 +40,7 @@ from src.evaluation.kazculture_phase1 import choose_highest
 from src.evaluation.kazculture_final import (
     CLOSED_BOOK, CONDITIONS, CTRL_LEN_MODES, DEFAULT_FRAME_ADAPTER,
     DEFAULT_ROUTE_MODES, DOCUMENTED, FRAME_CONDITIONS, check_documented_s1_config,
-    documented_count_check, FRAME_RENDER_MODES, FROZEN_S1, SETTINGS, Evidence,
+    documented_count_check, embedding_run_settings, FRAME_RENDER_MODES, FROZEN_S1, SETTINGS, Evidence,
     append_jsonl, condition_summary, ctrl_len_evidence, file_sha256, fit_blocks,
     format_labels, frame_evidence, load_frame_adapter, prediction_row,
     parse_route_modes, read_jsonl_checkpoint, reproduction_check, s1_evidence,
@@ -179,6 +179,7 @@ class Runner:
             "frame_adapter_kwargs": a.frame_adapter_kwargs,
             "route_modes": self.route_modes,
             "embedding_model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+            **embedding_run_settings(),
         }
         for s in SETTINGS:
             ix = getattr(a, f"index_{s}")

@@ -4,7 +4,7 @@ This page records what was run, which artifacts came from which run, where
 unmerged work lives, and which issues are still open. Update it whenever a run
 finishes or a branch changes state. The code cannot tell you any of this.
 
-Last updated: 2026-10-10.
+Last updated: 2026-11-07.
 
 ## 1. Runs, oldest first
 
@@ -120,6 +120,26 @@ hard 5205602, NormAd 5205597, OLMo 5205599, judge 5205216. Outputs `data/kg_v3/`
 - Bugs fixed during the run: vLLM cannot parse MIG UUIDs (scripts now map to device
   0); value-name parser rejected "self-direction" (1,080 labels re-parsed from stored
   replies, no LLM rerun).
+
+### KazCulture offline diagnostics (2026-11-07)
+
+Reviewed `kazculture-full-eval` at `91c995c2e3410251e22ea434d7c3e659c3e91155`.
+The original offline suite passed locally (302 passed, 1 skipped; Torch absent).
+New synthetic reproductions exposed two additional operational defects:
+
+- An interrupted first embedding-cache write, or a different writer's interrupted
+  append, could shift later keys onto unrelated vectors. Repair now runs under
+  the cache lock before both reading and appending, including zero complete keys.
+- Final-evaluation and train-dev checkpoints did not identify the active embedding
+  backend, so changing it could silently reuse earlier output. Settings now record
+  the requested backend and embedding implementation hash and reject old/mismatched
+  output directories. The gate also records adapter kwargs and context length.
+
+These checks use fake scorers/vectors only. No Narval/GPU job was submitted and
+no benchmark prediction, threshold, prompt, or answering condition was changed.
+Already-misaligned historical caches cannot be repaired semantically by the new
+tail-repair logic. Use a fresh cache and versioned output directory for a corrected
+run. See `KAZCULTURE_DIAGNOSTICS.md` for reproduction evidence and cluster checks.
 
 ## 2. Artifact lineage warnings
 

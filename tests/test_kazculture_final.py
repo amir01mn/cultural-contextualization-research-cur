@@ -568,6 +568,18 @@ def test_olmo_truncates_evidence_by_blocks(harness):
 
 # ----------------------------------------------------------------- gate
 
+def test_final_resume_rejects_changed_embedding_backend(harness, monkeypatch):
+    from src.core import config
+    h = harness
+    args = h.base + ["--conditions", "S4R"]
+    assert h.ev.main(args) == 0
+    before = (h.out / "strict" / "S4R.jsonl").read_bytes()
+    monkeypatch.setattr(config, "EMBEDDING_BACKEND", "bge-m3")
+    with pytest.raises(ValueError, match="Settings changed"):
+        h.ev.main(args)
+    assert (h.out / "strict" / "S4R.jsonl").read_bytes() == before
+
+
 def test_traindev_gate_leave_own_source_out_and_decision(tmp_path, monkeypatch):
     from scripts import eval_kazculture_traindev_gate as gate
     train = [unit(i, f"shapan kiiz train {i}") for i in range(30)]
@@ -598,6 +610,10 @@ def test_traindev_gate_leave_own_source_out_and_decision(tmp_path, monkeypatch):
     assert all(c[3] == {f"kzp_tr{int(c[0].split()[0][1:]) % 30}"} for c in adapter.calls)
     # Same seed -> same sample; resume is a no-op.
     assert gate.main(args) == 0
+    from src.core import config
+    monkeypatch.setattr(config, "EMBEDDING_BACKEND", "bge-m3")
+    with pytest.raises(ValueError, match="Gate settings changed"):
+        gate.main(args)
 
 
 def test_gate_decision_rule():

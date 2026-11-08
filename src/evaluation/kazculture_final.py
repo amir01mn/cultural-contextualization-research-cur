@@ -97,6 +97,21 @@ def file_sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def embedding_run_settings() -> dict:
+    """Fingerprint retrieval without loading an encoder or touching its cache.
+
+    A pinned model revision alone does not identify the active backend. It
+    previously let BGE-M3 reruns reuse MiniLM retrieval/prediction checkpoints.
+    The implementation hash also invalidates output made before a cache fix.
+    """
+    from ..core import config, embedding_utils
+
+    return {
+        "embedding_backend": config.EMBEDDING_BACKEND,
+        "embedding_implementation_sha256": file_sha256(Path(embedding_utils.__file__)),
+    }
+
+
 # --------------------------------------------------------------------------
 # Frame adapter (owned by the frame-KG port; imported lazily)
 # --------------------------------------------------------------------------

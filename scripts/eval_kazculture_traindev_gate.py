@@ -25,7 +25,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.loaders.kazculture_corpus import read_rows
 from src.evaluation.kazculture_final import (
-    DEFAULT_FRAME_ADAPTER, FRAME_CONDITIONS, append_jsonl, file_sha256, format_labels,
+    DEFAULT_FRAME_ADAPTER, FRAME_CONDITIONS, append_jsonl, embedding_run_settings, file_sha256, format_labels,
     frame_evidence, free_text_prompt, gate_decision, load_frame_adapter, parse_route_modes,
     read_jsonl_checkpoint, s1_evidence,
 )
@@ -107,6 +107,9 @@ def main(argv=None) -> int:
         "exclude_ids_n": len(exclude_ids), "model": a.model, "model_revision": a.model_revision,
         "top_k": top_k, "min_similarity": min_sim, "budget_chars": budget,
         "frame_adapter": a.frame_adapter, "route_modes": route_modes, "setting": a.setting,
+        "frame_adapter_kwargs": a.frame_adapter_kwargs,
+        "max_context_tokens": a.max_context_tokens,
+        **embedding_run_settings(),
         "sample_train_row_ids": [r["train_row_id"] for r in sample],
     }
     sp = a.out / "settings.json"

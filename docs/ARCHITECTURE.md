@@ -223,6 +223,13 @@ knobs that matter most:
 ## 7. Guards against known failure modes
 
 Each guard exists because a past run failed that way (see `RUN_HISTORY.md`).
+
+KazCulture embedding-cache reads and appends both repair incomplete key/vector
+tails while holding the shared file lock, including an interrupted first write.
+Final-evaluation and train-dev `settings.json` files record the requested embedding
+backend and the SHA-256 of `core/embedding_utils.py`; backend/implementation changes
+and legacy settings require a fresh output directory. This guard loads no encoder.
+Train-dev settings also include adapter kwargs and the scorer context length.
 Tests in `tests/test_pipeline_integrity.py` pin most of them.
 
 | Failure seen | Guard |

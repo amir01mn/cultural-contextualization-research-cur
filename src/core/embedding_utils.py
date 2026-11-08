@@ -154,7 +154,7 @@ class EmbeddingCache:
         self._load()
 
     def _load(self) -> None:
-        if not self.keys_path.exists() or not self.vec_path.exists():
+        if not self.dir.exists():
             return
         import fcntl
         with (self.dir / ".lock").open("a") as lock:
@@ -165,26 +165,44 @@ class EmbeddingCache:
                 fcntl.flock(lock, fcntl.LOCK_UN)
 
     def _load_locked(self) -> None:
-        raw = self.keys_path.read_bytes()
+        keys, dim = self._repair_locked()
+        if dim is None:
+            return
+        self.dim = dim
+        n = len(keys)
+        self.matrix = (np.fromfile(self.vec_path, dtype=np.float32, count=n * dim)
+                       .reshape(n, dim) if n else np.zeros((0, dim), dtype=np.float32))
+        self.index = {k: i for i, k in enumerate(keys)}
+
+    def _repair_locked(self) -> tuple[list[str], Optional[int]]:
+        """Keep complete key/vector pairs, including an interrupted first write.
+
+        Called under the shared lock before reads *and* appends: another writer
+        can die after this process has already opened the cache.
+        """
+        raw = self.keys_path.read_bytes() if self.keys_path.exists() else b""
         complete = raw[:raw.rfind(b"\n") + 1] if b"\n" in raw else b""
         keys = [k for k in complete.decode("ascii").split("\n") if k]
         meta = self.dir / "dim.txt"
-        if not meta.exists() or not keys:
-            return
-        self.dim = int(meta.read_text().strip())
-        row_bytes = 4 * self.dim
-        n = min(len(keys), self.vec_path.stat().st_size // row_bytes)
+        vector_bytes = self.vec_path.stat().st_size if self.vec_path.exists() else 0
+        if not meta.exists():
+            if raw or vector_bytes:
+                raise ValueError(f"Embedding cache {self.dir}: missing dimension metadata")
+            return [], None
+        dim = int(meta.read_text().strip())
+        if dim <= 0:
+            raise ValueError(f"Embedding cache {self.dir}: invalid dimension {dim}")
+        row_bytes = 4 * dim
+        n = min(len(keys), vector_bytes // row_bytes)
         if n != len(keys) or len(complete) != len(raw) \
-                or self.vec_path.stat().st_size != n * row_bytes:
+                or vector_bytes != n * row_bytes:
             LOGGER.warning("Embedding cache %s: repairing truncated tail (%d rows kept).",
                            self.dir, n)
             keys = keys[:n]
             self.keys_path.write_text("".join(k + "\n" for k in keys), encoding="ascii")
-            with self.vec_path.open("r+b") as fh:
+            with self.vec_path.open("a+b") as fh:
                 fh.truncate(n * row_bytes)
-        self.matrix = np.fromfile(self.vec_path, dtype=np.float32, count=n * self.dim
-                                  ).reshape(n, self.dim)
-        self.index = {k: i for i, k in enumerate(keys)}
+        return keys, dim
 
     def get(self, keys: list[str]) -> list[Optional[np.ndarray]]:
         return [self.matrix[self.index[k]] if k in self.index else None for k in keys]
@@ -193,12 +211,12 @@ class EmbeddingCache:
         vecs = np.ascontiguousarray(vecs, dtype=np.float32)
         if not len(keys):
             return
-        if self.dim is None:
-            self.dim = int(vecs.shape[1])
-            self.dir.mkdir(parents=True, exist_ok=True)
-            (self.dir / "dim.txt").write_text(str(self.dim))
-        if vecs.shape[1] != self.dim:
+        if vecs.ndim != 2 or vecs.shape[0] != len(keys) or vecs.shape[1] == 0:
+            raise ValueError("Embedding cache needs one nonempty vector per key")
+        dim = int(vecs.shape[1])
+        if self.dim is not None and dim != self.dim:
             raise ValueError(f"Cache dim {self.dim} != {vecs.shape[1]}")
+        self.dir.mkdir(parents=True, exist_ok=True)
         # Vectors first, then keys: a crash between the two leaves extra vector
         # bytes, which _load() trims; a key never points at a missing vector.
         # The exclusive lock keeps concurrent jobs from interleaving the two
@@ -207,6 +225,11 @@ class EmbeddingCache:
         with (self.dir / ".lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
             try:
+                _, stored_dim = self._repair_locked()
+                if stored_dim is not None and stored_dim != dim:
+                    raise ValueError(f"Cache dim {stored_dim} != {dim}")
+                if stored_dim is None:
+                    (self.dir / "dim.txt").write_text(str(dim))
                 with self.vec_path.open("ab") as fh:
                     vecs.tofile(fh)
                     fh.flush()
@@ -215,6 +238,7 @@ class EmbeddingCache:
                     fh.write("".join(k + "\n" for k in keys))
             finally:
                 fcntl.flock(lock, fcntl.LOCK_UN)
+        self.dim = dim
         # Row number, not len(self.index): keys.txt may hold a key twice (two jobs
         # encoding the same text), and then the dict is shorter than the matrix.
         start = self.matrix.reshape(-1, self.dim).shape[0]

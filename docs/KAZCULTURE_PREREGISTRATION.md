@@ -112,3 +112,18 @@ differs from the active one.
 numbers (`final_v1`, `traindev_gate_v1`) are kept and reported next to the corrected ones.
 v1b is the preregistered analysis; v1 is the record of the deviation. No threshold, prompt or
 condition was changed in response to test outcomes.
+
+### 2026-11-07: cache recovery and checkpoint identity (operational correction)
+
+Offline synthetic tests, without benchmark scoring, reproduced further cache
+misalignment after an interrupted first write and after another writer's incomplete
+append. Cache repair now runs before every append while holding the same file lock.
+The final evaluator and train-dev gate also record the requested embedding backend
+and embedding implementation hash, rejecting legacy or changed checkpoint settings.
+The gate additionally records adapter kwargs and context length.
+
+These are execution-integrity fixes, not changes to the model, prompt, thresholds,
+conditions, or statistical plan. No new test-set predictions were generated during
+diagnosis. Preserve historical artifacts, use fresh versioned output/cache paths,
+and inspect/rebuild any derived indexes known to have used a misaligned cache before
+a corrected run. Tail repair cannot identify already misassigned complete vectors.
