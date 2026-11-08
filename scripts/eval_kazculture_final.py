@@ -51,6 +51,9 @@ OLMO_ALLOWED = {"conditions": {"S0", "S1", "S4R"}, "settings": {"strict"}}
 NEEDS_S4R_CHARS = {"CTRL-LEN"}
 
 
+from src.evaluation.kazculture_og_evidence import OG_CONDITIONS  # noqa: E402
+
+
 def git_commit() -> str | None:
     try:
         return subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
@@ -89,7 +92,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--index_full", type=Path)
     p.add_argument("--s1_config", type=Path, required=True,
                    help="data/kazculture_pipeline/s1_full_dev_thresholds_v3.json")
-    p.add_argument("--conditions", required=True, help="Comma list of " + ",".join(CONDITIONS))
+    p.add_argument("--conditions", required=True, help="Comma list of " + ",".join(CONDITIONS + OG_CONDITIONS))
     p.add_argument("--settings", default="strict", help="Comma list of strict,full")
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--model_family", choices=("qwen3", "olmo2"), default="qwen3")
@@ -137,6 +140,7 @@ class Runner:
         self.adapter = None
         self.s1_cache: dict = {}
         self.frame_cache: dict = {}
+        self.og_builders: dict = {}
 
     # ---------------- setup ----------------
     def out_of_time(self) -> bool:
@@ -304,10 +308,31 @@ class Runner:
         return frame_evidence(items, max_chars=self.budget, skip_oversize=self.args.skip_oversize,
                               render=self.args.frame_render, sep=sep)
 
+    def og_builder(self, setting: str):
+        """v2 option-grounded evidence (same builder as the dev harness)."""
+        if setting not in self.og_builders:
+            from src.evaluation.kazculture_og_evidence import OGEvidenceBuilder
+            from src.retrieval import kazculture_frame_retriever as kfr
+            adapter = self.frame_adapter()
+            ix, _excluded, _ = self.index(setting)
+            self.og_builders[setting] = OGEvidenceBuilder(
+                ix, kfr._get().kazakh_frames(setting), labels_fn=adapter.labels)
+        return self.og_builders[setting]
+
     def evidence(self, setting: str, condition: str, q) -> Evidence:
         a = self.args
         if condition == "S0":
             return Evidence([], [])
+        if condition in OG_CONDITIONS:
+            _ix, excluded, _ = self.index(setting)
+            ev = self.og_builder(setting).evidence(
+                condition, q.question, dict(q.options), excluded,
+                top_k=self.top_k, budget=self.budget)
+            if setting == "strict":
+                leaked = {m["id"] for m in ev.meta if m.get("id")} & self.all_test_pids
+                if leaked:
+                    raise ValueError(f"Strict leakage in {condition}: {sorted(leaked)[:3]}")
+            return ev
         if condition in FRAME_CONDITIONS:
             return self.frame_ev(self.frame_items(setting, condition, q))
         cands = self.s1_candidates(setting, q)
@@ -500,7 +525,7 @@ class Runner:
 
     def main(self) -> int:
         a = self.args
-        self.conditions = parse_list(a.conditions, CONDITIONS, "conditions")
+        self.conditions = parse_list(a.conditions, CONDITIONS + OG_CONDITIONS, "conditions")
         self.settings = parse_list(a.settings, SETTINGS, "settings")
         self.route_modes = parse_route_modes(a.route_modes)
         if a.model_family == "olmo2":

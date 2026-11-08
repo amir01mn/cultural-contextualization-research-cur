@@ -704,3 +704,36 @@ def test_near_duplicate_audit_end_to_end(tmp_path, monkeypatch):
     assert rep["counts"]["containment_ge_0.8"]["passages"] == 1
     lst = json.loads((out / "near_dedup_list.json").read_text())
     assert len(lst["flagged_question_ids"]) == 1
+
+
+def test_final_evaluator_option_grounded_conditions(harness, monkeypatch):
+    """v2 OG conditions run through the same scorer/rows; strict excludes test passages."""
+    import numpy as np
+    from types import SimpleNamespace as NS
+    from src.evaluation.kazculture_og_evidence import OG_CONDITIONS, OGEvidenceBuilder
+    h = harness
+    built = {}
+
+    def fake_builder(self, setting):
+        if setting not in built:
+            ix = self.index(setting)[0]
+            frames = {u["passage_id"]: NS(values=["tradition"], norm_type_label="dress",
+                                          norm_type_id="nt", norm="n " + u["passage_id"])
+                      for u in ix.units}
+            built[setting] = OGEvidenceBuilder(
+                ix, frames, labels_fn=lambda pid: {"norm": "x", "values": ["tradition"]},
+                dense_fn=lambda q, n=len(ix.units): np.zeros(n))
+        return built[setting]
+
+    monkeypatch.setattr(h.ev.Runner, "og_builder", fake_builder)
+    rc = h.ev.main(h.base + ["--conditions", ",".join(OG_CONDITIONS), "--settings", "strict"])
+    assert rc == 0 and len(h.scorers) == 1
+    from src.loaders.kazculture_corpus import passage_id
+    test_pids = {passage_id(r["item_description"]) for r in h.rows}
+    for cond in OG_CONDITIONS:
+        rows = kf.read_jsonl_checkpoint(h.out / "strict" / f"{cond}.jsonl")
+        assert len(rows) == len(h.rows)
+        assert all(r["rendered_chars"] <= 1500 for r in rows)
+        assert not ({i for r in rows for i in r["retrieved_ids"] if i} & test_pids)
+    og = kf.read_jsonl_checkpoint(h.out / "strict" / "S4R-OG.jsonl")
+    assert og[0]["layers"][0] == "header" and "option" in og[0]["layers"]
