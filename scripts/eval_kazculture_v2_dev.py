@@ -17,6 +17,13 @@ Conditions (identical V2 prompt and scorer as scripts/eval_kazculture_final.py):
     S4R      v1 frame retrieval + routing (BGE-M3), as preregistered
     S4R-PR   S1's ranked passages rendered as frames (v1 layout): the frame layers
              with retrieval held fixed to S1, isolating the layers from ranking
+  v2 option-grounded conditions (src/retrieval/kazculture_option_grounded.py):
+    S1-OG    flat S1 blocks, pooled hybrid ranking (dense question + BM25 question+options)
+    S1-OG+L  S1-OG with each passage's own labels (S1+L annotation)
+    S1-OGpo  flat S1 blocks, per-option hybrid ranking interleaved (control for S4R-OG)
+    S4R-OG   per-option grounded frames, grouped by option, layered (values/norm type/norm)
+    S4R-OGR  S4R-OG with grounding routing: an option no retrieved passage mentions
+             in full (grounding < 1.0) also gets the abstract route (norm type + sibling norms)
 
 Output: <out>/<condition>.jsonl (resumable), <out>/summary.json, <out>/sample.json.
 """
@@ -44,7 +51,8 @@ from src.loaders.kazculture_loader import CHOICES, KazCultureQuestion  # noqa: E
 
 QWEN = ("Qwen/Qwen3-32B", "9216db5781bf21249d130ec9da846c4624c16137")
 BASE = ROOT / "data" / "kazculture_pipeline"
-CONDITIONS = ("S0", "S1", "S1+L", "S4R", "S4R-PR")
+CONDITIONS = ("S0", "S1", "S1+L", "S4R", "S4R-PR",
+              "S1-OG", "S1-OG+L", "S1-OGpo", "S4R-OG", "S4R-OGR")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -114,6 +122,63 @@ class Evidencer:
         check_embedding_backend(args.frames_dir / "full")
         self.kr = KazCultureFrameRetriever(args.frames_dir, settings=("full",))
         self._s1: dict[str, list[dict]] = {}
+        self._og = None
+        self._dense: dict[str, np.ndarray] = {}
+
+    # -- option-grounded (v2) ------------------------------------------------
+    def og(self):
+        if self._og is None:
+            from src.retrieval.kazculture_option_grounded import OptionGroundedRetriever
+            rows = [k for k, u in enumerate(self.index.units)
+                    if u["system"] == "S1" and u["dataset"] == "KazCulture" and not u["indirect"]]
+            self._og_rows = np.asarray(rows)
+            units = [self.index.units[k] for k in rows]
+            self._og = OptionGroundedRetriever(units, self.dense_scores)
+            frames = self.kr.kazakh_frames("full")
+            self._frames = frames
+            nt = {}
+            for pid, f in frames.items():
+                if f.norm_type_id:
+                    nt.setdefault(f.norm_type_id, []).append(pid)
+            self._nt_members = nt
+        return self._og
+
+    def dense_scores(self, question: str) -> np.ndarray:
+        if question not in self._dense:
+            vec = np.asarray(self.index._load_model().encode(
+                [question], normalize_embeddings=True, convert_to_numpy=True)[0],
+                dtype=np.float32)
+            self._dense[question] = np.asarray(self.index.emb[self._og_rows] @ vec, dtype=float)
+        return self._dense[question]
+
+    def og_evidence(self, condition: str, q, excl: set[str]) -> Evidence:
+        from src.retrieval.kazculture_option_grounded import (
+            norm_abstraction, render_option_grounded)
+        og = self.og()
+        if condition in ("S1-OG", "S1-OG+L"):
+            annotate = None
+            if condition == "S1-OG+L":
+                annotate = lambda u: format_labels(self.kr.labels_for_passage(u["passage_id"]))
+            return s1_evidence(og.pooled(q.question, q.options, exclude=excl),
+                               top_k=self.top_k, max_chars=self.budget, annotate=annotate)
+        per = og.per_option(q.question, q.options, exclude=excl, k=4)
+        if condition == "S1-OGpo":
+            return s1_evidence(og.interleave(per, self.top_k), top_k=self.top_k,
+                               max_chars=self.budget)
+        abstraction = tau = None
+        if condition == "S4R-OGR":
+            tau = 1.0
+            abstraction = norm_abstraction(self._frames, self._nt_members, exclude=excl)
+        blocks, meta = render_option_grounded(
+            q.options, per, self._frames, budget_chars=self.budget, per_option=2,
+            tau_ground=tau, abstraction=abstraction)
+        for m in meta:
+            m.setdefault("unit_id", None)
+            m["route"] = "abstract" if m["layer"] == "abstract" else "refine"
+            m.setdefault("indirect", False)
+        keep = list(zip(blocks, meta))
+        return Evidence([b for b, _ in keep], [m for _, m in keep], sep="\n",
+                        routes=sorted({str(m.get("grounded")) for m in meta if m.get("layer") == "option"}))
 
     def s1_hits(self, q, excl: set[str]) -> list[dict]:
         if q.question_id not in self._s1:
@@ -136,6 +201,8 @@ class Evidencer:
                                          budget_chars=self.budget, route_mode="routed",
                                          exclude_passage_ids=excl)
             return frame_evidence(items, max_chars=self.budget, sep="\n")
+        if condition in ("S1-OG", "S1-OG+L", "S1-OGpo", "S4R-OG", "S4R-OGR"):
+            return self.og_evidence(condition, q, excl)
         if condition == "S4R-PR":
             return frame_evidence(self.passage_ranked_items(q, excl),
                                   max_chars=self.budget, sep="\n")
